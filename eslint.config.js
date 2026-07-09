@@ -20,8 +20,8 @@ export default tseslint.config(
     },
   },
   {
-    // Los componentes shadcn/ui exportan variantes (cva) junto al componente.
-    files: ['src/components/ui/**/*.{ts,tsx}'],
+    // shadcn/ui exporta variantes (cva) y los hooks exportan providers + hook juntos.
+    files: ['src/components/ui/**/*.{ts,tsx}', 'src/hooks/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },
