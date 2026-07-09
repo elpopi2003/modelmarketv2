@@ -42,5 +42,5 @@ npm run dev
 ## Estado
 
 - [x] **M0 — Andamiaje**: Vite + React + TS + Tailwind v4 + shadcn, ESLint/Prettier, Vitest, CI.
-- [ ] M1 — Fundaciones de dominio (`SubscriptionTier`, `lib/api`, `queryKeys`, tokens, router).
+- [x] **M1 — Fundaciones de dominio**: `SubscriptionTier` + feature matrix, `queryKeys`, `handleSupabaseError`, cliente Supabase, router con layouts + lazy.
 - [ ] M2 — Auth + perfil · M3 — Listings · M4 — Requests/mensajería · M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.

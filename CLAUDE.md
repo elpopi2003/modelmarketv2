@@ -11,7 +11,7 @@ estado final para no acumular deuda.)
 Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar cada uno.
 
 - [x] **M0 · Andamiaje** — Vite 7 + React 19 + TS, Tailwind **v4**, shadcn/ui, ESLint + Prettier, Vitest, CI.
-- [ ] **M1 · Fundaciones de dominio** — `SubscriptionTier`, feature matrix, `lib/api/`, `queryKeys.ts`, `handleSupabaseError`, design tokens, cliente Supabase por env, Router (layouts + lazy), schemas Zod base.
+- [x] **M1 · Fundaciones de dominio** — `SubscriptionTier` + feature matrix, `queryKeys.ts`, `handleSupabaseError`, cliente Supabase por env, Router con layouts + lazy. (Schemas Zod se posponen a M3, con los formularios.)
 - [ ] **M2 · Auth + perfil** — `useAuth`, páginas Auth, guards de ruta.
 - [ ] **M3 · Listings** — explorar, producto, publicar/editar.
 - [ ] **M4 · Requests, favoritos, mensajería, notificaciones**.
