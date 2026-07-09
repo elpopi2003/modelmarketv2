@@ -10,6 +10,8 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type AppRole = 'admin' | 'user'
 export type SubscriptionPlan = 'free' | 'pro' | 'retail'
+export type ListingCondition = 'new' | 'like_new' | 'used' | 'for_parts'
+export type ListingStatus = 'draft' | 'active' | 'sold' | 'archived'
 
 export interface Database {
   public: {
@@ -65,6 +67,90 @@ export interface Database {
         }
         Relationships: []
       }
+      brands: {
+        Row: { id: string; name: string; slug: string; created_at: string }
+        Insert: { id?: string; name: string; slug: string; created_at?: string }
+        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          parent_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          parent_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          parent_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      listings: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          price_cents: number
+          currency: string
+          condition: ListingCondition
+          scale: string | null
+          category_id: string | null
+          brand_id: string | null
+          photos: string[]
+          status: ListingStatus
+          visible_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          price_cents?: number
+          currency?: string
+          condition?: ListingCondition
+          scale?: string | null
+          category_id?: string | null
+          brand_id?: string | null
+          photos?: string[]
+          status?: ListingStatus
+          visible_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          description?: string | null
+          price_cents?: number
+          currency?: string
+          condition?: ListingCondition
+          scale?: string | null
+          category_id?: string | null
+          brand_id?: string | null
+          photos?: string[]
+          status?: ListingStatus
+          visible_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -76,6 +162,8 @@ export interface Database {
     Enums: {
       app_role: AppRole
       subscription_plan: SubscriptionPlan
+      listing_condition: ListingCondition
+      listing_status: ListingStatus
     }
     CompositeTypes: Record<string, never>
   }
