@@ -1,21 +1,81 @@
 /**
- * PLACEHOLDER de tipos del esquema de base de datos.
+ * Tipos del esquema de base de datos.
  *
- * Cuando se conecte Lovable Cloud, este fichero se REGENERA con el esquema real y
- * NO debe editarse a mano (ver convenciones en CLAUDE.md). De momento solo declara
- * los enums que ya conocemos para poder tipar el cliente.
+ * IDEAL: regenerar con `supabase gen types typescript` una vez aplicada la migración.
+ * De momento se mantienen a mano las tablas ya definidas en supabase/migrations/.
+ * Cuando Lovable gestione el proyecto, este fichero pasa a ser autogenerado — no editar.
  */
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
+export type AppRole = 'admin' | 'user'
+export type SubscriptionPlan = 'free' | 'pro' | 'retail'
+
 export interface Database {
   public: {
-    Tables: Record<string, never>
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          username: string | null
+          display_name: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          username?: string | null
+          display_name?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          username?: string | null
+          display_name?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: AppRole
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role?: AppRole
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: AppRole
+          created_at?: string
+        }
+        Relationships: []
+      }
+    }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      has_role: {
+        Args: { _user_id: string; _role: AppRole }
+        Returns: boolean
+      }
+    }
     Enums: {
-      subscription_plan: 'free' | 'pro' | 'retail'
-      app_role: 'admin' | 'user'
+      app_role: AppRole
+      subscription_plan: SubscriptionPlan
     }
     CompositeTypes: Record<string, never>
   }

@@ -12,17 +12,17 @@ import type { Database } from './types'
  */
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   console.warn(
-    '[supabase] Backend no conectado: faltan VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY en .env',
+    '[supabase] Backend no conectado: faltan VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY en .env',
   )
 }
 
 export const supabase = createClient<Database>(
   supabaseUrl || 'http://localhost:54321',
-  supabaseAnonKey || 'anon-placeholder',
+  supabaseKey || 'publishable-placeholder',
   {
     auth: {
       persistSession: true,
