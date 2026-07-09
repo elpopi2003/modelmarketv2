@@ -66,7 +66,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   )
 }
 
-function RegisterForm() {
+function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const { signUp } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
@@ -78,12 +78,17 @@ function RegisterForm() {
 
   async function onSubmit(values: RegisterValues) {
     setServerError(null)
-    const { error } = await signUp(values.email, values.password)
+    const { error, needsConfirmation } = await signUp(values.email, values.password)
     if (error) {
       setServerError(error)
       return
     }
-    setDone(true)
+    if (needsConfirmation) {
+      setDone(true)
+      return
+    }
+    // Alta con sesión inmediata (confirm-email desactivado): entra directo.
+    onSuccess()
   }
 
   if (done) {
@@ -170,7 +175,7 @@ export default function Auth() {
           {mode === 'login' ? (
             <LoginForm onSuccess={() => navigate(from, { replace: true })} />
           ) : (
-            <RegisterForm />
+            <RegisterForm onSuccess={() => navigate(from, { replace: true })} />
           )}
 
           <p className="text-center text-sm text-muted-foreground">

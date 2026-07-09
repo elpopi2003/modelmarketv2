@@ -5,6 +5,8 @@ import { getErrorMessage } from '@/lib/errors'
 
 interface AuthResult {
   error: string | null
+  /** true si el alta requiere confirmar el email antes de tener sesión. */
+  needsConfirmation?: boolean
 }
 
 interface AuthContextValue {
@@ -52,12 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error ? getErrorMessage(error) : null }
       },
       async signUp(email, password) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
         })
-        return { error: error ? getErrorMessage(error) : null }
+        if (error) return { error: getErrorMessage(error), needsConfirmation: false }
+        // Sin sesión tras el alta => el proyecto exige confirmar el email.
+        return { error: null, needsConfirmation: !data.session }
       },
       async signOut() {
         await supabase.auth.signOut()
