@@ -12,6 +12,7 @@ import NotFound from '@/pages/NotFound'
 const Explorar = lazy(() => import('@/pages/Explorar'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
+const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 
 function PageFallback() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="publicar" element={<PublicarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
           </Route>
         </Route>

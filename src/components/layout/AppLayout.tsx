@@ -21,6 +21,12 @@ export function AppLayout() {
               ModelMarket
             </Link>
             <Link
+              to="/publicar"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Publicar
+            </Link>
+            <Link
               to="/perfil"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
