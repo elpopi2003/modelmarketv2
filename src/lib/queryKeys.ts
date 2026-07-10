@@ -9,15 +9,14 @@ export const queryKeys = {
   listings: {
     all: ['listings'] as const,
     lists: () => [...queryKeys.listings.all, 'list'] as const,
-    list: (filters: Record<string, unknown> = {}) =>
-      [...queryKeys.listings.lists(), filters] as const,
+    list: (filters: object = {}) => [...queryKeys.listings.lists(), filters] as const,
     detail: (id: string) => [...queryKeys.listings.all, 'detail', id] as const,
+    mine: (userId: string) => [...queryKeys.listings.all, 'mine', userId] as const,
   },
   requests: {
     all: ['requests'] as const,
     lists: () => [...queryKeys.requests.all, 'list'] as const,
-    list: (filters: Record<string, unknown> = {}) =>
-      [...queryKeys.requests.lists(), filters] as const,
+    list: (filters: object = {}) => [...queryKeys.requests.lists(), filters] as const,
     detail: (id: string) => [...queryKeys.requests.all, 'detail', id] as const,
     mine: () => [...queryKeys.requests.all, 'mine'] as const,
   },
