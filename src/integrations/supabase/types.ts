@@ -12,6 +12,7 @@ export type AppRole = 'admin' | 'user'
 export type SubscriptionPlan = 'free' | 'pro' | 'retail'
 export type ListingCondition = 'new' | 'like_new' | 'used' | 'for_parts'
 export type ListingStatus = 'draft' | 'active' | 'sold' | 'archived'
+export type RequestStatus = 'open' | 'fulfilled' | 'closed'
 
 export interface Database {
   public: {
@@ -151,6 +152,72 @@ export interface Database {
         }
         Relationships: []
       }
+      requests: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string | null
+          category_id: string | null
+          brand_id: string | null
+          scale: string | null
+          max_price_cents: number | null
+          photos: string[]
+          status: RequestStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          description?: string | null
+          category_id?: string | null
+          brand_id?: string | null
+          scale?: string | null
+          max_price_cents?: number | null
+          photos?: string[]
+          status?: RequestStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          description?: string | null
+          category_id?: string | null
+          brand_id?: string | null
+          scale?: string | null
+          max_price_cents?: number | null
+          photos?: string[]
+          status?: RequestStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          listing_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          listing_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          listing_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -158,12 +225,17 @@ export interface Database {
         Args: { _user_id: string; _role: AppRole }
         Returns: boolean
       }
+      listing_favorite_count: {
+        Args: { _listing_id: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: AppRole
       subscription_plan: SubscriptionPlan
       listing_condition: ListingCondition
       listing_status: ListingStatus
+      request_status: RequestStatus
     }
     CompositeTypes: Record<string, never>
   }
