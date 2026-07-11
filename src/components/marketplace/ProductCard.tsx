@@ -3,53 +3,58 @@ import type { Listing } from '@/lib/api/listings'
 import { formatPrice } from '@/lib/format'
 import { ConditionBadge } from './ConditionBadge'
 import { ScaleTag } from './ScaleTag'
+import { FavoriteButton } from './FavoriteButton'
 
 /** Tarjeta de anuncio (listing tile) — estética blueprint del design system. */
 export function ProductCard({ listing, brandName }: { listing: Listing; brandName?: string }) {
   const cover = listing.photos[0]
 
   return (
-    <Link
-      to={`/producto/${listing.id}`}
-      className="group relative block overflow-hidden rounded-md border-2 border-border bg-card transition-[border-color,box-shadow] duration-300 hover:border-primary hover:shadow-lg"
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {cover ? (
-          <img
-            src={cover}
-            alt={listing.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transform-none"
-          />
-        ) : (
-          <div className="mm-grid-subtle flex h-full w-full items-center justify-center">
-            <span className="mm-mono text-xs text-muted-foreground">SIN FOTO</span>
+    <div className="group relative">
+      <Link
+        to={`/producto/${listing.id}`}
+        className="block overflow-hidden rounded-md border-2 border-border bg-card transition-[border-color,box-shadow] duration-300 hover:border-primary hover:shadow-lg"
+      >
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          {cover ? (
+            <img
+              src={cover}
+              alt={listing.title}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transform-none"
+            />
+          ) : (
+            <div className="mm-grid-subtle flex h-full w-full items-center justify-center">
+              <span className="mm-mono text-xs text-muted-foreground">SIN FOTO</span>
+            </div>
+          )}
+          {listing.scale && (
+            <div className="absolute left-3 top-3">
+              <ScaleTag scale={listing.scale} />
+            </div>
+          )}
+          <div className="absolute bottom-3 left-3">
+            <ConditionBadge condition={listing.condition} />
           </div>
-        )}
-        {listing.scale && (
-          <div className="absolute left-3 top-3">
-            <ScaleTag scale={listing.scale} />
-          </div>
-        )}
-        <div className="absolute right-3 top-3">
-          <ConditionBadge condition={listing.condition} />
         </div>
-      </div>
 
-      <div className="p-4">
-        <p className="mm-mono mb-1 text-xs uppercase text-muted-foreground transition-colors group-hover:text-primary">
-          {brandName ?? 'Sin marca'}
-        </p>
-        <h3 className="mb-2 line-clamp-2 font-sans text-base font-semibold leading-snug transition-colors group-hover:text-primary">
-          {listing.title}
-        </h3>
-        <p className="mm-mono text-2xl font-bold transition-colors group-hover:text-primary">
-          {formatPrice(listing.price_cents, listing.currency)}
-        </p>
-      </div>
+        <div className="p-4">
+          <p className="mm-mono mb-1 text-xs uppercase text-muted-foreground transition-colors group-hover:text-primary">
+            {brandName ?? 'Sin marca'}
+          </p>
+          <h3 className="mb-2 line-clamp-2 font-sans text-base font-semibold leading-snug transition-colors group-hover:text-primary">
+            {listing.title}
+          </h3>
+          <p className="mm-mono text-2xl font-bold transition-colors group-hover:text-primary">
+            {formatPrice(listing.price_cents, listing.currency)}
+          </p>
+        </div>
 
-      <span className="absolute bottom-0 left-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100 motion-reduce:transition-none" />
-    </Link>
+        <span className="absolute bottom-0 left-0 h-1 w-full origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100 motion-reduce:transition-none" />
+      </Link>
+
+      <FavoriteButton listingId={listing.id} className="absolute right-3 top-3 rounded-full" />
+    </div>
   )
 }
 

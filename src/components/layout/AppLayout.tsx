@@ -33,6 +33,12 @@ export function AppLayout() {
               Mis peticiones
             </Link>
             <Link
+              to="/favoritos"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Favoritos
+            </Link>
+            <Link
               to="/perfil"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >

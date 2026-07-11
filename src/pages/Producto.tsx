@@ -8,6 +8,8 @@ import { queryKeys } from '@/lib/queryKeys'
 import { formatPrice } from '@/lib/format'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
+import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
+import { useFavoriteCount } from '@/hooks/useFavorites'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +25,8 @@ export default function Producto() {
     queryFn: () => fetchPublicProfile(listing!.user_id),
     enabled: Boolean(listing?.user_id),
   })
+
+  const { data: favoriteCount } = useFavoriteCount(id ?? '')
 
   if (isLoading) {
     return (
@@ -134,9 +138,17 @@ export default function Producto() {
           </div>
 
           <div className="mt-6">
-            <Button disabled className="w-full sm:w-auto">
-              Contactar vendedor
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button disabled>Contactar vendedor</Button>
+              <FavoriteButton listingId={listing.id} withLabel />
+              {favoriteCount != null && favoriteCount > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {favoriteCount === 1
+                    ? '1 persona lo ha guardado'
+                    : `${favoriteCount} personas lo han guardado`}
+                </span>
+              )}
+            </div>
             <p className="mt-2 text-xs text-muted-foreground">
               La mensajería llega en el siguiente hito (M4).
             </p>
