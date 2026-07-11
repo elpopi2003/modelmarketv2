@@ -44,4 +44,5 @@ npm run dev
 - [x] **M0 — Andamiaje**: Vite + React + TS + Tailwind v4 + shadcn, ESLint/Prettier, Vitest, CI.
 - [x] **M1 — Fundaciones de dominio**: `SubscriptionTier` + feature matrix, `queryKeys`, `handleSupabaseError`, cliente Supabase, router con layouts + lazy.
 - [x] **M2 — Auth + perfil**: backend Supabase conectado, auth (login/registro/guards), migración `profiles`+`user_roles` con RLS, página de perfil. Verificado en vivo.
-- [ ] M3 — Listings · M4 — Requests/mensajería · M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.
+- [x] **M3 — Listings**: publicar, explorar (filtros) y producto, con el design system "Blueprint" aplicado.
+- [ ] M4 — Requests/mensajería · M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.

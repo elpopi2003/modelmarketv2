@@ -131,7 +131,7 @@ export default function PublicarAnuncio() {
               <FieldError message={errors.title?.message} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="priceEuros">Precio (€)</Label>
                 <Input
@@ -157,7 +157,7 @@ export default function PublicarAnuncio() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="categoryId">Categoría</Label>
                 <select id="categoryId" className={selectClass} {...register('categoryId')}>

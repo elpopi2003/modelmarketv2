@@ -43,7 +43,8 @@ export default function Dashboard() {
               {listing.photos.length > 0 && (
                 <img
                   src={listing.photos[0]}
-                  alt=""
+                  alt={listing.title}
+                  loading="lazy"
                   className="h-14 w-14 shrink-0 rounded-md border border-border object-cover"
                 />
               )}

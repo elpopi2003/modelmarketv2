@@ -10,6 +10,7 @@ import NotFound from '@/pages/NotFound'
 
 // Rutas pesadas: lazy. La home (Index) y Auth van eager por ser puntos de entrada.
 const Explorar = lazy(() => import('@/pages/Explorar'))
+const Producto = lazy(() => import('@/pages/Producto'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
@@ -27,6 +28,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route index element={<Index />} />
           <Route path="explorar" element={<Explorar />} />
+          <Route path="producto/:id" element={<Producto />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

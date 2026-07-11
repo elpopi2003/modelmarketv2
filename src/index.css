@@ -50,6 +50,11 @@
   --started: 32 95% 52%; /* Empezado */
   --started-foreground: 0 0% 100%;
 
+  /* Tinta oscura de estado — texto accesible (≥4.5:1) sobre tintes claros */
+  --sealed-ink: 142 72% 24%;
+  --opened-ink: 213 72% 34%;
+  --started-ink: 25 90% 30%;
+
   /* Membresía PRO */
   --pro: 270 60% 55%;
   --pro-foreground: 0 0% 100%;
@@ -85,6 +90,11 @@
   --ring: 213 56% 55%;
 
   --grid-color: 213 31% 15%;
+
+  /* Tinta de estado, más clara para fondo oscuro */
+  --sealed-ink: 142 60% 65%;
+  --opened-ink: 213 70% 70%;
+  --started-ink: 32 90% 62%;
 }
 
 @theme inline {
@@ -124,6 +134,9 @@
   --color-opened-foreground: hsl(var(--opened-foreground));
   --color-started: hsl(var(--started));
   --color-started-foreground: hsl(var(--started-foreground));
+  --color-sealed-ink: hsl(var(--sealed-ink));
+  --color-opened-ink: hsl(var(--opened-ink));
+  --color-started-ink: hsl(var(--started-ink));
   --color-pro: hsl(var(--pro));
   --color-pro-foreground: hsl(var(--pro-foreground));
 
@@ -276,5 +289,17 @@
   }
   50% {
     box-shadow: 0 0 0 8px hsl(var(--accent) / 0);
+  }
+}
+
+/* Respeta la preferencia de movimiento reducido (audit A11y). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

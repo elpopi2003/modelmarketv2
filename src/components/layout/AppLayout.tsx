@@ -34,7 +34,9 @@ export function AppLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            {user?.email && <span className="text-muted-foreground">{user.email}</span>}
+            {user?.email && (
+              <span className="hidden text-muted-foreground sm:inline">{user.email}</span>
+            )}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               Cerrar sesión
             </Button>
