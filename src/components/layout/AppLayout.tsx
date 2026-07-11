@@ -1,10 +1,12 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useUnreadCount } from '@/hooks/useMessages'
 import { Button } from '@/components/ui/button'
 
 /** Shell autenticado: cabecera con identidad + logout. Se usa tras el guard RequireAuth. */
 export function AppLayout() {
   const { user, signOut } = useAuth()
+  const { data: unread } = useUnreadCount()
   const navigate = useNavigate()
 
   async function handleSignOut() {
@@ -19,6 +21,17 @@ export function AppLayout() {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
             <Link to="/dashboard" className="text-lg font-bold tracking-tight">
               ModelMarket
+            </Link>
+            <Link
+              to="/mensajes"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Mensajes
+              {unread ? (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-xs font-semibold text-accent-ink">
+                  {unread}
+                </span>
+              ) : null}
             </Link>
             <Link
               to="/publicar"

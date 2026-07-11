@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/hooks/useAuth'
+import { useGetOrCreateConversation } from '@/hooks/useMessages'
 import { useListing } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { fetchPublicProfile } from '@/lib/api/profiles'
@@ -27,6 +29,9 @@ export default function Producto() {
   })
 
   const { data: favoriteCount } = useFavoriteCount(id ?? '')
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const getOrCreateConversation = useGetOrCreateConversation()
 
   if (isLoading) {
     return (
@@ -53,6 +58,16 @@ export default function Producto() {
     ? categories?.find((c) => c.id === listing.category_id)?.name
     : null
   const sellerName = seller?.display_name || seller?.username || 'Vendedor'
+  const isOwner = user?.id === listing.user_id
+
+  async function handleContact() {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    const conversationId = await getOrCreateConversation.mutateAsync(listing!.id)
+    navigate(`/mensajes/${conversationId}`)
+  }
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -137,9 +152,13 @@ export default function Producto() {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 space-y-2">
             <div className="flex flex-wrap items-center gap-3">
-              <Button disabled>Contactar vendedor</Button>
+              {!isOwner && (
+                <Button onClick={handleContact} disabled={getOrCreateConversation.isPending}>
+                  {getOrCreateConversation.isPending ? 'Abriendo…' : 'Contactar vendedor'}
+                </Button>
+              )}
               <FavoriteButton listingId={listing.id} withLabel />
               {favoriteCount != null && favoriteCount > 0 && (
                 <span className="text-sm text-muted-foreground">
@@ -149,9 +168,7 @@ export default function Producto() {
                 </span>
               )}
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              La mensajería llega en el siguiente hito (M4).
-            </p>
+            {isOwner && <p className="text-xs text-muted-foreground">Este es tu anuncio.</p>}
           </div>
         </div>
       </div>
