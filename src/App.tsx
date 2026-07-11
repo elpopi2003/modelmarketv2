@@ -14,6 +14,7 @@ const Producto = lazy(() => import('@/pages/Producto'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
+const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
 function PageFallback() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="publicar" element={<PublicarAnuncio />} />
+            <Route path="anuncio/:id/editar" element={<EditarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
           </Route>
         </Route>

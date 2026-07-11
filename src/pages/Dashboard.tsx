@@ -1,10 +1,25 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useMyListings } from '@/hooks/useListings'
+import { useDeleteListing, useMyListings } from '@/hooks/useListings'
 import { formatPrice, STATUS_LABELS } from '@/lib/format'
+import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 
 export default function Dashboard() {
   const { data: listings, isLoading } = useMyListings()
+  const deleteListing = useDeleteListing()
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleDelete(id: string) {
+    setError(null)
+    try {
+      await deleteListing.mutateAsync(id)
+      setConfirmId(null)
+    } catch (e) {
+      setError(getErrorMessage(e))
+    }
+  }
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-16">
@@ -14,6 +29,8 @@ export default function Dashboard() {
           <Link to="/publicar">Publicar anuncio</Link>
         </Button>
       </div>
+
+      {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando…</p>
@@ -27,27 +44,54 @@ export default function Dashboard() {
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border">
           {listings.map((listing) => (
-            <li key={listing.id} className="flex items-center justify-between gap-4 p-4">
-              <div className="min-w-0">
-                <Link
-                  to={`/producto/${listing.id}`}
-                  className="font-medium hover:underline"
-                >
-                  {listing.title}
-                </Link>
-                <p className="text-sm text-muted-foreground">
-                  {formatPrice(listing.price_cents, listing.currency)} ·{' '}
-                  {STATUS_LABELS[listing.status]}
-                </p>
+            <li
+              key={listing.id}
+              className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                {listing.photos.length > 0 && (
+                  <img
+                    src={listing.photos[0]}
+                    alt={listing.title}
+                    loading="lazy"
+                    className="h-14 w-14 shrink-0 rounded-md border border-border object-cover"
+                  />
+                )}
+                <div className="min-w-0">
+                  <Link to={`/producto/${listing.id}`} className="font-medium hover:underline">
+                    {listing.title}
+                  </Link>
+                  <p className="text-sm text-muted-foreground">
+                    {formatPrice(listing.price_cents, listing.currency)} ·{' '}
+                    {STATUS_LABELS[listing.status]}
+                  </p>
+                </div>
               </div>
-              {listing.photos.length > 0 && (
-                <img
-                  src={listing.photos[0]}
-                  alt={listing.title}
-                  loading="lazy"
-                  className="h-14 w-14 shrink-0 rounded-md border border-border object-cover"
-                />
-              )}
+
+              <div className="flex shrink-0 items-center gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/anuncio/${listing.id}/editar`}>Editar</Link>
+                </Button>
+                {confirmId === listing.id ? (
+                  <>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={deleteListing.isPending}
+                      onClick={() => handleDelete(listing.id)}
+                    >
+                      {deleteListing.isPending ? 'Borrando…' : 'Sí, borrar'}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setConfirmId(null)}>
+                      No
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmId(listing.id)}>
+                    Borrar
+                  </Button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
