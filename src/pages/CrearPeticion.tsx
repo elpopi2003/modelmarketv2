@@ -48,7 +48,7 @@ export default function CrearPeticion() {
       <h1 className="mb-6 text-3xl font-bold tracking-tight">Crear petición</h1>
       <Card>
         <CardContent className="pt-6">
-          <RequestForm mode="create" onDone={() => navigate('/peticiones')} />
+          <RequestForm mode="create" onDone={() => navigate('/mis-peticiones')} />
         </CardContent>
       </Card>
     </section>

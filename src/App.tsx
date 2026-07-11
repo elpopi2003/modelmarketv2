@@ -13,6 +13,8 @@ const Explorar = lazy(() => import('@/pages/Explorar'))
 const Producto = lazy(() => import('@/pages/Producto'))
 const Peticiones = lazy(() => import('@/pages/Peticiones'))
 const CrearPeticion = lazy(() => import('@/pages/CrearPeticion'))
+const MisPeticiones = lazy(() => import('@/pages/MisPeticiones'))
+const EditarPeticion = lazy(() => import('@/pages/EditarPeticion'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
@@ -44,6 +46,8 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="publicar" element={<PublicarAnuncio />} />
             <Route path="crear-peticion" element={<CrearPeticion />} />
+            <Route path="mis-peticiones" element={<MisPeticiones />} />
+            <Route path="peticion/:id/editar" element={<EditarPeticion />} />
             <Route path="anuncio/:id/editar" element={<EditarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
           </Route>

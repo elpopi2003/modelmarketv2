@@ -1,4 +1,4 @@
-import type { ListingCondition, ListingStatus } from '@/integrations/supabase/types'
+import type { ListingCondition, ListingStatus, RequestStatus } from '@/integrations/supabase/types'
 
 /** Formatea un importe en céntimos como moneda (por defecto EUR, locale es-ES). */
 export function formatPrice(cents: number, currency = 'EUR', locale = 'es-ES'): string {
@@ -17,4 +17,10 @@ export const STATUS_LABELS: Record<ListingStatus, string> = {
   active: 'Activo',
   sold: 'Vendido',
   archived: 'Archivado',
+}
+
+export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
+  open: 'Abierta',
+  fulfilled: 'Encontrada',
+  closed: 'Cerrada',
 }

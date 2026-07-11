@@ -15,8 +15,8 @@ export function AppLayout() {
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-5">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-4">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
             <Link to="/dashboard" className="text-lg font-bold tracking-tight">
               ModelMarket
             </Link>
@@ -25,6 +25,12 @@ export function AppLayout() {
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Publicar
+            </Link>
+            <Link
+              to="/mis-peticiones"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Mis peticiones
             </Link>
             <Link
               to="/perfil"
