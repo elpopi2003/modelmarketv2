@@ -4,99 +4,131 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design tokens — ModelMarket
- * Fuente de verdad de color en HSL. Nada de colores hardcodeados en componentes:
- * usar SIEMPRE utilidades semánticas (bg-primary, text-muted-foreground, border-border, ...).
+ * Design tokens — ModelMarket · estética "Blueprint / Industrial"
+ * Aplicados desde el design system de Claude Design (ModelMarket Design System).
+ * Canales HSL crudos (H S% L%), consumidos como hsl(var(--x)); mapeados a utilidades
+ * semánticas en @theme inline. Nada de colores hardcodeados en componentes.
  */
 :root {
-  --radius: 0.625rem;
+  --radius: 0.375rem; /* 6px — radio pequeño "técnico" */
 
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(224 71% 4%);
+  /* Azul blueprint (marca/estructura) */
+  --primary: 213 56% 24%;
+  --primary-foreground: 210 40% 98%;
 
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(224 71% 4%);
+  /* Naranja precisión (CTA/acento) */
+  --accent: 32 95% 52%;
+  --accent-foreground: 0 0% 100%;
 
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(224 71% 4%);
+  /* Papel e tinta */
+  --background: 210 20% 98%;
+  --foreground: 213 31% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 213 31% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 213 31% 15%;
 
-  /* Primario: azul marca */
-  --primary: hsl(221 83% 53%);
-  --primary-foreground: hsl(210 40% 98%);
+  /* Grises técnicos */
+  --secondary: 210 14% 93%;
+  --secondary-foreground: 213 31% 15%;
+  --muted: 210 14% 96%;
+  --muted-foreground: 213 16% 45%;
 
-  --secondary: hsl(220 14% 96%);
-  --secondary-foreground: hsl(220 39% 11%);
+  /* Líneas y campos */
+  --border: 213 20% 88%;
+  --input: 213 20% 88%;
+  --ring: 213 56% 24%;
 
-  --muted: hsl(220 14% 96%);
-  --muted-foreground: hsl(220 9% 46%);
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
 
-  /* Acento: ámbar/naranja (coleccionismo) */
-  --accent: hsl(24 95% 53%);
-  --accent-foreground: hsl(0 0% 100%);
+  /* Sellos de estado del artículo */
+  --sealed: 142 71% 45%; /* Precintado */
+  --sealed-foreground: 0 0% 100%;
+  --opened: 213 56% 50%; /* Abierto */
+  --opened-foreground: 0 0% 100%;
+  --started: 32 95% 52%; /* Empezado */
+  --started-foreground: 0 0% 100%;
 
-  --destructive: hsl(0 72% 51%);
-  --destructive-foreground: hsl(210 40% 98%);
+  /* Membresía PRO */
+  --pro: 270 60% 55%;
+  --pro-foreground: 0 0% 100%;
 
-  --border: hsl(220 13% 91%);
-  --input: hsl(220 13% 91%);
-  --ring: hsl(221 83% 53%);
+  /* Línea de la rejilla blueprint */
+  --grid-color: 213 30% 92%;
 }
 
 .dark {
-  --background: hsl(224 71% 4%);
-  --foreground: hsl(210 40% 98%);
+  --background: 213 31% 10%;
+  --foreground: 210 20% 95%;
+  --card: 213 31% 13%;
+  --card-foreground: 210 20% 95%;
+  --popover: 213 31% 13%;
+  --popover-foreground: 210 20% 95%;
 
-  --card: hsl(222 47% 11%);
-  --card-foreground: hsl(210 40% 98%);
+  --primary: 213 56% 55%;
+  --primary-foreground: 213 31% 10%;
 
-  --popover: hsl(222 47% 11%);
-  --popover-foreground: hsl(210 40% 98%);
+  --secondary: 213 31% 18%;
+  --secondary-foreground: 210 20% 95%;
+  --muted: 213 31% 18%;
+  --muted-foreground: 213 16% 60%;
 
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(222 47% 11%);
+  --accent: 32 95% 52%;
+  --accent-foreground: 0 0% 100%;
 
-  --secondary: hsl(215 28% 17%);
-  --secondary-foreground: hsl(210 40% 98%);
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 210 40% 98%;
 
-  --muted: hsl(215 28% 17%);
-  --muted-foreground: hsl(218 11% 65%);
+  --border: 213 31% 22%;
+  --input: 213 31% 22%;
+  --ring: 213 56% 55%;
 
-  --accent: hsl(20 90% 55%);
-  --accent-foreground: hsl(0 0% 100%);
-
-  --destructive: hsl(0 63% 51%);
-  --destructive-foreground: hsl(210 40% 98%);
-
-  --border: hsl(215 28% 17%);
-  --input: hsl(215 28% 17%);
-  --ring: hsl(217 91% 60%);
+  --grid-color: 213 31% 15%;
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Fuentes: Raleway 800 (display), Montserrat (cuerpo), JetBrains Mono (técnico) */
+  --font-display: 'Raleway', system-ui, sans-serif;
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-sealed: hsl(var(--sealed));
+  --color-sealed-foreground: hsl(var(--sealed-foreground));
+  --color-opened: hsl(var(--opened));
+  --color-opened-foreground: hsl(var(--opened-foreground));
+  --color-started: hsl(var(--started));
+  --color-started-foreground: hsl(var(--started-foreground));
+  --color-pro: hsl(var(--pro));
+  --color-pro-foreground: hsl(var(--pro-foreground));
+
+  /* Sombra firma "blueprint": offset duro sin blur + keyline interior */
+  --shadow-blueprint: 4px 4px 0 0 hsl(var(--border)), inset 0 0 0 1px hsl(var(--border) / 0.5);
 }
 
 @layer base {
@@ -105,7 +137,144 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+}
+
+/*
+ * Utilidades de marca (patterns.css del design system).
+ * Clases planas reutilizables que codifican los motivos "blueprint".
+ */
+.mm-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+.mm-grid {
+  background-image:
+    linear-gradient(hsl(var(--grid-color)) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--grid-color)) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.mm-grid-subtle {
+  background-image:
+    linear-gradient(hsl(var(--grid-color) / 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--grid-color) / 0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.mm-card-blueprint {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-blueprint);
+}
+.mm-card-blueprint::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: hsl(var(--primary));
+}
+
+.mm-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.mm-section-header::before {
+  content: '';
+  width: 0.75rem;
+  height: 0.75rem;
+  background: hsl(var(--accent));
+  transform: rotate(45deg);
+  flex: none;
+}
+.mm-section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: hsl(var(--border));
+}
+.mm-section-header__label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.mm-scale-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.3);
+  border-radius: var(--radius);
+}
+
+.mm-border-technical {
+  border: 2px dashed hsl(var(--border));
+}
+
+.mm-hover-lift {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+.mm-hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.mm-underline-accent {
+  position: relative;
+  display: inline-block;
+}
+.mm-underline-accent::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: hsl(var(--accent));
+}
+
+@keyframes mm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes mm-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(var(--accent) / 0);
   }
 }
