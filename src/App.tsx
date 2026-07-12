@@ -17,6 +17,7 @@ const MisPeticiones = lazy(() => import('@/pages/MisPeticiones'))
 const EditarPeticion = lazy(() => import('@/pages/EditarPeticion'))
 const Favoritos = lazy(() => import('@/pages/Favoritos'))
 const Mensajes = lazy(() => import('@/pages/Mensajes'))
+const Notificaciones = lazy(() => import('@/pages/Notificaciones'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
@@ -53,6 +54,7 @@ function App() {
             <Route path="favoritos" element={<Favoritos />} />
             <Route path="mensajes" element={<Mensajes />} />
             <Route path="mensajes/:id" element={<Mensajes />} />
+            <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="anuncio/:id/editar" element={<EditarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
           </Route>

@@ -45,4 +45,5 @@ npm run dev
 - [x] **M1 — Fundaciones de dominio**: `SubscriptionTier` + feature matrix, `queryKeys`, `handleSupabaseError`, cliente Supabase, router con layouts + lazy.
 - [x] **M2 — Auth + perfil**: backend Supabase conectado, auth (login/registro/guards), migración `profiles`+`user_roles` con RLS, página de perfil. Verificado en vivo.
 - [x] **M3 — Listings**: publicar, explorar (filtros) y producto, con el design system "Blueprint" aplicado.
-- [ ] M4 — Requests/mensajería · M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.
+- [x] **M4 — Requests, favoritos, mensajería, notificaciones**: verificado en vivo con 2 usuarios.
+- [ ] M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.

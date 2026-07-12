@@ -1,12 +1,15 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Bell } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useUnreadCount } from '@/hooks/useMessages'
+import { useUnreadNotificationCount } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
 
 /** Shell autenticado: cabecera con identidad + logout. Se usa tras el guard RequireAuth. */
 export function AppLayout() {
   const { user, signOut } = useAuth()
   const { data: unread } = useUnreadCount()
+  const { data: unreadNotif } = useUnreadNotificationCount()
   const navigate = useNavigate()
 
   async function handleSignOut() {
@@ -59,6 +62,18 @@ export function AppLayout() {
             </Link>
           </div>
           <div className="flex items-center gap-4 text-sm">
+            <Link
+              to="/notificaciones"
+              className="relative text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Notificaciones"
+            >
+              <Bell className="size-5" />
+              {unreadNotif ? (
+                <span className="absolute -right-2 -top-2 inline-flex min-w-4 items-center justify-center rounded-full bg-accent px-1 py-0.5 text-[0.65rem] font-semibold text-accent-ink">
+                  {unreadNotif}
+                </span>
+              ) : null}
+            </Link>
             {user?.email && (
               <span className="hidden text-muted-foreground sm:inline">{user.email}</span>
             )}

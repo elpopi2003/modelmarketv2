@@ -24,3 +24,15 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
   fulfilled: 'Encontrada',
   closed: 'Cerrada',
 }
+
+/** Tiempo relativo legible ("hace 5 minutos") para fechas ISO. */
+export function formatRelativeTime(iso: string, locale = 'es-ES'): string {
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+  const diffSeconds = (new Date(iso).getTime() - Date.now()) / 1000
+  const abs = Math.abs(diffSeconds)
+  if (abs < 60) return rtf.format(Math.round(diffSeconds), 'second')
+  if (abs < 3600) return rtf.format(Math.round(diffSeconds / 60), 'minute')
+  if (abs < 86400) return rtf.format(Math.round(diffSeconds / 3600), 'hour')
+  if (abs < 2592000) return rtf.format(Math.round(diffSeconds / 86400), 'day')
+  return rtf.format(Math.round(diffSeconds / 2592000), 'month')
+}
