@@ -278,6 +278,39 @@ export interface Database {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          body: string | null
+          link: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          body?: string | null
+          link?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          body?: string | null
+          link?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -304,6 +337,10 @@ export interface Database {
       mark_conversation_read: {
         Args: { _conversation_id: string }
         Returns: undefined
+      }
+      unread_notification_count: {
+        Args: Record<string, never>
+        Returns: number
       }
     }
     Enums: {
