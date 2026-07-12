@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check, Minus } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { useCheckout } from '@/hooks/useSubscription'
 import {
   SUBSCRIPTION_TIERS,
   TIER_CAPABILITIES,
   isUnlimited,
   type SubscriptionTier,
 } from '@/lib/subscription'
+import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -35,6 +37,7 @@ function featureRows(tier: SubscriptionTier) {
 export default function Precios() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const checkout = useCheckout()
   const [notice, setNotice] = useState<string | null>(null)
 
   function handleSubscribe(tier: SubscriptionTier) {
@@ -42,8 +45,9 @@ export default function Precios() {
       navigate('/auth')
       return
     }
-    // TODO (M5, paso Stripe): llamar a create-checkout con el tier.
-    setNotice(`El pago del plan ${TIER_CAPABILITIES[tier].label} se activa al conectar Stripe.`)
+    setNotice(null)
+    // create-checkout redirige a Stripe; en caso de error (p. ej. sin desplegar) lo mostramos.
+    checkout.mutate(tier, { onError: (e) => setNotice(getErrorMessage(e)) })
   }
 
   return (
@@ -105,9 +109,10 @@ export default function Precios() {
                   <Button
                     variant={highlighted ? 'accent' : 'default'}
                     className="w-full"
+                    disabled={checkout.isPending}
                     onClick={() => handleSubscribe(tier)}
                   >
-                    Hazte {c.label}
+                    {checkout.isPending ? 'Redirigiendo…' : `Hazte ${c.label}`}
                   </Button>
                 )}
               </div>

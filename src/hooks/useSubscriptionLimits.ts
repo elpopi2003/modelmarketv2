@@ -5,15 +5,15 @@ import {
   getCapabilities,
   type SubscriptionTier,
 } from '@/lib/subscription'
+import { useSubscription } from '@/hooks/useSubscription'
 
 /**
- * Límites y capacidades del plan del usuario.
- *
- * TODO (M5): leer el `tier` real de la suscripción (tabla `subscriptions`) en lugar de
- * asumir `DEFAULT_TIER`. La interfaz ya queda estable para ese cambio.
+ * Límites y capacidades del plan del usuario, leídos de su suscripción real.
+ * Mientras carga o sin sesión, cae a `DEFAULT_TIER` (free).
  */
 export function useSubscriptionLimits() {
-  const tier: SubscriptionTier = DEFAULT_TIER
+  const { data } = useSubscription()
+  const tier: SubscriptionTier = data ?? DEFAULT_TIER
   const capabilities = getCapabilities(tier)
 
   return {
