@@ -16,6 +16,9 @@ export function PublicLayout() {
             <Link to="/peticiones" className="transition-colors hover:text-foreground">
               Peticiones
             </Link>
+            <Link to="/precios" className="transition-colors hover:text-foreground">
+              Precios
+            </Link>
           </nav>
         </div>
       </header>

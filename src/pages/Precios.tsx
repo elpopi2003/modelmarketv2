@@ -1,0 +1,137 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Check, Minus } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  SUBSCRIPTION_TIERS,
+  TIER_CAPABILITIES,
+  isUnlimited,
+  type SubscriptionTier,
+} from '@/lib/subscription'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+function priceLabel(priceMonthly: number): string {
+  if (priceMonthly === 0) return 'Gratis'
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(priceMonthly)
+}
+
+function featureRows(tier: SubscriptionTier) {
+  const c = TIER_CAPABILITIES[tier]
+  const limit = (n: number, unlimited: string) => (isUnlimited(n) ? unlimited : String(n))
+  return [
+    { label: 'Anuncios activos', value: limit(c.maxListings, 'Ilimitados') },
+    { label: 'Peticiones activas', value: limit(c.maxRequests, 'Ilimitadas') },
+    { label: 'Fotos por anuncio', value: limit(c.maxPhotosPerItem, 'Ilimitadas') },
+    {
+      label: 'Visibilidad',
+      value: c.immediateVisibility ? 'Inmediata' : `Retardada ${c.visibilityDelayHours}h`,
+    },
+    { label: 'Insignia de plan', value: c.hasBadge },
+    { label: 'Carga masiva CSV', value: c.csvBulkImport },
+  ]
+}
+
+export default function Precios() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [notice, setNotice] = useState<string | null>(null)
+
+  function handleSubscribe(tier: SubscriptionTier) {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    // TODO (M5, paso Stripe): llamar a create-checkout con el tier.
+    setNotice(`El pago del plan ${TIER_CAPABILITIES[tier].label} se activa al conectar Stripe.`)
+  }
+
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-16">
+      <div className="mb-10 text-center">
+        <div className="mm-section-header justify-center">
+          <span className="mm-section-header__label">Planes</span>
+        </div>
+        <h1 className="text-4xl font-extrabold tracking-tight">Elige tu plan</h1>
+        <p className="mt-3 text-muted-foreground">
+          Vende y compra con <span className="mm-underline-accent font-semibold">0% de comisión</span>.
+          Mejora solo cuando lo necesites.
+        </p>
+      </div>
+
+      {notice && (
+        <p className="mb-6 rounded-md border border-border bg-muted p-3 text-center text-sm text-muted-foreground">
+          {notice}
+        </p>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {SUBSCRIPTION_TIERS.map((tier) => {
+          const c = TIER_CAPABILITIES[tier]
+          const highlighted = tier === 'pro'
+          const isFree = tier === 'free'
+          return (
+            <div
+              key={tier}
+              className={cn(
+                'flex flex-col rounded-md border-2 bg-card p-6',
+                highlighted ? 'border-accent shadow-lg' : 'border-border',
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="font-display text-2xl font-extrabold uppercase tracking-wide">
+                  {c.label}
+                </h2>
+                {highlighted && (
+                  <span className="mm-mono rounded-md bg-accent px-2 py-0.5 text-xs font-semibold uppercase text-accent-ink">
+                    Popular
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-4">
+                <span className="mm-mono text-3xl font-bold">{priceLabel(c.priceMonthly)}</span>
+                {c.priceMonthly > 0 && <span className="text-sm text-muted-foreground"> /mes</span>}
+              </p>
+
+              <div className="mt-6">
+                {isFree ? (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to={user ? '/dashboard' : '/auth'}>
+                      {user ? 'Tu plan base' : 'Empezar gratis'}
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    variant={highlighted ? 'accent' : 'default'}
+                    className="w-full"
+                    onClick={() => handleSubscribe(tier)}
+                  >
+                    Hazte {c.label}
+                  </Button>
+                )}
+              </div>
+
+              <ul className="mt-6 space-y-3 text-sm">
+                {featureRows(tier).map((row) => (
+                  <li key={row.label} className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">{row.label}</span>
+                    {typeof row.value === 'boolean' ? (
+                      row.value ? (
+                        <Check className="size-4 text-sealed-ink" aria-label="Sí" />
+                      ) : (
+                        <Minus className="size-4 text-muted-foreground" aria-label="No" />
+                      )
+                    ) : (
+                      <span className="mm-mono font-semibold">{row.value}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}

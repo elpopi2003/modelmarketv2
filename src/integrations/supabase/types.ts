@@ -311,8 +311,53 @@ export interface Database {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          tier: SubscriptionPlan
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          current_period_end: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          tier?: SubscriptionPlan
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          current_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          tier?: SubscriptionPlan
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          current_period_end?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
-    Views: Record<string, never>
+    Views: {
+      subscriptions_public: {
+        Row: {
+          user_id: string | null
+          tier: SubscriptionPlan | null
+          status: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       has_role: {
         Args: { _user_id: string; _role: AppRole }

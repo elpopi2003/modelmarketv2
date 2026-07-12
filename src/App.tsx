@@ -12,6 +12,7 @@ import NotFound from '@/pages/NotFound'
 const Explorar = lazy(() => import('@/pages/Explorar'))
 const Producto = lazy(() => import('@/pages/Producto'))
 const Peticiones = lazy(() => import('@/pages/Peticiones'))
+const Precios = lazy(() => import('@/pages/Precios'))
 const CrearPeticion = lazy(() => import('@/pages/CrearPeticion'))
 const MisPeticiones = lazy(() => import('@/pages/MisPeticiones'))
 const EditarPeticion = lazy(() => import('@/pages/EditarPeticion'))
@@ -38,6 +39,7 @@ function App() {
           <Route path="explorar" element={<Explorar />} />
           <Route path="producto/:id" element={<Producto />} />
           <Route path="peticiones" element={<Peticiones />} />
+          <Route path="precios" element={<Precios />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
