@@ -29,7 +29,28 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.email) return fail('No autorizado', 401)
 
-    const { tier } = await req.json().catch(() => ({}))
+    const { tier, debug } = await req.json().catch(() => ({}))
+
+    let appUrl = (Deno.env.get('APP_URL') || 'https://modelmarket.es').trim().replace(/\/+$/, '')
+    if (!/^https?:\/\//.test(appUrl)) {
+      appUrl =
+        appUrl.startsWith('localhost') || appUrl.startsWith('127.0.0.1')
+          ? `http://${appUrl}`
+          : `https://${appUrl}`
+    }
+
+    // Modo diagnóstico: no llama a Stripe, solo devuelve la config resuelta.
+    if (debug) {
+      return ok({
+        appUrlRaw: Deno.env.get('APP_URL') ?? null,
+        appUrlResolved: appUrl,
+        successUrl: `${appUrl}/dashboard?checkout=success`,
+        pricePro: (Deno.env.get('STRIPE_PRICE_PRO') ?? '(sin valor)').slice(0, 10),
+        priceRetail: (Deno.env.get('STRIPE_PRICE_RETAIL') ?? '(sin valor)').slice(0, 10),
+        hasSecretKey: Boolean(Deno.env.get('STRIPE_SECRET_KEY')),
+      })
+    }
+
     const priceId =
       tier === 'pro'
         ? Deno.env.get('STRIPE_PRICE_PRO')
@@ -42,13 +63,6 @@ Deno.serve(async (req) => {
       apiVersion: '2024-06-20',
       httpClient: Stripe.createFetchHttpClient(),
     })
-    let appUrl = (Deno.env.get('APP_URL') || 'https://modelmarket.es').trim().replace(/\/+$/, '')
-    if (!/^https?:\/\//.test(appUrl)) {
-      appUrl =
-        appUrl.startsWith('localhost') || appUrl.startsWith('127.0.0.1')
-          ? `http://${appUrl}`
-          : `https://${appUrl}`
-    }
 
     // Reutiliza el cliente de Stripe por email, o lo crea.
     const existing = await stripe.customers.list({ email: user.email, limit: 1 })
