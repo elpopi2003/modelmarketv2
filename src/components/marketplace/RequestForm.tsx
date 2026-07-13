@@ -5,9 +5,12 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateRequest, useUpdateRequest } from '@/hooks/useRequests'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
+import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
+import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { requestSchema, type RequestFormValues } from '@/lib/schemas/request'
 import { getErrorMessage } from '@/lib/errors'
 import type { Request } from '@/lib/api/requests'
+import { PhotoUploaderField } from '@/components/marketplace/PhotoUploaderField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,6 +38,8 @@ export function RequestForm({
   const updateRequest = useUpdateRequest()
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
+  const { maxPhotosPerItem } = useSubscriptionLimits()
+  const uploader = usePhotoUploader({ max: maxPhotosPerItem, initialUrls: request?.photos })
   const [serverError, setServerError] = useState<string | null>(null)
 
   const {
@@ -66,6 +71,7 @@ export function RequestForm({
         scale: values.scale?.trim() || null,
         category_id: values.categoryId || null,
         brand_id: values.brandId || null,
+        photos: await uploader.resolveUrls(user.id),
       }
 
       if (mode === 'edit' && request) {
@@ -138,6 +144,15 @@ export function RequestForm({
         <Textarea id="description" rows={5} placeholder="Estado deseado, referencias, etc." {...register('description')} />
         <FieldError message={errors.description?.message} />
       </div>
+
+      <PhotoUploaderField
+        photos={uploader.photos}
+        onAdd={uploader.addFiles}
+        onRemove={uploader.removePhoto}
+        max={maxPhotosPerItem}
+        canAddMore={uploader.canAddMore}
+        label="Fotos de referencia"
+      />
 
       <FieldError message={serverError ?? undefined} />
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
@@ -6,11 +6,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCreateListing, useUpdateListing } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
-import { uploadListingPhoto } from '@/lib/api/storage'
+import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { listingSchema, type ListingFormValues } from '@/lib/schemas/listing'
 import { CONDITION_LABELS } from '@/lib/format'
 import { getErrorMessage } from '@/lib/errors'
 import type { Listing } from '@/lib/api/listings'
+import { PhotoUploaderField } from '@/components/marketplace/PhotoUploaderField'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,9 +24,6 @@ function FieldError({ message }: { message?: string }) {
   if (!message) return null
   return <p className="text-sm text-destructive">{message}</p>
 }
-
-/** Foto ya guardada (URL) o nueva por subir (File). */
-type Photo = { kind: 'existing'; url: string } | { kind: 'new'; file: File; url: string }
 
 export function ListingForm({
   mode,
@@ -42,18 +40,8 @@ export function ListingForm({
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
   const { maxPhotosPerItem } = useSubscriptionLimits()
-
-  const [photos, setPhotos] = useState<Photo[]>(
-    () => listing?.photos.map((url) => ({ kind: 'existing', url }) as Photo) ?? [],
-  )
+  const uploader = usePhotoUploader({ max: maxPhotosPerItem, initialUrls: listing?.photos })
   const [serverError, setServerError] = useState<string | null>(null)
-
-  // Libera las object URLs de las fotos nuevas al desmontar/cambiar.
-  useEffect(() => {
-    return () => {
-      photos.forEach((p) => p.kind === 'new' && URL.revokeObjectURL(p.url))
-    }
-  }, [photos])
 
   const {
     register,
@@ -74,33 +62,10 @@ export function ListingForm({
       : { condition: 'used' },
   })
 
-  function addFiles(list: FileList | null) {
-    if (!list) return
-    const room = maxPhotosPerItem - photos.length
-    const incoming: Photo[] = Array.from(list)
-      .slice(0, Math.max(0, room))
-      .map((file) => ({ kind: 'new', file, url: URL.createObjectURL(file) }))
-    setPhotos((prev) => [...prev, ...incoming])
-  }
-
-  function removePhoto(index: number) {
-    setPhotos((prev) => {
-      const target = prev[index]
-      if (target?.kind === 'new') URL.revokeObjectURL(target.url)
-      return prev.filter((_, i) => i !== index)
-    })
-  }
-
   async function onSubmit(values: ListingFormValues) {
     if (!user) return
     setServerError(null)
     try {
-      // Sube solo las fotos nuevas; conserva las existentes.
-      const urls: string[] = []
-      for (const photo of photos) {
-        urls.push(photo.kind === 'existing' ? photo.url : await uploadListingPhoto(user.id, photo.file))
-      }
-
       const payload = {
         title: values.title,
         description: values.description?.trim() || null,
@@ -109,7 +74,7 @@ export function ListingForm({
         scale: values.scale?.trim() || null,
         category_id: values.categoryId || null,
         brand_id: values.brandId || null,
-        photos: urls,
+        photos: await uploader.resolveUrls(user.id),
       }
 
       if (mode === 'edit' && listing) {
@@ -123,8 +88,6 @@ export function ListingForm({
       setServerError(getErrorMessage(error))
     }
   }
-
-  const canAddMore = photos.length < maxPhotosPerItem
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
@@ -190,47 +153,13 @@ export function ListingForm({
         <FieldError message={errors.description?.message} />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="photos">
-          Fotos{' '}
-          <span className="font-normal text-muted-foreground">
-            ({photos.length}/{maxPhotosPerItem})
-          </span>
-        </Label>
-        <input
-          id="photos"
-          type="file"
-          accept="image/*"
-          multiple
-          disabled={!canAddMore}
-          onChange={(e) => {
-            addFiles(e.target.files)
-            e.target.value = ''
-          }}
-          className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-secondary/80"
-        />
-        {photos.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-3">
-            {photos.map((photo, index) => (
-              <div key={photo.url} className="relative">
-                <img
-                  src={photo.url}
-                  alt=""
-                  className="h-20 w-20 rounded-md border border-border object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => removePhoto(index)}
-                  className="absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full bg-destructive text-xs text-destructive-foreground"
-                  aria-label="Quitar foto"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <PhotoUploaderField
+        photos={uploader.photos}
+        onAdd={uploader.addFiles}
+        onRemove={uploader.removePhoto}
+        max={maxPhotosPerItem}
+        canAddMore={uploader.canAddMore}
+      />
 
       <FieldError message={serverError ?? undefined} />
 
