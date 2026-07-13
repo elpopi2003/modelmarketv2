@@ -42,7 +42,13 @@ Deno.serve(async (req) => {
       apiVersion: '2024-06-20',
       httpClient: Stripe.createFetchHttpClient(),
     })
-    const appUrl = Deno.env.get('APP_URL') ?? 'https://modelmarket.es'
+    let appUrl = (Deno.env.get('APP_URL') || 'https://modelmarket.es').trim().replace(/\/+$/, '')
+    if (!/^https?:\/\//.test(appUrl)) {
+      appUrl =
+        appUrl.startsWith('localhost') || appUrl.startsWith('127.0.0.1')
+          ? `http://${appUrl}`
+          : `https://${appUrl}`
+    }
 
     // Reutiliza el cliente de Stripe por email, o lo crea.
     const existing = await stripe.customers.list({ email: user.email, limit: 1 })

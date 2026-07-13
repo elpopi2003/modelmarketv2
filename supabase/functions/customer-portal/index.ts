@@ -32,7 +32,13 @@ Deno.serve(async (req) => {
       apiVersion: '2024-06-20',
       httpClient: Stripe.createFetchHttpClient(),
     })
-    const appUrl = Deno.env.get('APP_URL') ?? 'https://modelmarket.es'
+    let appUrl = (Deno.env.get('APP_URL') || 'https://modelmarket.es').trim().replace(/\/+$/, '')
+    if (!/^https?:\/\//.test(appUrl)) {
+      appUrl =
+        appUrl.startsWith('localhost') || appUrl.startsWith('127.0.0.1')
+          ? `http://${appUrl}`
+          : `https://${appUrl}`
+    }
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 })
     const customerId = customers.data[0]?.id
