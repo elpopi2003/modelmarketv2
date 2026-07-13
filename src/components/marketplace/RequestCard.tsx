@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Request } from '@/lib/api/requests'
 import { formatPrice } from '@/lib/format'
 import { ScaleTag } from './ScaleTag'
@@ -15,7 +16,10 @@ export function RequestCard({
   const meta = [brandName, categoryName].filter(Boolean).join(' · ')
 
   return (
-    <article className="mm-border-technical rounded-md bg-card p-5">
+    <Link
+      to={`/peticion/${request.id}`}
+      className="mm-border-technical group block rounded-md bg-card p-5 transition-[border-color,box-shadow] duration-300 hover:border-accent hover:shadow-lg"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -25,7 +29,9 @@ export function RequestCard({
             {request.scale && <ScaleTag scale={request.scale} />}
           </div>
 
-          <h3 className="text-lg font-semibold leading-snug">{request.title}</h3>
+          <h3 className="text-lg font-semibold leading-snug transition-colors group-hover:text-accent">
+            {request.title}
+          </h3>
 
           {request.description && (
             <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{request.description}</p>
@@ -43,6 +49,6 @@ export function RequestCard({
           </div>
         )}
       </div>
-    </article>
+    </Link>
   )
 }
