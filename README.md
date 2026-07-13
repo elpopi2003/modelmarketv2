@@ -46,4 +46,6 @@ npm run dev
 - [x] **M2 — Auth + perfil**: backend Supabase conectado, auth (login/registro/guards), migración `profiles`+`user_roles` con RLS, página de perfil. Verificado en vivo.
 - [x] **M3 — Listings**: publicar, explorar (filtros) y producto, con el design system "Blueprint" aplicado.
 - [x] **M4 — Requests, favoritos, mensajería, notificaciones**: verificado en vivo con 2 usuarios.
-- [ ] M5 — Stripe · M6 — Admin/Edge · M7 — SEO/perf.
+- [x] **M5 — Suscripciones/Stripe**: /precios, Checkout/Portal/Webhook, tier real. Verificado end-to-end (pago test → PRO → gating desbloqueado).
+- [~] M6 — Admin, moderación, Edge Functions, emails (capa de email con Resend ya adelantada y verificada).
+- [ ] M7 — SEO, rendimiento, tests e2e.
