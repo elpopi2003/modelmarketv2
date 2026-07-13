@@ -1,12 +1,22 @@
 import { Link } from 'react-router-dom'
 import type { Listing } from '@/lib/api/listings'
+import type { SubscriptionTier } from '@/lib/subscription'
 import { formatPrice } from '@/lib/format'
 import { ConditionBadge } from './ConditionBadge'
 import { ScaleTag } from './ScaleTag'
 import { FavoriteButton } from './FavoriteButton'
+import { TierBadge } from './TierBadge'
 
 /** Tarjeta de anuncio (listing tile) — estética blueprint del design system. */
-export function ProductCard({ listing, brandName }: { listing: Listing; brandName?: string }) {
+export function ProductCard({
+  listing,
+  brandName,
+  sellerTier,
+}: {
+  listing: Listing
+  brandName?: string
+  sellerTier?: SubscriptionTier
+}) {
   const cover = listing.photos[0]
 
   return (
@@ -36,6 +46,11 @@ export function ProductCard({ listing, brandName }: { listing: Listing; brandNam
           <div className="absolute bottom-3 left-3">
             <ConditionBadge condition={listing.condition} />
           </div>
+          {sellerTier && (
+            <div className="absolute bottom-3 right-3">
+              <TierBadge tier={sellerTier} />
+            </div>
+          )}
         </div>
 
         <div className="p-4">

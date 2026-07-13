@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Link } from 'react-router-dom'
 import { useProfile } from '@/hooks/useProfile'
+import { useCustomerPortal, useSubscription } from '@/hooks/useSubscription'
 import { profileSchema, type ProfileFormValues } from '@/lib/schemas/profile'
+import { getCapabilities, DEFAULT_TIER } from '@/lib/subscription'
 import { getErrorMessage } from '@/lib/errors'
+import { TierBadge } from '@/components/marketplace/TierBadge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -17,7 +21,10 @@ function emptyToNull(value?: string): string | null {
 
 export default function Perfil() {
   const { profile, isLoading, updateProfile, isUpdating } = useProfile()
+  const { data: tier = DEFAULT_TIER } = useSubscription()
+  const portal = useCustomerPortal()
   const [status, setStatus] = useState<{ kind: 'ok' | 'error'; message: string } | null>(null)
+  const [portalError, setPortalError] = useState<string | null>(null)
 
   const {
     register,
@@ -109,6 +116,37 @@ export default function Perfil() {
               </Button>
             </form>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Suscripción</CardTitle>
+          <CardDescription>Tu plan actual y facturación.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="flex items-center gap-2 text-sm">
+            Plan actual:
+            <span className="font-semibold">{getCapabilities(tier).label}</span>
+            <TierBadge tier={tier} />
+          </p>
+
+          {tier === 'free' ? (
+            <Button asChild variant="accent">
+              <Link to="/precios">Mejorar plan</Link>
+            </Button>
+          ) : (
+            <Button
+              disabled={portal.isPending}
+              onClick={() => {
+                setPortalError(null)
+                portal.mutate(undefined, { onError: (e) => setPortalError(getErrorMessage(e)) })
+              }}
+            >
+              {portal.isPending ? 'Abriendo…' : 'Gestionar suscripción'}
+            </Button>
+          )}
+          {portalError && <p className="text-sm text-destructive">{portalError}</p>}
         </CardContent>
       </Card>
     </section>

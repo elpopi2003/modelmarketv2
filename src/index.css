@@ -59,6 +59,7 @@
   /* Membresía PRO */
   --pro: 270 60% 55%;
   --pro-foreground: 0 0% 100%;
+  --pro-ink: 271 55% 40%; /* texto violeta accesible sobre tinte claro */
 
   /* Línea de la rejilla blueprint */
   --grid-color: 213 30% 92%;
@@ -96,6 +97,7 @@
   --sealed-ink: 142 60% 65%;
   --opened-ink: 213 70% 70%;
   --started-ink: 32 90% 62%;
+  --pro-ink: 271 70% 75%;
 }
 
 @theme inline {
@@ -141,6 +143,7 @@
   --color-started-ink: hsl(var(--started-ink));
   --color-pro: hsl(var(--pro));
   --color-pro-foreground: hsl(var(--pro-foreground));
+  --color-pro-ink: hsl(var(--pro-ink));
 
   /* Sombra firma "blueprint": offset duro sin blur + keyline interior */
   --shadow-blueprint: 4px 4px 0 0 hsl(var(--border)), inset 0 0 0 1px hsl(var(--border) / 0.5);

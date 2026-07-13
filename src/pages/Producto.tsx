@@ -11,7 +11,9 @@ import { formatPrice } from '@/lib/format'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
+import { TierBadge } from '@/components/marketplace/TierBadge'
 import { useFavoriteCount } from '@/hooks/useFavorites'
+import { usePublicTiers } from '@/hooks/useSubscription'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +31,7 @@ export default function Producto() {
   })
 
   const { data: favoriteCount } = useFavoriteCount(id ?? '')
+  const { data: sellerTiers } = usePublicTiers(listing ? [listing.user_id] : [])
   const { user } = useAuth()
   const navigate = useNavigate()
   const getOrCreateConversation = useGetOrCreateConversation()
@@ -148,7 +151,10 @@ export default function Producto() {
             </span>
             <div className="min-w-0">
               <p className="mm-mono text-xs uppercase text-muted-foreground">Vendedor</p>
-              <p className="truncate font-semibold">{sellerName}</p>
+              <div className="flex items-center gap-2">
+                <p className="truncate font-semibold">{sellerName}</p>
+                <TierBadge tier={sellerTiers?.[listing.user_id]} />
+              </div>
             </div>
           </div>
 

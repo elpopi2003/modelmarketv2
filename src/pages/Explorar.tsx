@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useListings } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
+import { usePublicTiers } from '@/hooks/useSubscription'
 import { ProductCard, ProductCardSkeleton } from '@/components/marketplace/ProductCard'
 import { CONDITION_LABELS } from '@/lib/format'
 import type { ListingFilters, ListingSort } from '@/lib/api/listings'
@@ -42,6 +43,8 @@ export default function Explorar() {
     () => new Map((brands ?? []).map((b) => [b.id, b.name])),
     [brands],
   )
+  const ownerIds = useMemo(() => (listings ?? []).map((l) => l.user_id), [listings])
+  const { data: tiers } = usePublicTiers(ownerIds)
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
@@ -125,6 +128,7 @@ export default function Explorar() {
               key={listing.id}
               listing={listing}
               brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
+              sellerTier={tiers?.[listing.user_id]}
             />
           ))}
         </div>

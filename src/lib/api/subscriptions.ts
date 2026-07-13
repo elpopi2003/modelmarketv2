@@ -2,6 +2,25 @@ import { supabase } from '@/integrations/supabase/client'
 import { handleSupabaseError } from '@/lib/errors'
 import { normalizeTier, type SubscriptionTier } from '@/lib/subscription'
 
+/** Tier público (activo) de varios usuarios, para insignias. Solo pro/retail. */
+export async function fetchPublicTiers(
+  userIds: string[],
+): Promise<Record<string, SubscriptionTier>> {
+  if (userIds.length === 0) return {}
+  const { data, error } = await supabase
+    .from('subscriptions_public')
+    .select('user_id, tier, status')
+    .in('user_id', userIds)
+  if (error) handleSupabaseError(error)
+
+  const map: Record<string, SubscriptionTier> = {}
+  for (const row of data ?? []) {
+    const active = row.status === 'active' || row.status === 'trialing'
+    if (row.user_id && active) map[row.user_id] = normalizeTier(row.tier)
+  }
+  return map
+}
+
 /** Tier real del usuario (lee su suscripción; 'free' si no hay o no está activa). */
 export async function fetchMySubscriptionTier(): Promise<SubscriptionTier> {
   const { data, error } = await supabase.from('subscriptions').select('tier, status').maybeSingle()

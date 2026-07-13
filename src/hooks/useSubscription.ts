@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   createCheckout,
   fetchMySubscriptionTier,
+  fetchPublicTiers,
   openCustomerPortal,
 } from '@/lib/api/subscriptions'
 import { queryKeys } from '@/lib/queryKeys'
@@ -15,6 +16,17 @@ export function useSubscription() {
     queryKey: queryKeys.subscription.current(),
     queryFn: fetchMySubscriptionTier,
     enabled: Boolean(user),
+  })
+}
+
+/** Tiers públicos (pro/retail) de un conjunto de usuarios, para insignias. */
+export function usePublicTiers(userIds: string[]) {
+  const unique = [...new Set(userIds)].sort()
+  return useQuery({
+    queryKey: [...queryKeys.subscription.all, 'public-tiers', unique.join(',')],
+    queryFn: () => fetchPublicTiers(unique),
+    enabled: unique.length > 0,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
