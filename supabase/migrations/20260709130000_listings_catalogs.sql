@@ -131,5 +131,5 @@ insert into public.categories (name, slug) values
   ('Trenes', 'trenes'),
   ('Figuras', 'figuras'),
   ('Ciencia ficción', 'ciencia-ficcion'),
-  ('Dioramas y accesorios', 'dioramas-accesorios')
+  ('Pinturas y Accesorios', 'pinturas-accesorios')
 on conflict (slug) do nothing;
