@@ -52,25 +52,29 @@ export function RequestForm({
       ? {
           title: request.title,
           description: request.description ?? '',
-          maxPriceEuros: request.max_price_cents != null ? String(request.max_price_cents / 100) : '',
+          maxPriceEuros: request.max_price_cents != null ? request.max_price_cents / 100 : undefined,
           scale: request.scale ?? '',
           categoryId: request.category_id ?? '',
           brandId: request.brand_id ?? '',
         }
-      : {},
+      : { title: '', description: '', scale: '', categoryId: '', brandId: '' },
   })
 
   async function onSubmit(values: RequestFormValues) {
     if (!user) return
     setServerError(null)
+    if (uploader.photos.length === 0) {
+      setServerError('Añade al menos una foto de referencia.')
+      return
+    }
     try {
       const payload = {
         title: values.title,
-        description: values.description?.trim() || null,
-        max_price_cents: values.maxPriceEuros ? Math.round(Number(values.maxPriceEuros) * 100) : null,
-        scale: values.scale?.trim() || null,
-        category_id: values.categoryId || null,
-        brand_id: values.brandId || null,
+        description: values.description.trim(),
+        max_price_cents: Math.round(values.maxPriceEuros * 100),
+        scale: values.scale.trim(),
+        category_id: values.categoryId,
+        brand_id: values.brandId,
         photos: await uploader.resolveUrls(user.id),
       }
 
@@ -102,7 +106,7 @@ export function RequestForm({
             type="number"
             step="0.01"
             min="0"
-            placeholder="Opcional"
+            placeholder="p. ej. 30"
             {...register('maxPriceEuros')}
           />
           <FieldError message={errors.maxPriceEuros?.message} />
@@ -118,24 +122,30 @@ export function RequestForm({
         <div className="space-y-2">
           <Label htmlFor="categoryId">Categoría</Label>
           <select id="categoryId" className={selectClass} {...register('categoryId')}>
-            <option value="">Sin categoría</option>
+            <option value="" disabled>
+              Selecciona categoría
+            </option>
             {categories?.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
+          <FieldError message={errors.categoryId?.message} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="brandId">Marca</Label>
           <select id="brandId" className={selectClass} {...register('brandId')}>
-            <option value="">Cualquier marca</option>
+            <option value="" disabled>
+              Selecciona marca
+            </option>
             {brands?.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
               </option>
             ))}
           </select>
+          <FieldError message={errors.brandId?.message} />
         </div>
       </div>
 

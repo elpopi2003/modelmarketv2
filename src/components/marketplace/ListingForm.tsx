@@ -59,12 +59,16 @@ export function ListingForm({
           categoryId: listing.category_id ?? '',
           brandId: listing.brand_id ?? '',
         }
-      : { condition: 'used' },
+      : { condition: 'used', title: '', description: '', scale: '', categoryId: '', brandId: '' },
   })
 
   async function onSubmit(values: ListingFormValues) {
     if (!user) return
     setServerError(null)
+    if (uploader.photos.length === 0) {
+      setServerError('Añade al menos una foto.')
+      return
+    }
     try {
       const payload = {
         title: values.title,
@@ -120,24 +124,30 @@ export function ListingForm({
         <div className="space-y-2">
           <Label htmlFor="categoryId">Categoría</Label>
           <select id="categoryId" className={selectClass} {...register('categoryId')}>
-            <option value="">Sin categoría</option>
+            <option value="" disabled>
+              Selecciona categoría
+            </option>
             {categories?.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
+          <FieldError message={errors.categoryId?.message} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="brandId">Marca</Label>
           <select id="brandId" className={selectClass} {...register('brandId')}>
-            <option value="">Sin marca</option>
+            <option value="" disabled>
+              Selecciona marca
+            </option>
             {brands?.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
               </option>
             ))}
           </select>
+          <FieldError message={errors.brandId?.message} />
         </div>
       </div>
 

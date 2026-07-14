@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { listingSchema } from './listing'
 
-const base = { title: 'Tanque Tiger I', priceEuros: 25, condition: 'used' as const }
+const base = {
+  title: 'Tanque Tiger I',
+  description: 'Kit precintado, sin abrir, en perfecto estado.',
+  priceEuros: 25,
+  condition: 'used' as const,
+  scale: '1:35',
+  categoryId: '00000000-0000-0000-0000-000000000001',
+  brandId: '00000000-0000-0000-0000-000000000002',
+}
 
 describe('listingSchema', () => {
-  it('acepta un anuncio válido mínimo', () => {
+  it('acepta un anuncio con todos los campos', () => {
     expect(listingSchema.safeParse(base).success).toBe(true)
   })
 
@@ -24,5 +32,13 @@ describe('listingSchema', () => {
     const result = listingSchema.safeParse({ ...base, priceEuros: '49.99' })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.priceEuros).toBeCloseTo(49.99)
+  })
+
+  it('exige todos los campos obligatorios', () => {
+    expect(listingSchema.safeParse({ ...base, description: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, priceEuros: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, scale: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, categoryId: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, brandId: '' }).success).toBe(false)
   })
 })
