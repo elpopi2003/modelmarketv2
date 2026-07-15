@@ -15,7 +15,8 @@ export const requestSchema = z.object({
   ),
   scale: z.string().trim().min(1, 'La escala es obligatoria').max(20, 'Máximo 20 caracteres'),
   categoryId: z.string().uuid('Selecciona una categoría'),
-  brandId: z.string().uuid('Selecciona una marca'),
+  brandId: z.string().min(1, 'Selecciona una marca'),
+  newBrand: z.string().trim().max(60, 'Máximo 60 caracteres').optional(),
 })
 
 export type RequestFormValues = z.infer<typeof requestSchema>

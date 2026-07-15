@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateListing, useUpdateListing } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
 import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { listingSchema, type ListingFormValues } from '@/lib/schemas/listing'
+import { getOrCreateBrand } from '@/lib/api/catalogs'
+import { queryKeys } from '@/lib/queryKeys'
 import { CONDITION_LABELS } from '@/lib/format'
 import { getErrorMessage } from '@/lib/errors'
 import type { Listing } from '@/lib/api/listings'
@@ -35,6 +38,7 @@ export function ListingForm({
   onDone: (id: string) => void
 }) {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const createListing = useCreateListing()
   const updateListing = useUpdateListing()
   const { data: brands } = useBrands()
@@ -46,6 +50,7 @@ export function ListingForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ListingFormValues>({
     resolver: zodResolver(listingSchema),
@@ -58,8 +63,17 @@ export function ListingForm({
           scale: listing.scale ?? '',
           categoryId: listing.category_id ?? '',
           brandId: listing.brand_id ?? '',
+          newBrand: '',
         }
-      : { condition: 'used', title: '', description: '', scale: '', categoryId: '', brandId: '' },
+      : {
+          condition: 'used',
+          title: '',
+          description: '',
+          scale: '',
+          categoryId: '',
+          brandId: '',
+          newBrand: '',
+        },
   })
 
   async function onSubmit(values: ListingFormValues) {
@@ -70,6 +84,13 @@ export function ListingForm({
       return
     }
     try {
+      // "Otra": crea (o reutiliza) la marca y usa su id; refresca el listado.
+      let brandId = values.brandId
+      if (brandId === 'other') {
+        brandId = await getOrCreateBrand(values.newBrand!.trim())
+        await queryClient.invalidateQueries({ queryKey: queryKeys.catalog.brands })
+      }
+
       const payload = {
         title: values.title,
         description: values.description?.trim() || null,
@@ -77,7 +98,7 @@ export function ListingForm({
         condition: values.condition,
         scale: values.scale?.trim() || null,
         category_id: values.categoryId || null,
-        brand_id: values.brandId || null,
+        brand_id: brandId || null,
         photos: await uploader.resolveUrls(user.id),
       }
 
@@ -146,8 +167,19 @@ export function ListingForm({
                 {b.name}
               </option>
             ))}
+            <option value="other">Otra marca…</option>
           </select>
           <FieldError message={errors.brandId?.message} />
+          {watch('brandId') === 'other' && (
+            <div className="space-y-2 pt-1">
+              <Input
+                aria-label="Nueva marca"
+                placeholder="Escribe la marca nueva"
+                {...register('newBrand')}
+              />
+              <FieldError message={errors.newBrand?.message} />
+            </div>
+          )}
         </div>
       </div>
 

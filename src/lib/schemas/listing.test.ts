@@ -41,4 +41,12 @@ describe('listingSchema', () => {
     expect(listingSchema.safeParse({ ...base, categoryId: '' }).success).toBe(false)
     expect(listingSchema.safeParse({ ...base, brandId: '' }).success).toBe(false)
   })
+
+  it('con marca "Otra" exige el nombre de la nueva marca', () => {
+    expect(listingSchema.safeParse({ ...base, brandId: 'other' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, brandId: 'other', newBrand: 'A' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, brandId: 'other', newBrand: 'Meng' }).success).toBe(
+      true,
+    )
+  })
 })

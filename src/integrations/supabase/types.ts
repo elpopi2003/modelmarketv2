@@ -387,6 +387,10 @@ export interface Database {
         Args: Record<string, never>
         Returns: number
       }
+      get_or_create_brand: {
+        Args: { _name: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: AppRole

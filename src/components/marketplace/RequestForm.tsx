@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateRequest, useUpdateRequest } from '@/hooks/useRequests'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
 import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { requestSchema, type RequestFormValues } from '@/lib/schemas/request'
+import { getOrCreateBrand } from '@/lib/api/catalogs'
+import { queryKeys } from '@/lib/queryKeys'
 import { getErrorMessage } from '@/lib/errors'
 import type { Request } from '@/lib/api/requests'
 import { PhotoUploaderField } from '@/components/marketplace/PhotoUploaderField'
@@ -34,6 +37,7 @@ export function RequestForm({
   onDone: (id: string) => void
 }) {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const createRequest = useCreateRequest()
   const updateRequest = useUpdateRequest()
   const { data: brands } = useBrands()
@@ -45,6 +49,7 @@ export function RequestForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RequestFormValues>({
     resolver: zodResolver(requestSchema),
@@ -56,8 +61,9 @@ export function RequestForm({
           scale: request.scale ?? '',
           categoryId: request.category_id ?? '',
           brandId: request.brand_id ?? '',
+          newBrand: '',
         }
-      : { title: '', description: '', scale: '', categoryId: '', brandId: '' },
+      : { title: '', description: '', scale: '', categoryId: '', brandId: '', newBrand: '' },
   })
 
   async function onSubmit(values: RequestFormValues) {
@@ -68,13 +74,20 @@ export function RequestForm({
       return
     }
     try {
+      // "Otra": crea (o reutiliza) la marca y usa su id; refresca el listado.
+      let brandId = values.brandId
+      if (brandId === 'other') {
+        brandId = await getOrCreateBrand(values.newBrand!.trim())
+        await queryClient.invalidateQueries({ queryKey: queryKeys.catalog.brands })
+      }
+
       const payload = {
         title: values.title,
         description: values.description.trim(),
         max_price_cents: Math.round(values.maxPriceEuros * 100),
         scale: values.scale.trim(),
         category_id: values.categoryId,
-        brand_id: values.brandId,
+        brand_id: brandId,
         photos: await uploader.resolveUrls(user.id),
       }
 
@@ -144,8 +157,19 @@ export function RequestForm({
                 {b.name}
               </option>
             ))}
+            <option value="other">Otra marca…</option>
           </select>
           <FieldError message={errors.brandId?.message} />
+          {watch('brandId') === 'other' && (
+            <div className="space-y-2 pt-1">
+              <Input
+                aria-label="Nueva marca"
+                placeholder="Escribe la marca nueva"
+                {...register('newBrand')}
+              />
+              <FieldError message={errors.newBrand?.message} />
+            </div>
+          )}
         </div>
       </div>
 

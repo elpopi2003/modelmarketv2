@@ -16,3 +16,10 @@ export async function fetchCategories(): Promise<Category[]> {
   if (error) handleSupabaseError(error)
   return data ?? []
 }
+
+/** Crea (o reutiliza) una marca por nombre y devuelve su id. RPC con dedup por slug. */
+export async function getOrCreateBrand(name: string): Promise<string> {
+  const { data, error } = await supabase.rpc('get_or_create_brand', { _name: name })
+  if (error) handleSupabaseError(error)
+  return data as string
+}
