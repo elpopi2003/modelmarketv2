@@ -297,6 +297,22 @@
   }
 }
 
+/* Marquee del banner beta: dos pistas idénticas desplazándose -50% en bucle. */
+@keyframes mm-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.mm-marquee-track {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  animation: mm-marquee 48s linear infinite;
+}
+
 /* Respeta la preferencia de movimiento reducido (audit A11y). */
 @media (prefers-reduced-motion: reduce) {
   *,
