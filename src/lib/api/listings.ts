@@ -28,9 +28,12 @@ export interface ListingFilters {
   sort?: ListingSort
 }
 
-/** Anuncios públicos (solo activos; la RLS ya filtra visibilidad y ownership). */
+/**
+ * Anuncios públicos del catálogo. Incluye los reservados: siguen visibles (con su lazo)
+ * para indicar que ya hay trato. La RLS filtra además visibilidad y ownership.
+ */
 export async function fetchListings(filters: ListingFilters = {}): Promise<Listing[]> {
-  let query = supabase.from('listings').select('*').eq('status', 'active')
+  let query = supabase.from('listings').select('*').in('status', ['active', 'reserved'])
 
   if (filters.categoryId) query = query.eq('category_id', filters.categoryId)
   if (filters.brandId) query = query.eq('brand_id', filters.brandId)
