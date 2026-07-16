@@ -34,6 +34,11 @@ export interface TierCapabilities {
   hasBadge: boolean
   /** Acceso a la importación masiva por CSV. */
   csvBulkImport: boolean
+  /**
+   * Puede responder a peticiones (enviar ofertas a su autor).
+   * Las peticiones son públicas para todos; solo el contacto está reservado a PRO/Retail.
+   */
+  canRespondToRequests: boolean
   /** Prioridad en listados/orden (mayor = más prioridad). free < pro < retail. */
   priority: number
 }
@@ -49,6 +54,7 @@ export const TIER_CAPABILITIES: Record<SubscriptionTier, TierCapabilities> = {
     visibilityDelayHours: 24,
     hasBadge: false,
     csvBulkImport: false,
+    canRespondToRequests: false,
     priority: 0,
   },
   pro: {
@@ -61,6 +67,7 @@ export const TIER_CAPABILITIES: Record<SubscriptionTier, TierCapabilities> = {
     visibilityDelayHours: 0,
     hasBadge: true,
     csvBulkImport: false,
+    canRespondToRequests: true,
     priority: 1,
   },
   retail: {
@@ -73,6 +80,7 @@ export const TIER_CAPABILITIES: Record<SubscriptionTier, TierCapabilities> = {
     visibilityDelayHours: 0,
     hasBadge: true,
     csvBulkImport: true,
+    canRespondToRequests: true,
     priority: 2,
   },
 }
