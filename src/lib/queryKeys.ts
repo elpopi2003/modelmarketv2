@@ -24,6 +24,13 @@ export const queryKeys = {
     all: ['favorites'] as const,
     list: (userId: string) => [...queryKeys.favorites.all, userId] as const,
   },
+  offers: {
+    all: ['offers'] as const,
+    forRequest: (requestId: string) => [...queryKeys.offers.all, 'request', requestId] as const,
+    forListing: (listingId: string) => [...queryKeys.offers.all, 'listing', listingId] as const,
+    requestCount: (requestId: string) =>
+      [...queryKeys.offers.all, 'count', 'request', requestId] as const,
+  },
   conversations: {
     all: ['conversations'] as const,
     list: () => [...queryKeys.conversations.all, 'list'] as const,

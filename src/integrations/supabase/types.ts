@@ -16,6 +16,9 @@ export type ListingStatus = 'draft' | 'active' | 'reserved' | 'sold' | 'archived
 /** Perfectas / Amarilleadas / No disponibles. "Calcas OK" es derivado: decals === 'perfect'. */
 export type DecalsStatus = 'perfect' | 'yellowed' | 'unavailable'
 export type RequestStatus = 'open' | 'fulfilled' | 'closed'
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
+/** Un mensaje generado por una oferta se marca 'offer' (no notifica como mensaje). */
+export type MessageKind = 'text' | 'offer'
 
 export interface Database {
   public: {
@@ -240,9 +243,11 @@ export interface Database {
         Relationships: []
       }
       conversations: {
+        /** Cuelga de un anuncio O de una petición (exactamente uno). */
         Row: {
           id: string
-          listing_id: string
+          listing_id: string | null
+          request_id: string | null
           buyer_id: string
           seller_id: string
           buyer_deleted_at: string | null
@@ -252,7 +257,8 @@ export interface Database {
         }
         Insert: {
           id?: string
-          listing_id: string
+          listing_id?: string | null
+          request_id?: string | null
           buyer_id: string
           seller_id: string
           buyer_deleted_at?: string | null
@@ -262,7 +268,8 @@ export interface Database {
         }
         Update: {
           id?: string
-          listing_id?: string
+          listing_id?: string | null
+          request_id?: string | null
           buyer_id?: string
           seller_id?: string
           buyer_deleted_at?: string | null
@@ -278,6 +285,7 @@ export interface Database {
           conversation_id: string
           sender_id: string
           body: string
+          kind: MessageKind
           read_at: string | null
           created_at: string
         }
@@ -286,6 +294,7 @@ export interface Database {
           conversation_id: string
           sender_id: string
           body: string
+          kind?: MessageKind
           read_at?: string | null
           created_at?: string
         }
@@ -294,8 +303,52 @@ export interface Database {
           conversation_id?: string
           sender_id?: string
           body?: string
+          kind?: MessageKind
           read_at?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      offers: {
+        /** Apunta a un anuncio O a una petición (exactamente uno). */
+        Row: {
+          id: string
+          listing_id: string | null
+          request_id: string | null
+          from_user_id: string
+          to_user_id: string
+          conversation_id: string | null
+          amount_cents: number
+          message: string | null
+          status: OfferStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          listing_id?: string | null
+          request_id?: string | null
+          from_user_id: string
+          to_user_id: string
+          conversation_id?: string | null
+          amount_cents: number
+          message?: string | null
+          status?: OfferStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string | null
+          request_id?: string | null
+          from_user_id?: string
+          to_user_id?: string
+          conversation_id?: string | null
+          amount_cents?: number
+          message?: string | null
+          status?: OfferStatus
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -416,6 +469,28 @@ export interface Database {
         Args: { _listing_id: string }
         Returns: undefined
       }
+      request_offer_count: {
+        Args: { _request_id: string }
+        Returns: number
+      }
+      listing_offer_count: {
+        Args: { _listing_id: string }
+        Returns: number
+      }
+      /** Crea (o revisa) la oferta, abre el chat y devuelve el id de la conversación. */
+      create_offer: {
+        Args: {
+          _listing_id: string | null
+          _request_id: string | null
+          _amount_cents: number
+          _message?: string | null
+        }
+        Returns: string
+      }
+      respond_to_offer: {
+        Args: { _offer_id: string; _status: OfferStatus }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: AppRole
@@ -424,6 +499,7 @@ export interface Database {
       listing_status: ListingStatus
       decals_status: DecalsStatus
       request_status: RequestStatus
+      offer_status: OfferStatus
     }
     CompositeTypes: Record<string, never>
   }

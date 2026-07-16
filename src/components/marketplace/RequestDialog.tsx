@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Lock, MapPin, Send, User, X } from 'lucide-react'
+import { Clock, Lock, MapPin, Send, Tag, User, X } from 'lucide-react'
 import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime } from '@/lib/format'
 import { getCapabilities } from '@/lib/subscription'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useRequestOfferCount } from '@/hooks/useOffers'
 import { useAuth } from '@/hooks/useAuth'
 import { ScaleTag } from './ScaleTag'
+import { OfferForm } from './OfferForm'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -34,7 +36,9 @@ export function RequestDialog({
   const ref = useRef<HTMLDialogElement>(null)
   const { user } = useAuth()
   const { data: tier } = useSubscription()
+  const { data: offerCount } = useRequestOfferCount(request?.id ?? '')
   const canRespond = getCapabilities(tier ?? 'free').canRespondToRequests
+  const isOwner = Boolean(user && request && user.id === request.user_id)
 
   useEffect(() => {
     const el = ref.current
@@ -122,18 +126,30 @@ export function RequestDialog({
                 <Clock className="size-3 shrink-0" />
                 {formatRelativeTime(request.created_at)}
               </span>
+              <span className="flex items-center gap-1">
+                <Tag className="size-3 shrink-0" />
+                {offerCount ?? 0} {offerCount === 1 ? 'oferta' : 'ofertas'}
+              </span>
             </div>
 
-            {!user ? (
+            {isOwner ? (
+              <p className="rounded-md bg-muted p-3 text-center text-sm text-muted-foreground">
+                Esta es tu petición. Recibirás un aviso cuando alguien te haga una oferta.
+              </p>
+            ) : !user ? (
               <Button asChild variant="accent" size="lg" className="w-full">
                 <Link to="/auth">
                   <Send /> Enviar oferta
                 </Link>
               </Button>
             ) : canRespond ? (
-              <Button variant="accent" size="lg" className="w-full" disabled>
-                <Send /> Enviar oferta (próximamente)
-              </Button>
+              <OfferForm
+                requestId={request.id}
+                suggestedAmountEuros={
+                  request.max_price_cents != null ? request.max_price_cents / 100 : undefined
+                }
+                onSent={onClose}
+              />
             ) : (
               <div className="space-y-2">
                 <Button asChild variant="accent" size="lg" className="w-full">

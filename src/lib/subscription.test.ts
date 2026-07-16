@@ -98,4 +98,10 @@ describe('capacidades específicas', () => {
     expect(getCapabilities('pro').immediateVisibility).toBe(true)
     expect(getCapabilities('retail').visibilityDelayHours).toBe(0)
   })
+
+  it('responder a peticiones es solo de pago (las peticiones se leen gratis)', () => {
+    expect(getCapabilities('free').canRespondToRequests).toBe(false)
+    expect(getCapabilities('pro').canRespondToRequests).toBe(true)
+    expect(getCapabilities('retail').canRespondToRequests).toBe(true)
+  })
 })

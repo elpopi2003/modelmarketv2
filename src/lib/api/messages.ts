@@ -5,15 +5,21 @@ import type { Database } from '@/integrations/supabase/types'
 export type Conversation = Database['public']['Tables']['conversations']['Row']
 export type Message = Database['public']['Tables']['messages']['Row']
 
+/** Un hilo cuelga de un anuncio o de una petición: el "asunto" de la conversación. */
+export type ConversationSubjectKind = 'listing' | 'request'
+
 export interface ConversationListItem {
   conversation: Conversation
   otherUserId: string
   otherName: string
-  listingTitle: string
-  listingCover: string | null
+  subjectKind: ConversationSubjectKind
+  subjectTitle: string
+  subjectCover: string | null
+  /** Ruta al anuncio o petición de origen. */
+  subjectLink: string
 }
 
-/** Conversaciones del usuario (enriquecidas con anuncio y otro participante). */
+/** Conversaciones del usuario (enriquecidas con su asunto y el otro participante). */
 export async function fetchConversationList(userId: string): Promise<ConversationListItem[]> {
   const { data: convs, error } = await supabase
     .from('conversations')
@@ -28,28 +34,42 @@ export async function fetchConversationList(userId: string): Promise<Conversatio
   if (mine.length === 0) return []
 
   const otherId = (c: Conversation) => (userId === c.buyer_id ? c.seller_id : c.buyer_id)
-  const listingIds = [...new Set(mine.map((c) => c.listing_id))]
+  const isString = (value: string | null): value is string => Boolean(value)
+  const listingIds = [...new Set(mine.map((c) => c.listing_id).filter(isString))]
+  const requestIds = [...new Set(mine.map((c) => c.request_id).filter(isString))]
   const otherIds = [...new Set(mine.map(otherId))]
 
-  const [listingsRes, profilesRes] = await Promise.all([
+  const [listingsRes, requestsRes, profilesRes] = await Promise.all([
     supabase.from('listings').select('id, title, photos').in('id', listingIds),
+    supabase.from('requests').select('id, title, photos').in('id', requestIds),
     supabase.from('profiles').select('id, display_name, username').in('id', otherIds),
   ])
   if (listingsRes.error) handleSupabaseError(listingsRes.error)
+  if (requestsRes.error) handleSupabaseError(requestsRes.error)
   if (profilesRes.error) handleSupabaseError(profilesRes.error)
 
   const listingMap = new Map((listingsRes.data ?? []).map((l) => [l.id, l]))
+  const requestMap = new Map((requestsRes.data ?? []).map((r) => [r.id, r]))
   const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.id, p]))
 
   return mine.map((conversation) => {
-    const listing = listingMap.get(conversation.listing_id)
     const profile = profileMap.get(otherId(conversation))
+    const subject = conversation.listing_id
+      ? listingMap.get(conversation.listing_id)
+      : conversation.request_id
+        ? requestMap.get(conversation.request_id)
+        : undefined
+    const kind: ConversationSubjectKind = conversation.listing_id ? 'listing' : 'request'
+
     return {
       conversation,
       otherUserId: otherId(conversation),
       otherName: profile?.display_name || profile?.username || 'Usuario',
-      listingTitle: listing?.title ?? 'Anuncio',
-      listingCover: listing?.photos?.[0] ?? null,
+      subjectKind: kind,
+      subjectTitle: subject?.title ?? (kind === 'listing' ? 'Anuncio' : 'Petición'),
+      subjectCover: subject?.photos?.[0] ?? null,
+      subjectLink:
+        kind === 'listing' ? `/producto/${conversation.listing_id}` : `/peticion/${conversation.request_id}`,
     }
   })
 }

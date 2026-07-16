@@ -29,6 +29,7 @@ import {
   formatPriceShort,
 } from '@/lib/format'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
+import { OfferForm } from '@/components/marketplace/OfferForm'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
 import { TierBadge } from '@/components/marketplace/TierBadge'
@@ -77,6 +78,7 @@ export default function Producto() {
   const { data: categories } = useCategories()
   const [activePhoto, setActivePhoto] = useState(0)
   const [shared, setShared] = useState(false)
+  const [offering, setOffering] = useState(false)
 
   const { data: seller } = useQuery({
     queryKey: listing ? queryKeys.profile.detail(listing.user_id) : ['profile', 'none'],
@@ -306,16 +308,21 @@ export default function Producto() {
                 <Button asChild variant="outline" size="lg" className="w-full">
                   <Link to={`/anuncio/${listing.id}/editar`}>Editar mi anuncio</Link>
                 </Button>
+              ) : offering ? (
+                <OfferForm
+                  listingId={listing.id}
+                  suggestedAmountEuros={listing.price_cents / 100}
+                  onSent={() => setOffering(false)}
+                />
               ) : (
                 <Button
                   variant="accent"
                   size="lg"
                   className="w-full"
-                  onClick={handleContact}
-                  disabled={getOrCreateConversation.isPending}
+                  onClick={() => (user ? setOffering(true) : navigate('/auth'))}
                 >
                   <Send />
-                  {getOrCreateConversation.isPending ? 'Abriendo…' : 'Enviar oferta'}
+                  Enviar oferta
                 </Button>
               )}
             </div>

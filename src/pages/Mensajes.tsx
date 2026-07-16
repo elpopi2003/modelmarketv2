@@ -21,9 +21,9 @@ function ConversationRow({ item, active }: { item: ConversationListItem; active:
         active && 'bg-muted',
       )}
     >
-      {item.listingCover ? (
+      {item.subjectCover ? (
         <img
-          src={item.listingCover}
+          src={item.subjectCover}
           alt=""
           loading="lazy"
           className="h-10 w-10 shrink-0 rounded-md border border-border object-cover"
@@ -35,7 +35,12 @@ function ConversationRow({ item, active }: { item: ConversationListItem; active:
       )}
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold">{item.otherName}</p>
-        <p className="truncate text-xs text-muted-foreground">{item.listingTitle}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          <span className="mm-mono uppercase">
+            {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
+          </span>{' '}
+          · {item.subjectTitle}
+        </p>
       </div>
     </Link>
   )
@@ -75,8 +80,16 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
         </Link>
         <div className="min-w-0">
           <p className="truncate font-semibold">{item?.otherName ?? 'Conversación'}</p>
-          {item?.listingTitle && (
-            <p className="truncate text-xs text-muted-foreground">{item.listingTitle}</p>
+          {item && (
+            <Link
+              to={item.subjectLink}
+              className="truncate text-xs text-muted-foreground hover:text-primary"
+            >
+              <span className="mm-mono uppercase">
+                {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
+              </span>{' '}
+              · {item.subjectTitle}
+            </Link>
           )}
         </div>
       </div>
