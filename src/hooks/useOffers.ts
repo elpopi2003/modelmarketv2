@@ -1,14 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createOffer,
+  fetchOffers,
   fetchOffersForListing,
   fetchOffersForRequest,
   fetchRequestOfferCount,
   respondToOffer,
   type CreateOfferInput,
+  type OfferBox,
 } from '@/lib/api/offers'
+import { useAuth } from '@/hooks/useAuth'
 import { queryKeys } from '@/lib/queryKeys'
 import type { OfferStatus } from '@/integrations/supabase/types'
+
+/** Bandeja de ofertas del usuario actual (recibidas o enviadas). */
+export function useOffersBox(box: OfferBox) {
+  const { user } = useAuth()
+  return useQuery({
+    queryKey: queryKeys.offers.box(user?.id ?? '', box),
+    queryFn: () => fetchOffers(user!.id, box),
+    enabled: Boolean(user?.id),
+  })
+}
 
 /** Contador público de ofertas de una petición ("N ofertas"). */
 export function useRequestOfferCount(requestId: string) {

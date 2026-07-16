@@ -21,6 +21,7 @@ const Favoritos = lazy(() => import('@/pages/Favoritos'))
 const Mensajes = lazy(() => import('@/pages/Mensajes'))
 const Notificaciones = lazy(() => import('@/pages/Notificaciones'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
+const Ofertas = lazy(() => import('@/pages/Ofertas'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
@@ -51,6 +52,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="ofertas" element={<Ofertas />} />
             <Route path="publicar" element={<PublicarAnuncio />} />
             <Route path="crear-peticion" element={<CrearPeticion />} />
             <Route path="mis-peticiones" element={<MisPeticiones />} />

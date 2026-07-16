@@ -2,6 +2,7 @@ import type {
   DecalsStatus,
   ListingCondition,
   ListingStatus,
+  OfferStatus,
   RequestStatus,
 } from '@/integrations/supabase/types'
 
@@ -48,6 +49,13 @@ export const STATUS_LABELS: Record<ListingStatus, string> = {
   reserved: 'Reservado',
   sold: 'Vendido',
   archived: 'Archivado',
+}
+
+export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
+  pending: 'Pendiente',
+  accepted: 'Aceptada',
+  rejected: 'Rechazada',
+  withdrawn: 'Retirada',
 }
 
 export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {

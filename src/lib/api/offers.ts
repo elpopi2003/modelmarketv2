@@ -49,6 +49,78 @@ export async function fetchRequestOfferCount(requestId: string): Promise<number>
   return data ?? 0
 }
 
+/** Bandeja: ofertas que me han hecho, u ofertas que he enviado. */
+export type OfferBox = 'received' | 'sent'
+
+export interface OfferListItem {
+  offer: Offer
+  /** Sobre qué se ofertó. */
+  subjectKind: 'listing' | 'request'
+  subjectTitle: string
+  subjectCover: string | null
+  subjectLink: string
+  /** La otra parte (quien oferta si es recibida; el dueño si es enviada). */
+  counterpartName: string
+  counterpartAvatar: string | null
+}
+
+/**
+ * Ofertas del usuario, enriquecidas con su objeto y la otra parte.
+ * La RLS ya limita a las ofertas en las que participa; el filtro por columna
+ * decide la bandeja.
+ */
+export async function fetchOffers(userId: string, box: OfferBox): Promise<OfferListItem[]> {
+  const column = box === 'received' ? 'to_user_id' : 'from_user_id'
+  const { data: offers, error } = await supabase
+    .from('offers')
+    .select('*')
+    .eq(column, userId)
+    .order('created_at', { ascending: false })
+  if (error) handleSupabaseError(error)
+  if (!offers || offers.length === 0) return []
+
+  const isString = (value: string | null): value is string => Boolean(value)
+  const listingIds = [...new Set(offers.map((o) => o.listing_id).filter(isString))]
+  const requestIds = [...new Set(offers.map((o) => o.request_id).filter(isString))]
+  const otherIds = [
+    ...new Set(offers.map((o) => (box === 'received' ? o.from_user_id : o.to_user_id))),
+  ]
+
+  const [listingsRes, requestsRes, profilesRes] = await Promise.all([
+    supabase.from('listings').select('id, title, photos').in('id', listingIds),
+    supabase.from('requests').select('id, title, photos').in('id', requestIds),
+    supabase.from('profiles').select('id, display_name, username, avatar_url').in('id', otherIds),
+  ])
+  if (listingsRes.error) handleSupabaseError(listingsRes.error)
+  if (requestsRes.error) handleSupabaseError(requestsRes.error)
+  if (profilesRes.error) handleSupabaseError(profilesRes.error)
+
+  const listingMap = new Map((listingsRes.data ?? []).map((l) => [l.id, l]))
+  const requestMap = new Map((requestsRes.data ?? []).map((r) => [r.id, r]))
+  const profileMap = new Map((profilesRes.data ?? []).map((p) => [p.id, p]))
+
+  return offers.map((offer) => {
+    const kind: 'listing' | 'request' = offer.listing_id ? 'listing' : 'request'
+    const subject = offer.listing_id
+      ? listingMap.get(offer.listing_id)
+      : offer.request_id
+        ? requestMap.get(offer.request_id)
+        : undefined
+    const other = profileMap.get(box === 'received' ? offer.from_user_id : offer.to_user_id)
+
+    return {
+      offer,
+      subjectKind: kind,
+      subjectTitle: subject?.title ?? (kind === 'listing' ? 'Anuncio' : 'Petición'),
+      subjectCover: subject?.photos?.[0] ?? null,
+      subjectLink:
+        kind === 'listing' ? `/producto/${offer.listing_id}` : `/peticion/${offer.request_id}`,
+      counterpartName: other?.display_name || other?.username || 'Usuario',
+      counterpartAvatar: other?.avatar_url ?? null,
+    }
+  })
+}
+
 /** Ofertas recibidas o enviadas por el usuario actual (la RLS filtra). */
 export async function fetchOffersForRequest(requestId: string): Promise<Offer[]> {
   const { data, error } = await supabase

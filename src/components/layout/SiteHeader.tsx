@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Plus,
   Search,
+  Tag,
   User as UserIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -157,6 +158,9 @@ function AuthedActions() {
           >
             <MenuItem to="/dashboard" icon={<LayoutDashboard className="size-4" />} onNavigate={() => setOpen(false)}>
               Mi panel
+            </MenuItem>
+            <MenuItem to="/ofertas" icon={<Tag className="size-4" />} onNavigate={() => setOpen(false)}>
+              Ofertas
             </MenuItem>
             <MenuItem to="/perfil" icon={<UserIcon className="size-4" />} onNavigate={() => setOpen(false)}>
               Mi perfil

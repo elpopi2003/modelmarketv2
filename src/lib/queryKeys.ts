@@ -26,6 +26,7 @@ export const queryKeys = {
   },
   offers: {
     all: ['offers'] as const,
+    box: (userId: string, box: string) => [...queryKeys.offers.all, 'box', box, userId] as const,
     forRequest: (requestId: string) => [...queryKeys.offers.all, 'request', requestId] as const,
     forListing: (listingId: string) => [...queryKeys.offers.all, 'listing', listingId] as const,
     requestCount: (requestId: string) =>
