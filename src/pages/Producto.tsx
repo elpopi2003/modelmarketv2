@@ -30,6 +30,8 @@ import {
 } from '@/lib/format'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { OfferForm } from '@/components/marketplace/OfferForm'
+import { OffersPanel } from '@/components/marketplace/OffersPanel'
+import { useListingOffers } from '@/hooks/useOffers'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
 import { TierBadge } from '@/components/marketplace/TierBadge'
@@ -87,6 +89,7 @@ export default function Producto() {
   })
 
   const { data: favoriteCount } = useFavoriteCount(id ?? '')
+  const { data: listingOffers, isLoading: offersLoading } = useListingOffers(id)
   const { data: sellerTiers } = usePublicTiers(listing ? [listing.user_id] : [])
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -327,6 +330,9 @@ export default function Producto() {
               )}
             </div>
           </div>
+
+          {/* Ofertas: el dueño ve las recibidas; quien oferta, la suya. La RLS decide. */}
+          <OffersPanel offers={listingOffers} isLoading={offersLoading} canRespond={isOwner} />
 
           {/* Descripción */}
           {listing.description && (

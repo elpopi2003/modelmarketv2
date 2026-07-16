@@ -5,10 +5,11 @@ import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime } from '@/lib/format'
 import { getCapabilities } from '@/lib/subscription'
 import { useSubscription } from '@/hooks/useSubscription'
-import { useRequestOfferCount } from '@/hooks/useOffers'
+import { useRequestOfferCount, useRequestOffers } from '@/hooks/useOffers'
 import { useAuth } from '@/hooks/useAuth'
 import { ScaleTag } from './ScaleTag'
 import { OfferForm } from './OfferForm'
+import { OffersPanel } from './OffersPanel'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -37,6 +38,7 @@ export function RequestDialog({
   const { user } = useAuth()
   const { data: tier } = useSubscription()
   const { data: offerCount } = useRequestOfferCount(request?.id ?? '')
+  const { data: requestOffers, isLoading: offersLoading } = useRequestOffers(request?.id)
   const canRespond = getCapabilities(tier ?? 'free').canRespondToRequests
   const isOwner = Boolean(user && request && user.id === request.user_id)
 
@@ -132,10 +134,14 @@ export function RequestDialog({
               </span>
             </div>
 
+            <OffersPanel offers={requestOffers} isLoading={offersLoading} canRespond={isOwner} />
+
             {isOwner ? (
-              <p className="rounded-md bg-muted p-3 text-center text-sm text-muted-foreground">
-                Esta es tu petición. Recibirás un aviso cuando alguien te haga una oferta.
-              </p>
+              !requestOffers?.length && (
+                <p className="rounded-md bg-muted p-3 text-center text-sm text-muted-foreground">
+                  Esta es tu petición. Recibirás un aviso cuando alguien te haga una oferta.
+                </p>
+              )
             ) : !user ? (
               <Button asChild variant="accent" size="lg" className="w-full">
                 <Link to="/auth">

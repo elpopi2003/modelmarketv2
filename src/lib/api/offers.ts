@@ -121,23 +121,53 @@ export async function fetchOffers(userId: string, box: OfferBox): Promise<OfferL
   })
 }
 
-/** Ofertas recibidas o enviadas por el usuario actual (la RLS filtra). */
-export async function fetchOffersForRequest(requestId: string): Promise<Offer[]> {
-  const { data, error } = await supabase
-    .from('offers')
-    .select('*')
-    .eq('request_id', requestId)
-    .order('created_at', { ascending: false })
-  if (error) handleSupabaseError(error)
-  return data ?? []
+/** Una oferta con quien la envía, para mostrarla en el propio anuncio/petición. */
+export interface OfferWithSender {
+  offer: Offer
+  senderName: string
+  senderAvatar: string | null
 }
 
-export async function fetchOffersForListing(listingId: string): Promise<Offer[]> {
-  const { data, error } = await supabase
+/**
+ * Ofertas sobre un anuncio o una petición, con el perfil de quien oferta.
+ * La RLS ya limita lo visible: el dueño ve las que ha recibido, y quien oferta
+ * ve la suya. No hace falta filtrar aquí.
+ */
+async function fetchOffersForTarget(
+  column: 'listing_id' | 'request_id',
+  targetId: string,
+): Promise<OfferWithSender[]> {
+  const { data: offers, error } = await supabase
     .from('offers')
     .select('*')
-    .eq('listing_id', listingId)
+    .eq(column, targetId)
     .order('created_at', { ascending: false })
   if (error) handleSupabaseError(error)
-  return data ?? []
+  if (!offers || offers.length === 0) return []
+
+  const senderIds = [...new Set(offers.map((o) => o.from_user_id))]
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, display_name, username, avatar_url')
+    .in('id', senderIds)
+  if (profilesError) handleSupabaseError(profilesError)
+
+  const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]))
+
+  return offers.map((offer) => {
+    const sender = profileMap.get(offer.from_user_id)
+    return {
+      offer,
+      senderName: sender?.display_name || sender?.username || 'Usuario',
+      senderAvatar: sender?.avatar_url ?? null,
+    }
+  })
+}
+
+export function fetchOffersForRequest(requestId: string): Promise<OfferWithSender[]> {
+  return fetchOffersForTarget('request_id', requestId)
+}
+
+export function fetchOffersForListing(listingId: string): Promise<OfferWithSender[]> {
+  return fetchOffersForTarget('listing_id', listingId)
 }
