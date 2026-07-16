@@ -5,7 +5,10 @@ const base = {
   title: 'Tanque Tiger I',
   description: 'Kit precintado, sin abrir, en perfecto estado.',
   priceEuros: 25,
-  condition: 'used' as const,
+  condition: 'sealed' as const,
+  decals: 'perfect' as const,
+  shippingInpost: true,
+  handDelivery: false,
   scale: '1:35',
   categoryId: '00000000-0000-0000-0000-000000000001',
   brandId: '00000000-0000-0000-0000-000000000002',
@@ -40,6 +43,19 @@ describe('listingSchema', () => {
     expect(listingSchema.safeParse({ ...base, scale: '' }).success).toBe(false)
     expect(listingSchema.safeParse({ ...base, categoryId: '' }).success).toBe(false)
     expect(listingSchema.safeParse({ ...base, brandId: '' }).success).toBe(false)
+  })
+
+  it('exige al menos un método de entrega', () => {
+    expect(
+      listingSchema.safeParse({ ...base, shippingInpost: false, handDelivery: false }).success,
+    ).toBe(false)
+    expect(
+      listingSchema.safeParse({ ...base, shippingInpost: false, handDelivery: true }).success,
+    ).toBe(true)
+  })
+
+  it('rechaza un estado de calcas inválido', () => {
+    expect(listingSchema.safeParse({ ...base, decals: 'rotas' }).success).toBe(false)
   })
 
   it('con marca "Otra" exige el nombre de la nueva marca', () => {

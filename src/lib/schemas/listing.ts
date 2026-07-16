@@ -19,9 +19,15 @@ export const listingSchema = z
       .min(10, 'Mínimo 10 caracteres')
       .max(2000, 'Máximo 2000 caracteres'),
     priceEuros: requiredNumber('El precio es obligatorio', 'Introduce un precio'),
-    condition: z.enum(['new', 'like_new', 'used', 'for_parts'], {
+    condition: z.enum(['sealed', 'opened', 'started'], {
       message: 'Elige un estado',
     }),
+    decals: z.enum(['perfect', 'yellowed', 'unavailable'], {
+      message: 'Elige el estado de las calcas',
+    }),
+    // Entrega: pueden ofrecerse ambas, pero al menos una (ver superRefine).
+    shippingInpost: z.boolean(),
+    handDelivery: z.boolean(),
     scale: z.string().trim().min(1, 'La escala es obligatoria').max(20, 'Máximo 20 caracteres'),
     categoryId: z.string().uuid('Selecciona una categoría'),
     // uuid de una marca existente, o 'other' para crear una nueva.
@@ -34,6 +40,13 @@ export const listingSchema = z
         code: z.ZodIssueCode.custom,
         path: ['newBrand'],
         message: 'Escribe el nombre de la marca (mín. 2)',
+      })
+    }
+    if (!data.shippingInpost && !data.handDelivery) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['shippingInpost'],
+        message: 'Elige al menos un método de entrega',
       })
     }
   })

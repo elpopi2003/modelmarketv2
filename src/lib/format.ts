@@ -1,20 +1,51 @@
-import type { ListingCondition, ListingStatus, RequestStatus } from '@/integrations/supabase/types'
+import type {
+  DecalsStatus,
+  ListingCondition,
+  ListingStatus,
+  RequestStatus,
+} from '@/integrations/supabase/types'
 
 /** Formatea un importe en céntimos como moneda (por defecto EUR, locale es-ES). */
 export function formatPrice(cents: number, currency = 'EUR', locale = 'es-ES'): string {
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100)
 }
 
+/**
+ * Precio compacto tipo marketplace: "40€" cuando es un importe entero, "12,50€" si no.
+ * Para EUR pega el símbolo sin espacio (como en las tarjetas). Otras monedas → formatPrice.
+ */
+export function formatPriceShort(cents: number, currency = 'EUR', locale = 'es-ES'): string {
+  if (currency !== 'EUR') return formatPrice(cents, currency, locale)
+  const euros = cents / 100
+  const value = Number.isInteger(euros)
+    ? String(euros)
+    : euros.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return `${value}€`
+}
+
 export const CONDITION_LABELS: Record<ListingCondition, string> = {
-  new: 'Nuevo',
-  like_new: 'Como nuevo',
-  used: 'Usado',
-  for_parts: 'Para piezas',
+  sealed: 'Precintado',
+  opened: 'Abierto',
+  started: 'Empezado',
+}
+
+/** Descripción larga del estado, para la fila de confianza del anuncio. */
+export const CONDITION_DESCRIPTIONS: Record<ListingCondition, string> = {
+  sealed: 'Caja sin abrir, sellado de fábrica intacto',
+  opened: 'Caja abierta, piezas sin usar',
+  started: 'Montaje iniciado, puede faltar alguna pieza',
+}
+
+export const DECALS_LABELS: Record<DecalsStatus, string> = {
+  perfect: 'Perfectas',
+  yellowed: 'Amarilleadas',
+  unavailable: 'No disponibles',
 }
 
 export const STATUS_LABELS: Record<ListingStatus, string> = {
   draft: 'Borrador',
   active: 'Activo',
+  reserved: 'Reservado',
   sold: 'Vendido',
   archived: 'Archivado',
 }

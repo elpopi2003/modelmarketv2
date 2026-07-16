@@ -1,13 +1,20 @@
+import type { ComponentType } from 'react'
+import { Hammer, Package, PackageOpen } from 'lucide-react'
 import type { ListingCondition } from '@/integrations/supabase/types'
 import { CONDITION_LABELS } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-/** Sellos de estado tipo "marca de inspección" (tinte + tinta oscura accesible). */
-const CONDITION_STYLES: Record<ListingCondition, string> = {
-  new: 'bg-sealed/10 text-sealed-ink border-sealed/30',
-  like_new: 'bg-opened/10 text-opened-ink border-opened/30',
-  used: 'bg-started/10 text-started-ink border-started/30',
-  for_parts: 'bg-muted text-muted-foreground border-border',
+/**
+ * Sello de estado del artículo: pastilla sólida + icono, en mono y mayúsculas.
+ * Los colores salen de los tokens de estado (sealed / opened / started).
+ */
+const CONDITION_STYLES: Record<
+  ListingCondition,
+  { className: string; Icon: ComponentType<{ className?: string }> }
+> = {
+  sealed: { className: 'bg-sealed text-sealed-foreground', Icon: Package },
+  opened: { className: 'bg-opened text-opened-foreground', Icon: PackageOpen },
+  started: { className: 'bg-started text-started-foreground', Icon: Hammer },
 }
 
 export function ConditionBadge({
@@ -17,14 +24,16 @@ export function ConditionBadge({
   condition: ListingCondition
   className?: string
 }) {
+  const { className: tone, Icon } = CONDITION_STYLES[condition]
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[0.7rem] font-semibold uppercase tracking-wide',
-        CONDITION_STYLES[condition],
+        'inline-flex items-center gap-1 rounded-md border border-transparent px-2.5 py-0.5 font-mono text-xs font-semibold uppercase tracking-wide',
+        tone,
         className,
       )}
     >
+      <Icon className="size-3 shrink-0" />
       {CONDITION_LABELS[condition]}
     </span>
   )

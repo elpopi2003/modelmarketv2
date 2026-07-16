@@ -11,7 +11,7 @@ import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { listingSchema, type ListingFormValues } from '@/lib/schemas/listing'
 import { getOrCreateBrand } from '@/lib/api/catalogs'
 import { queryKeys } from '@/lib/queryKeys'
-import { CONDITION_LABELS } from '@/lib/format'
+import { CONDITION_LABELS, DECALS_LABELS } from '@/lib/format'
 import { getErrorMessage } from '@/lib/errors'
 import type { Listing } from '@/lib/api/listings'
 import { PhotoUploaderField } from '@/components/marketplace/PhotoUploaderField'
@@ -60,13 +60,19 @@ export function ListingForm({
           description: listing.description ?? '',
           priceEuros: listing.price_cents / 100,
           condition: listing.condition,
+          decals: listing.decals,
+          shippingInpost: listing.shipping_inpost,
+          handDelivery: listing.hand_delivery,
           scale: listing.scale ?? '',
           categoryId: listing.category_id ?? '',
           brandId: listing.brand_id ?? '',
           newBrand: '',
         }
       : {
-          condition: 'used',
+          condition: 'sealed',
+          decals: 'perfect',
+          shippingInpost: true,
+          handDelivery: false,
           title: '',
           description: '',
           scale: '',
@@ -96,6 +102,9 @@ export function ListingForm({
         description: values.description?.trim() || null,
         price_cents: Math.round(values.priceEuros * 100),
         condition: values.condition,
+        decals: values.decals,
+        shipping_inpost: values.shippingInpost,
+        hand_delivery: values.handDelivery,
         scale: values.scale?.trim() || null,
         category_id: values.categoryId || null,
         brand_id: brandId || null,
@@ -139,6 +148,32 @@ export function ListingForm({
           </select>
           <FieldError message={errors.condition?.message} />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="decals">Calcas</Label>
+          <select id="decals" className={selectClass} {...register('decals')}>
+            {Object.entries(DECALS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <FieldError message={errors.decals?.message} />
+        </div>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium leading-none">Método de entrega</legend>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4 rounded border-input" {...register('shippingInpost')} />
+            Envío por InPost
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="size-4 rounded border-input" {...register('handDelivery')} />
+            Entrega en mano
+          </label>
+          <FieldError message={errors.shippingInpost?.message} />
+        </fieldset>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

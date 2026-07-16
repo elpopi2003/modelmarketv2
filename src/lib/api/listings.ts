@@ -8,6 +8,15 @@ export type ListingUpdate = Database['public']['Tables']['listings']['Update']
 
 export type ListingSort = 'recent' | 'price_asc' | 'price_desc'
 
+/**
+ * Suma una visita al anuncio (RPC SECURITY DEFINER: el visitante no tiene UPDATE).
+ * Silencioso a propósito: un contador que falla nunca debe romper la ficha.
+ */
+export async function incrementListingViews(listingId: string): Promise<void> {
+  const { error } = await supabase.rpc('increment_listing_views', { _listing_id: listingId })
+  if (error) console.warn('[views] no se pudo registrar la visita', error.message)
+}
+
 export interface ListingFilters {
   categoryId?: string
   brandId?: string

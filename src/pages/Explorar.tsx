@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useListings } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
-import { usePublicTiers } from '@/hooks/useSubscription'
+import { fetchPublicProfiles } from '@/lib/api/profiles'
+import { queryKeys } from '@/lib/queryKeys'
 import { ProductCard, ProductCardSkeleton } from '@/components/marketplace/ProductCard'
 import { CONDITION_LABELS } from '@/lib/format'
 import type { ListingFilters, ListingSort } from '@/lib/api/listings'
@@ -44,7 +46,12 @@ export default function Explorar() {
     [brands],
   )
   const ownerIds = useMemo(() => (listings ?? []).map((l) => l.user_id), [listings])
-  const { data: tiers } = usePublicTiers(ownerIds)
+  const { data: sellers } = useQuery({
+    queryKey: [...queryKeys.profile.all, 'list', ownerIds],
+    queryFn: () => fetchPublicProfiles(ownerIds),
+    enabled: ownerIds.length > 0,
+  })
+  const sellerById = useMemo(() => new Map((sellers ?? []).map((s) => [s.id, s])), [sellers])
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
@@ -123,14 +130,20 @@ export default function Explorar() {
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {listings.map((listing) => (
-            <ProductCard
-              key={listing.id}
-              listing={listing}
-              brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
-              sellerTier={tiers?.[listing.user_id]}
-            />
-          ))}
+          {listings.map((listing) => {
+            const seller = sellerById.get(listing.user_id)
+            return (
+              <ProductCard
+                key={listing.id}
+                listing={listing}
+                brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
+                sellerName={seller?.display_name || seller?.username || undefined}
+                sellerAvatarUrl={seller?.avatar_url}
+                shippingAvailable={listing.shipping_inpost}
+                reserved={listing.status === 'reserved'}
+              />
+            )
+          })}
         </div>
       )}
     </section>

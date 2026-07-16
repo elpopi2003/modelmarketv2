@@ -10,8 +10,11 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type AppRole = 'admin' | 'user'
 export type SubscriptionPlan = 'free' | 'pro' | 'retail'
-export type ListingCondition = 'new' | 'like_new' | 'used' | 'for_parts'
-export type ListingStatus = 'draft' | 'active' | 'sold' | 'archived'
+/** Precintado / Abierto / Empezado */
+export type ListingCondition = 'sealed' | 'opened' | 'started'
+export type ListingStatus = 'draft' | 'active' | 'reserved' | 'sold' | 'archived'
+/** Perfectas / Amarilleadas / No disponibles. "Calcas OK" es derivado: decals === 'perfect'. */
+export type DecalsStatus = 'perfect' | 'yellowed' | 'unavailable'
 export type RequestStatus = 'open' | 'fulfilled' | 'closed'
 
 export interface Database {
@@ -24,6 +27,7 @@ export interface Database {
           display_name: string | null
           avatar_url: string | null
           bio: string | null
+          location: string | null
           created_at: string
           updated_at: string
         }
@@ -33,6 +37,7 @@ export interface Database {
           display_name?: string | null
           avatar_url?: string | null
           bio?: string | null
+          location?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -42,6 +47,7 @@ export interface Database {
           display_name?: string | null
           avatar_url?: string | null
           bio?: string | null
+          location?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -107,6 +113,11 @@ export interface Database {
           price_cents: number
           currency: string
           condition: ListingCondition
+          decals: DecalsStatus
+          shipping_inpost: boolean
+          hand_delivery: boolean
+          ref_number: number
+          views: number
           scale: string | null
           category_id: string | null
           brand_id: string | null
@@ -124,6 +135,11 @@ export interface Database {
           price_cents?: number
           currency?: string
           condition?: ListingCondition
+          decals?: DecalsStatus
+          shipping_inpost?: boolean
+          hand_delivery?: boolean
+          ref_number?: number
+          views?: number
           scale?: string | null
           category_id?: string | null
           brand_id?: string | null
@@ -141,6 +157,11 @@ export interface Database {
           price_cents?: number
           currency?: string
           condition?: ListingCondition
+          decals?: DecalsStatus
+          shipping_inpost?: boolean
+          hand_delivery?: boolean
+          ref_number?: number
+          views?: number
           scale?: string | null
           category_id?: string | null
           brand_id?: string | null
@@ -391,12 +412,17 @@ export interface Database {
         Args: { _name: string }
         Returns: string
       }
+      increment_listing_views: {
+        Args: { _listing_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: AppRole
       subscription_plan: SubscriptionPlan
       listing_condition: ListingCondition
       listing_status: ListingStatus
+      decals_status: DecalsStatus
       request_status: RequestStatus
     }
     CompositeTypes: Record<string, never>
