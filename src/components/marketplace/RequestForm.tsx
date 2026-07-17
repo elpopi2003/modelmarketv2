@@ -9,6 +9,7 @@ import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
 import { usePhotoUploader } from '@/hooks/usePhotoUploader'
 import { requestSchema, type RequestFormValues } from '@/lib/schemas/request'
+import { CONDITION_LABELS, DECALS_REQUIREMENT_LABELS, URGENCY_LABELS } from '@/lib/format'
 import { getOrCreateBrand } from '@/lib/api/catalogs'
 import { queryKeys } from '@/lib/queryKeys'
 import { getErrorMessage } from '@/lib/errors'
@@ -62,8 +63,22 @@ export function RequestForm({
           categoryId: request.category_id ?? '',
           brandId: request.brand_id ?? '',
           newBrand: '',
+          acceptedConditions: request.accepted_conditions,
+          decalsRequirement: request.decals_requirement,
+          urgency: request.urgency,
         }
-      : { title: '', description: '', scale: '', categoryId: '', brandId: '', newBrand: '' },
+      : {
+          title: '',
+          description: '',
+          scale: '',
+          categoryId: '',
+          brandId: '',
+          newBrand: '',
+          // Lo menos restrictivo por defecto: cualquier estado, calcas no importantes.
+          acceptedConditions: ['sealed', 'opened', 'started'],
+          decalsRequirement: 'any',
+          urgency: 'normal',
+        },
   })
 
   async function onSubmit(values: RequestFormValues) {
@@ -88,6 +103,9 @@ export function RequestForm({
         scale: values.scale.trim(),
         category_id: values.categoryId,
         brand_id: brandId,
+        accepted_conditions: values.acceptedConditions,
+        decals_requirement: values.decalsRequirement,
+        urgency: values.urgency,
         photos: await uploader.resolveUrls(user.id),
       }
 
@@ -170,6 +188,49 @@ export function RequestForm({
               <FieldError message={errors.newBrand?.message} />
             </div>
           )}
+        </div>
+      </div>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium leading-none">Estados que aceptas</legend>
+        <div className="flex flex-wrap gap-4 pt-1">
+          {Object.entries(CONDITION_LABELS).map(([value, label]) => (
+            <label key={value} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                value={value}
+                className="size-4 rounded border-input"
+                {...register('acceptedConditions')}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+        <FieldError message={errors.acceptedConditions?.message} />
+      </fieldset>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="decalsRequirement">Calcas</Label>
+          <select id="decalsRequirement" className={selectClass} {...register('decalsRequirement')}>
+            {Object.entries(DECALS_REQUIREMENT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <FieldError message={errors.decalsRequirement?.message} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="urgency">Urgencia</Label>
+          <select id="urgency" className={selectClass} {...register('urgency')}>
+            {Object.entries(URGENCY_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <FieldError message={errors.urgency?.message} />
         </div>
       </div>
 

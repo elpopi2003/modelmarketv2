@@ -1,9 +1,11 @@
 import type {
+  DecalsRequirement,
   DecalsStatus,
   ListingCondition,
   ListingStatus,
   OfferStatus,
   RequestStatus,
+  RequestUrgency,
 } from '@/integrations/supabase/types'
 
 /** Formatea un importe en céntimos como moneda (por defecto EUR, locale es-ES). */
@@ -56,6 +58,20 @@ export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   accepted: 'Aceptada',
   rejected: 'Rechazada',
   withdrawn: 'Retirada',
+}
+
+/** Requisito de calcas en una petición (lo que pide el autor). */
+export const DECALS_REQUIREMENT_LABELS: Record<DecalsRequirement, string> = {
+  any: 'No importante',
+  perfect: 'Perfectas',
+  yellowed: 'Amarilleadas',
+  unavailable: 'No disponibles',
+}
+
+export const URGENCY_LABELS: Record<RequestUrgency, string> = {
+  no_rush: 'Sin prisa',
+  normal: 'Normal',
+  urgent: 'Urgente',
 }
 
 export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {

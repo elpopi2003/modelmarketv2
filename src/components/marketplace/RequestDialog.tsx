@@ -2,7 +2,13 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Clock, Lock, MapPin, Send, Tag, User, X } from 'lucide-react'
 import type { Request } from '@/lib/api/requests'
-import { formatPriceShort, formatRelativeTime } from '@/lib/format'
+import {
+  CONDITION_LABELS,
+  DECALS_REQUIREMENT_LABELS,
+  formatPriceShort,
+  formatRelativeTime,
+  URGENCY_LABELS,
+} from '@/lib/format'
 import { getCapabilities } from '@/lib/subscription'
 import { useSubscription } from '@/hooks/useSubscription'
 import { useRequestOfferCount, useRequestOffers } from '@/hooks/useOffers'
@@ -102,14 +108,37 @@ export function RequestDialog({
               </div>
             )}
 
-            {request.max_price_cents != null && (
+            <div className="grid grid-cols-2 gap-4">
+              {request.max_price_cents != null && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Ofrezco máximo:</p>
+                  <p className="mm-mono text-2xl font-bold text-accent">
+                    {formatPriceShort(request.max_price_cents)}
+                  </p>
+                </div>
+              )}
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Ofrezco máximo:</p>
-                <p className="mm-mono text-2xl font-bold text-accent">
-                  {formatPriceShort(request.max_price_cents)}
-                </p>
+                <p className="text-xs text-muted-foreground">Estados aceptados</p>
+                <div className="flex flex-wrap gap-1">
+                  {(request.accepted_conditions ?? []).map((condition) => (
+                    <span
+                      key={condition}
+                      className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground"
+                    >
+                      {CONDITION_LABELS[condition]}
+                    </span>
+                  ))}
+                </div>
               </div>
-            )}
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Calcas</p>
+                <p className="text-sm">{DECALS_REQUIREMENT_LABELS[request.decals_requirement]}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Urgencia</p>
+                <p className="text-sm">{URGENCY_LABELS[request.urgency]}</p>
+              </div>
+            </div>
 
             <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
               {authorName && (

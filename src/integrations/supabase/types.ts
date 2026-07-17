@@ -16,6 +16,9 @@ export type ListingStatus = 'draft' | 'active' | 'reserved' | 'sold' | 'archived
 /** Perfectas / Amarilleadas / No disponibles. "Calcas OK" es derivado: decals === 'perfect'. */
 export type DecalsStatus = 'perfect' | 'yellowed' | 'unavailable'
 export type RequestStatus = 'open' | 'fulfilled' | 'closed'
+/** Requisito de calcas del autor de una petición ('any' = no importante). */
+export type DecalsRequirement = 'any' | 'perfect' | 'yellowed' | 'unavailable'
+export type RequestUrgency = 'no_rush' | 'normal' | 'urgent'
 export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
 /** Un mensaje generado por una oferta se marca 'offer' (no notifica como mensaje). */
 export type MessageKind = 'text' | 'offer'
@@ -186,6 +189,9 @@ export interface Database {
           brand_id: string | null
           scale: string | null
           max_price_cents: number | null
+          accepted_conditions: ListingCondition[]
+          decals_requirement: DecalsRequirement
+          urgency: RequestUrgency
           photos: string[]
           status: RequestStatus
           created_at: string
@@ -200,6 +206,9 @@ export interface Database {
           brand_id?: string | null
           scale?: string | null
           max_price_cents?: number | null
+          accepted_conditions?: ListingCondition[]
+          decals_requirement?: DecalsRequirement
+          urgency?: RequestUrgency
           photos?: string[]
           status?: RequestStatus
           created_at?: string
@@ -214,6 +223,9 @@ export interface Database {
           brand_id?: string | null
           scale?: string | null
           max_price_cents?: number | null
+          accepted_conditions?: ListingCondition[]
+          decals_requirement?: DecalsRequirement
+          urgency?: RequestUrgency
           photos?: string[]
           status?: RequestStatus
           created_at?: string
@@ -498,7 +510,9 @@ export interface Database {
       listing_condition: ListingCondition
       listing_status: ListingStatus
       decals_status: DecalsStatus
+      decals_requirement: DecalsRequirement
       request_status: RequestStatus
+      request_urgency: RequestUrgency
       offer_status: OfferStatus
     }
     CompositeTypes: Record<string, never>

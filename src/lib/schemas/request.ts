@@ -17,6 +17,15 @@ export const requestSchema = z.object({
   categoryId: z.string().uuid('Selecciona una categoría'),
   brandId: z.string().min(1, 'Selecciona una marca'),
   newBrand: z.string().trim().max(60, 'Máximo 60 caracteres').optional(),
+  acceptedConditions: z
+    .array(z.enum(['sealed', 'opened', 'started']))
+    .min(1, 'Marca al menos un estado que aceptes'),
+  decalsRequirement: z.enum(['any', 'perfect', 'yellowed', 'unavailable'], {
+    message: 'Elige el requisito de calcas',
+  }),
+  urgency: z.enum(['no_rush', 'normal', 'urgent'], {
+    message: 'Elige la urgencia',
+  }),
 })
 
 export type RequestFormValues = z.infer<typeof requestSchema>

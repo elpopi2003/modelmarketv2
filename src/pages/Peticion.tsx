@@ -4,7 +4,12 @@ import { useRequest } from '@/hooks/useRequests'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { fetchPublicProfile } from '@/lib/api/profiles'
 import { queryKeys } from '@/lib/queryKeys'
-import { formatPrice } from '@/lib/format'
+import {
+  CONDITION_LABELS,
+  DECALS_REQUIREMENT_LABELS,
+  formatPrice,
+  URGENCY_LABELS,
+} from '@/lib/format'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 
 export default function Peticion() {
@@ -98,6 +103,30 @@ export default function Peticion() {
           </p>
         )}
 
+        <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-6 sm:grid-cols-3">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Estados aceptados</p>
+            <div className="flex flex-wrap gap-1">
+              {(request.accepted_conditions ?? []).map((condition) => (
+                <span
+                  key={condition}
+                  className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground"
+                >
+                  {CONDITION_LABELS[condition]}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Calcas</p>
+            <p className="text-sm">{DECALS_REQUIREMENT_LABELS[request.decals_requirement]}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Urgencia</p>
+            <p className="text-sm">{URGENCY_LABELS[request.urgency]}</p>
+          </div>
+        </div>
+
         <div className="mm-card mt-8 flex items-center gap-3 p-4">
           <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/10 font-mono text-sm font-semibold text-accent-ink">
             {requesterName.charAt(0).toUpperCase()}
@@ -109,7 +138,8 @@ export default function Peticion() {
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">
-          Responder a las peticiones estará disponible para los planes PRO y Retail.
+          Responder a las peticiones es una función de los planes PRO y Retail. Puedes enviar tu
+          oferta desde el listado de <Link to="/peticiones" className="underline underline-offset-2">peticiones</Link>.
         </p>
       </article>
     </section>
