@@ -73,11 +73,14 @@ export function SiteHeader() {
 
 function GuestActions() {
   return (
-    <div className="flex items-center gap-2">
-      <Button asChild variant="ghost" size="sm">
-        <Link to="/auth">Entrar</Link>
-      </Button>
-      <Button asChild variant="accent" size="sm">
+    <div className="flex items-center gap-1 sm:gap-1.5">
+      <Link to="/explorar" aria-label="Buscar" className={cn(iconButton, 'hidden sm:inline-flex')}>
+        <Search className="size-5" />
+      </Link>
+      <Link to="/auth" aria-label="Entrar o registrarse" title="Entrar" className={iconButton}>
+        <UserIcon className="size-5" />
+      </Link>
+      <Button asChild variant="accent" size="sm" className="ml-1">
         <Link to="/publicar">
           <Plus /> Publicar
         </Link>
