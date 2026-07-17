@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useListings } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
@@ -40,6 +41,15 @@ export default function Explorar() {
   const { data: listings, isLoading } = useListings(filters)
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
+
+  // Soporta llegar con ?cat=<slug> (tarjetas de categoría de la home).
+  const [searchParams] = useSearchParams()
+  const catSlug = searchParams.get('cat')
+  useEffect(() => {
+    if (!catSlug || !categories) return
+    const match = categories.find((c) => c.slug === catSlug)
+    if (match) setCategoryId(match.id)
+  }, [catSlug, categories])
 
   const brandNames = useMemo(
     () => new Map((brands ?? []).map((b) => [b.id, b.name])),
