@@ -123,6 +123,13 @@ export function ListingForm({
     }
   }
 
+  // Un <select> nativo no puede mostrar un valor cuyo <option> aún no existe: si el
+  // formulario monta antes que los catálogos, la marca/categoría del modo edición se
+  // pintaría como la primera opción. Se espera a tenerlos antes de montar los selects.
+  if (!brands || !categories) {
+    return <div className="h-96 animate-pulse rounded-lg bg-muted" aria-busy="true" />
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
       <div className="space-y-2">
