@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { uploadAvatar } from '@/lib/api/storage'
 import { queryKeys } from '@/lib/queryKeys'
 import { handleSupabaseError } from '@/lib/errors'
 import { useAuth } from '@/hooks/useAuth'
@@ -46,11 +47,25 @@ export function useProfile() {
     },
   })
 
+  /** Sube el fichero al bucket de avatares y lo fija como avatar del perfil. */
+  async function setAvatar(file: File): Promise<void> {
+    if (!userId) throw new Error('No hay usuario autenticado')
+    const url = await uploadAvatar(userId, file)
+    await mutation.mutateAsync({ avatar_url: url })
+  }
+
+  /** Quita el avatar del perfil (el fichero queda en storage; no es visible sin la URL). */
+  async function removeAvatar(): Promise<void> {
+    await mutation.mutateAsync({ avatar_url: null })
+  }
+
   return {
     profile: query.data ?? null,
     isLoading: query.isLoading,
     error: query.error,
     updateProfile: mutation.mutateAsync,
     isUpdating: mutation.isPending,
+    setAvatar,
+    removeAvatar,
   }
 }

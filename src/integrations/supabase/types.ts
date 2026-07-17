@@ -34,6 +34,8 @@ export interface Database {
           avatar_url: string | null
           bio: string | null
           location: string | null
+          notify_email: boolean
+          notify_push: boolean
           created_at: string
           updated_at: string
         }
@@ -44,6 +46,8 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           location?: string | null
+          notify_email?: boolean
+          notify_push?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -54,6 +58,8 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           location?: string | null
+          notify_email?: boolean
+          notify_push?: boolean
           created_at?: string
           updated_at?: string
         }

@@ -23,6 +23,7 @@ const Notificaciones = lazy(() => import('@/pages/Notificaciones'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Ofertas = lazy(() => import('@/pages/Ofertas'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
+const Configuracion = lazy(() => import('@/pages/Configuracion'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
@@ -63,6 +64,7 @@ function App() {
             <Route path="notificaciones" element={<Notificaciones />} />
             <Route path="anuncio/:id/editar" element={<EditarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
+            <Route path="configuracion" element={<Configuracion />} />
           </Route>
         </Route>
       </Routes>

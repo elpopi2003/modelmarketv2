@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Plus,
   Search,
+  Settings,
   Tag,
   User as UserIcon,
 } from 'lucide-react'
@@ -164,6 +165,13 @@ function AuthedActions() {
             </MenuItem>
             <MenuItem to="/perfil" icon={<UserIcon className="size-4" />} onNavigate={() => setOpen(false)}>
               Mi perfil
+            </MenuItem>
+            <MenuItem
+              to="/configuracion"
+              icon={<Settings className="size-4" />}
+              onNavigate={() => setOpen(false)}
+            >
+              Configuración
             </MenuItem>
             <MenuItem
               to="/notificaciones"
