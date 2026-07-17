@@ -9,6 +9,7 @@ import {
   type LoginValues,
   type RegisterValues,
 } from '@/lib/schemas/auth'
+import { Logo } from '@/components/layout/Logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -143,11 +144,15 @@ export default function Auth() {
 
   return (
     <div className="grid min-h-dvh place-items-center bg-background px-6 py-12">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>{mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</CardTitle>
-          <CardDescription>ModelMarket — 0% de comisión entre coleccionistas.</CardDescription>
-        </CardHeader>
+      <div className="w-full max-w-sm">
+        <Link to="/" className="mb-6 flex justify-center" aria-label="Volver al inicio">
+          <Logo className="h-14" />
+        </Link>
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>{mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</CardTitle>
+            <CardDescription>ModelMarket — 0% de comisión entre coleccionistas.</CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1 text-sm">
             <button
@@ -183,8 +188,9 @@ export default function Auth() {
               Volver al inicio
             </Link>
           </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
