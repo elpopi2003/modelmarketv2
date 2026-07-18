@@ -14,18 +14,15 @@ import {
   fetchAdminUsers,
   fetchAllListings,
   fetchAllRequests,
-  setListingStatus,
-  setRequestStatus,
+  restoreContent,
   setUserAdmin,
+  takeDownContent,
+  type ContentKind,
 } from '@/lib/api/admin'
 import { handleSupabaseError } from '@/lib/errors'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuth } from '@/hooks/useAuth'
-import type {
-  ListingStatus,
-  ReportStatus,
-  RequestStatus,
-} from '@/integrations/supabase/types'
+import type { ReportStatus } from '@/integrations/supabase/types'
 
 /**
  * ¿El usuario actual es administrador? Vía RPC has_role (SECURITY DEFINER).
@@ -96,17 +93,16 @@ export function useAllRequests() {
   return useQuery({ queryKey: queryKeys.admin.requests(), queryFn: fetchAllRequests })
 }
 
-/** Cambia el estado de un anuncio o petición desde el panel (retirar/restaurar). */
+/**
+ * Retira o restaura contenido desde el panel. Retirar guarda el estado previo;
+ * restaurar lo devuelve tal cual estaba (no siempre a "activo").
+ */
 export function useSetContentStatus() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (
-      input:
-        | { kind: 'listing'; id: string; status: ListingStatus }
-        | { kind: 'request'; id: string; status: RequestStatus },
-    ) => {
-      if (input.kind === 'listing') await setListingStatus(input.id, input.status)
-      else await setRequestStatus(input.id, input.status)
+    mutationFn: async (input: { kind: ContentKind; id: string; action: 'takeDown' | 'restore' }) => {
+      if (input.action === 'takeDown') await takeDownContent(input.kind, input.id)
+      else await restoreContent(input.kind, input.id)
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })

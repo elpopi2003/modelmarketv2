@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { handleSupabaseError } from '@/lib/errors'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
-import type { ListingStatus, RequestStatus, SubscriptionPlan } from '@/integrations/supabase/types'
+import type { SubscriptionPlan } from '@/integrations/supabase/types'
 
 export interface AdminUser {
   id: string
@@ -66,12 +66,19 @@ export async function fetchAllRequests(): Promise<Request[]> {
   return data ?? []
 }
 
-export async function setListingStatus(id: string, status: ListingStatus): Promise<void> {
-  const { error } = await supabase.from('listings').update({ status }).eq('id', id)
+export type ContentKind = 'listing' | 'request'
+
+/**
+ * Retira contenido guardando su estado previo, para poder devolverlo tal cual.
+ * Vía RPC: leer-y-escribir desde el cliente podría guardar un estado obsoleto.
+ */
+export async function takeDownContent(kind: ContentKind, id: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_take_down', { _kind: kind, _id: id })
   if (error) handleSupabaseError(error)
 }
 
-export async function setRequestStatus(id: string, status: RequestStatus): Promise<void> {
-  const { error } = await supabase.from('requests').update({ status }).eq('id', id)
+/** Restaura contenido a su estado previo (o al público por defecto si no consta). */
+export async function restoreContent(kind: ContentKind, id: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_restore', { _kind: kind, _id: id })
   if (error) handleSupabaseError(error)
 }

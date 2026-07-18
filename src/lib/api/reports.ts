@@ -128,17 +128,23 @@ export async function resolveReport(
   if (error) handleSupabaseError(error)
 }
 
-/** Retira contenido denunciado (admin: policy de update con has_role). */
+/**
+ * Retira contenido denunciado. Reutiliza la RPC del panel para que la retirada
+ * desde moderación también guarde el estado previo y sea restaurable.
+ */
 export async function takeDownListing(listingId: string): Promise<void> {
-  const { error } = await supabase
-    .from('listings')
-    .update({ status: 'archived' })
-    .eq('id', listingId)
+  const { error } = await supabase.rpc('admin_take_down', {
+    _kind: 'listing',
+    _id: listingId,
+  })
   if (error) handleSupabaseError(error)
 }
 
 export async function takeDownRequest(requestId: string): Promise<void> {
-  const { error } = await supabase.from('requests').update({ status: 'closed' }).eq('id', requestId)
+  const { error } = await supabase.rpc('admin_take_down', {
+    _kind: 'request',
+    _id: requestId,
+  })
   if (error) handleSupabaseError(error)
 }
 

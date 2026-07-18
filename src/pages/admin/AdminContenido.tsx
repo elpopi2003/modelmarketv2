@@ -37,6 +37,7 @@ function ContentRow({
   link,
   statusLabel,
   hidden,
+  restoreTo,
   onToggle,
   busy,
 }: {
@@ -46,6 +47,8 @@ function ContentRow({
   link: string
   statusLabel: string
   hidden: boolean
+  /** Estado al que volverá si se restaura (null = no consta). */
+  restoreTo: string | null
   onToggle: () => void
   busy: boolean
 }) {
@@ -73,6 +76,11 @@ function ContentRow({
           <ExternalLink className="size-3.5 shrink-0" />
         </Link>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
+        {hidden && restoreTo && (
+          <p className="mm-mono mt-1 text-xs text-muted-foreground">
+            Se restaurará como: {restoreTo}
+          </p>
+        )}
       </div>
 
       <Button
@@ -168,12 +176,13 @@ export default function AdminContenido() {
                     link={`/producto/${l.id}`}
                     statusLabel={STATUS_LABELS[l.status]}
                     hidden={hidden}
+                    restoreTo={l.previous_status ? STATUS_LABELS[l.previous_status] : null}
                     busy={setStatus.isPending}
                     onToggle={() =>
                       setStatus.mutate({
                         kind: 'listing',
                         id: l.id,
-                        status: hidden ? 'active' : HIDDEN_LISTING,
+                        action: hidden ? 'restore' : 'takeDown',
                       })
                     }
                   />
@@ -192,12 +201,13 @@ export default function AdminContenido() {
                     link={`/peticion/${r.id}`}
                     statusLabel={REQUEST_STATUS_LABELS[r.status]}
                     hidden={hidden}
+                    restoreTo={r.previous_status ? REQUEST_STATUS_LABELS[r.previous_status] : null}
                     busy={setStatus.isPending}
                     onToggle={() =>
                       setStatus.mutate({
                         kind: 'request',
                         id: r.id,
-                        status: hidden ? 'open' : HIDDEN_REQUEST,
+                        action: hidden ? 'restore' : 'takeDown',
                       })
                     }
                   />

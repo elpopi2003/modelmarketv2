@@ -143,6 +143,8 @@ export interface Database {
           brand_id: string | null
           photos: string[]
           status: ListingStatus
+          /** Estado antes de una retirada por moderación (para restaurar). */
+          previous_status: ListingStatus | null
           visible_at: string
           created_at: string
           updated_at: string
@@ -208,6 +210,8 @@ export interface Database {
           urgency: RequestUrgency
           photos: string[]
           status: RequestStatus
+          /** Estado antes de una retirada por moderación (para restaurar). */
+          previous_status: RequestStatus | null
           created_at: string
           updated_at: string
         }
@@ -598,6 +602,16 @@ export interface Database {
       /** Promueve o degrada a administrador. Solo admins, con salvaguardas. */
       admin_set_admin: {
         Args: { _user_id: string; _make_admin: boolean }
+        Returns: undefined
+      }
+      /** Retira contenido guardando su estado previo. Solo admins. */
+      admin_take_down: {
+        Args: { _kind: 'listing' | 'request'; _id: string }
+        Returns: undefined
+      }
+      /** Restaura contenido a su estado previo. Solo admins. */
+      admin_restore: {
+        Args: { _kind: 'listing' | 'request'; _id: string }
         Returns: undefined
       }
     }
