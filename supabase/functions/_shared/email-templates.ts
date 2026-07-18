@@ -181,6 +181,30 @@ export function requestStatusEmail(p: {
   }
 }
 
+// ---- Despachador de notificaciones ----------------------------------------
+
+/**
+ * Email construido a partir de una notificación de la BD. Los triggers ya redactan
+ * un título y cuerpo cuidados por cada evento, así que un único builder cubre todos
+ * los tipos (mensaje, oferta, favorito, reporte…) y los que se añadan después.
+ */
+export function notificationEmail(p: {
+  title: string
+  body?: string | null
+  link?: string | null
+}): EmailContent {
+  return {
+    subject: p.title,
+    html: layout({
+      heading: p.title,
+      paragraphs: p.body ? [p.body] : [],
+      cta: p.link ? { label: 'Abrir en ModelMarket', path: p.link } : undefined,
+      footNote:
+        'Puedes desactivar estos avisos por email en Configuración → Notificaciones.',
+    }),
+  }
+}
+
 // ---- Contacto / admin -----------------------------------------------------
 
 export function contactEmail(p: { name: string; email: string; message: string }): EmailContent {
