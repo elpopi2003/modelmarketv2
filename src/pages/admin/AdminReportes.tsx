@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Ban, Check, ExternalLink, Flag, X } from 'lucide-react'
+import { Ban, Check, ExternalLink, Flag, X } from 'lucide-react'
 import { useReports, useResolveReport } from '@/hooks/useAdmin'
 import type { ReportListItem } from '@/lib/api/reports'
 import type { ReportStatus } from '@/integrations/supabase/types'
@@ -9,6 +9,7 @@ import {
   REPORT_REASON_LABELS,
   REPORT_STATUS_LABELS,
 } from '@/lib/format'
+import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -134,12 +135,7 @@ export default function AdminReportes() {
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <Link
-        to="/admin"
-        className="mb-6 inline-flex items-center gap-2 font-display text-sm font-extrabold uppercase tracking-wide text-foreground transition-colors hover:text-accent"
-      >
-        <ArrowLeft className="size-4" /> Administración
-      </Link>
+      <AdminNav />
 
       <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight">
         <Flag className="size-7" /> Moderación

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Flag, Package, Tag, Target, Users, type LucideIcon } from 'lucide-react'
 import { useAdminStats } from '@/hooks/useAdmin'
+import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <AdminNav />
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Administración</h1>
       <p className="mt-1 text-muted-foreground">Estado general de la plataforma.</p>
 

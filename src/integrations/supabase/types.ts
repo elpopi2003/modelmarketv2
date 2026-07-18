@@ -577,6 +577,29 @@ export interface Database {
           reports_pending: number
         }
       }
+      /** Listado de usuarios con email y actividad. Solo admins. */
+      admin_users: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          email: string
+          display_name: string | null
+          username: string | null
+          location: string | null
+          avatar_url: string | null
+          is_admin: boolean
+          tier: SubscriptionPlan
+          listings_count: number
+          requests_count: number
+          reports_count: number
+          created_at: string
+        }[]
+      }
+      /** Promueve o degrada a administrador. Solo admins, con salvaguardas. */
+      admin_set_admin: {
+        Args: { _user_id: string; _make_admin: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: AppRole

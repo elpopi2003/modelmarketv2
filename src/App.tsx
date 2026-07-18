@@ -27,6 +27,8 @@ const Perfil = lazy(() => import('@/pages/Perfil'))
 const Configuracion = lazy(() => import('@/pages/Configuracion'))
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 const AdminReportes = lazy(() => import('@/pages/admin/AdminReportes'))
+const AdminUsuarios = lazy(() => import('@/pages/admin/AdminUsuarios'))
+const AdminContenido = lazy(() => import('@/pages/admin/AdminContenido'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
@@ -73,6 +75,8 @@ function App() {
             <Route element={<RequireAdmin />}>
               <Route path="admin" element={<AdminDashboard />} />
               <Route path="admin/reportes" element={<AdminReportes />} />
+              <Route path="admin/usuarios" element={<AdminUsuarios />} />
+              <Route path="admin/contenido" element={<AdminContenido />} />
             </Route>
           </Route>
         </Route>
