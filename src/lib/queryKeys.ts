@@ -52,6 +52,12 @@ export const queryKeys = {
     all: ['profile'] as const,
     detail: (userId: string) => [...queryKeys.profile.all, userId] as const,
   },
+  admin: {
+    all: ['admin'] as const,
+    stats: () => [...queryKeys.admin.all, 'stats'] as const,
+    reports: (status?: string) => [...queryKeys.admin.all, 'reports', status ?? 'all'] as const,
+    isAdmin: (userId: string) => [...queryKeys.admin.all, 'is-admin', userId] as const,
+  },
   catalog: {
     brands: ['catalog', 'brands'] as const,
     categories: ['catalog', 'categories'] as const,

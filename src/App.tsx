@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { RequireAuth } from '@/components/auth/RequireAuth'
+import { RequireAdmin } from '@/components/auth/RequireAdmin'
 import Index from '@/pages/Index'
 import Auth from '@/pages/Auth'
 import AuthCallback from '@/pages/AuthCallback'
@@ -24,6 +25,8 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const Ofertas = lazy(() => import('@/pages/Ofertas'))
 const Perfil = lazy(() => import('@/pages/Perfil'))
 const Configuracion = lazy(() => import('@/pages/Configuracion'))
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
+const AdminReportes = lazy(() => import('@/pages/admin/AdminReportes'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
@@ -65,6 +68,12 @@ function App() {
             <Route path="anuncio/:id/editar" element={<EditarAnuncio />} />
             <Route path="perfil" element={<Perfil />} />
             <Route path="configuracion" element={<Configuracion />} />
+
+            {/* Panel de administración: además del guard, la BD comprueba el rol. */}
+            <Route element={<RequireAdmin />}>
+              <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin/reportes" element={<AdminReportes />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

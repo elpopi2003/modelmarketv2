@@ -4,6 +4,8 @@ import type {
   ListingCondition,
   ListingStatus,
   OfferStatus,
+  ReportReason,
+  ReportStatus,
   RequestStatus,
   RequestUrgency,
 } from '@/integrations/supabase/types'
@@ -72,6 +74,21 @@ export const URGENCY_LABELS: Record<RequestUrgency, string> = {
   no_rush: 'Sin prisa',
   normal: 'Normal',
   urgent: 'Urgente',
+}
+
+export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
+  spam: 'Spam o publicidad',
+  prohibited: 'Artículo no permitido',
+  counterfeit: 'Copia o falsificación',
+  misleading: 'Descripción o fotos engañosas',
+  offensive: 'Contenido ofensivo',
+  other: 'Otro motivo',
+}
+
+export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
+  pending: 'Pendiente',
+  resolved: 'Resuelta',
+  dismissed: 'Descartada',
 }
 
 export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {

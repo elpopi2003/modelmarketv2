@@ -9,12 +9,14 @@ import {
   Plus,
   Search,
   Settings,
+  Shield,
   Tag,
   User as UserIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useUnreadCount } from '@/hooks/useMessages'
 import { useUnreadNotificationCount } from '@/hooks/useNotifications'
+import { useIsAdmin } from '@/hooks/useAdmin'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/layout/Logo'
 import { cn } from '@/lib/utils'
@@ -93,6 +95,7 @@ function AuthedActions() {
   const { user, signOut } = useAuth()
   const { data: unreadMsg } = useUnreadCount()
   const { data: unreadNotif } = useUnreadNotificationCount()
+  const { isAdmin } = useIsAdmin()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -184,6 +187,18 @@ function AuthedActions() {
             >
               Notificaciones
             </MenuItem>
+            {isAdmin && (
+              <>
+                <div className="my-1 h-px bg-border" />
+                <MenuItem
+                  to="/admin"
+                  icon={<Shield className="size-4" />}
+                  onNavigate={() => setOpen(false)}
+                >
+                  Administración
+                </MenuItem>
+              </>
+            )}
             <div className="my-1 h-px bg-border" />
             <button
               type="button"

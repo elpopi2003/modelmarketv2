@@ -20,6 +20,14 @@ export type RequestStatus = 'open' | 'fulfilled' | 'closed'
 export type DecalsRequirement = 'any' | 'perfect' | 'yellowed' | 'unavailable'
 export type RequestUrgency = 'no_rush' | 'normal' | 'urgent'
 export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
+export type ReportReason =
+  | 'spam'
+  | 'prohibited'
+  | 'counterfeit'
+  | 'misleading'
+  | 'offensive'
+  | 'other'
+export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
 /** Un mensaje generado por una oferta se marca 'offer' (no notifica como mensaje). */
 export type MessageKind = 'text' | 'offer'
 
@@ -370,6 +378,55 @@ export interface Database {
         }
         Relationships: []
       }
+      reports: {
+        /** Apunta a un anuncio, una petición O un usuario (exactamente uno). */
+        Row: {
+          id: string
+          reporter_id: string
+          listing_id: string | null
+          request_id: string | null
+          reported_user_id: string | null
+          reason: ReportReason
+          details: string | null
+          status: ReportStatus
+          resolved_by: string | null
+          resolved_at: string | null
+          resolution_note: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          reporter_id: string
+          listing_id?: string | null
+          request_id?: string | null
+          reported_user_id?: string | null
+          reason: ReportReason
+          details?: string | null
+          status?: ReportStatus
+          resolved_by?: string | null
+          resolved_at?: string | null
+          resolution_note?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          reporter_id?: string
+          listing_id?: string | null
+          request_id?: string | null
+          reported_user_id?: string | null
+          reason?: ReportReason
+          details?: string | null
+          status?: ReportStatus
+          resolved_by?: string | null
+          resolved_at?: string | null
+          resolution_note?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           id: string
@@ -509,6 +566,17 @@ export interface Database {
         Args: { _offer_id: string; _status: OfferStatus }
         Returns: undefined
       }
+      /** Contadores del panel de administración. Solo responde a admins. */
+      admin_stats: {
+        Args: Record<string, never>
+        Returns: {
+          users: number
+          listings: number
+          requests: number
+          offers: number
+          reports_pending: number
+        }
+      }
     }
     Enums: {
       app_role: AppRole
@@ -520,6 +588,8 @@ export interface Database {
       request_status: RequestStatus
       request_urgency: RequestUrgency
       offer_status: OfferStatus
+      report_reason: ReportReason
+      report_status: ReportStatus
     }
     CompositeTypes: Record<string, never>
   }

@@ -5,6 +5,7 @@ import {
   ChevronRight,
   CircleCheck,
   CircleSlash,
+  Flag,
   Handshake,
   MapPin,
   MessageSquare,
@@ -31,6 +32,7 @@ import {
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { OfferForm } from '@/components/marketplace/OfferForm'
 import { OffersPanel } from '@/components/marketplace/OffersPanel'
+import { ReportDialog } from '@/components/marketplace/ReportDialog'
 import { useListingOffers } from '@/hooks/useOffers'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
@@ -81,6 +83,7 @@ export default function Producto() {
   const [activePhoto, setActivePhoto] = useState(0)
   const [shared, setShared] = useState(false)
   const [offering, setOffering] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
   const { data: seller } = useQuery({
     queryKey: listing ? queryKeys.profile.detail(listing.user_id) : ['profile', 'none'],
@@ -241,6 +244,16 @@ export default function Producto() {
               <Share2 className="size-4" />
               {shared ? 'Enlace copiado' : 'Compartir'}
             </button>
+            {!isOwner && (
+              <button
+                type="button"
+                onClick={() => setReporting(true)}
+                className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-destructive"
+              >
+                <Flag className="size-4" />
+                Reportar
+              </button>
+            )}
           </div>
 
           {/* Fila de confianza */}
@@ -396,6 +409,13 @@ export default function Producto() {
           </div>
         </div>
       </div>
+
+      <ReportDialog
+        open={reporting}
+        onClose={() => setReporting(false)}
+        listingId={listing.id}
+        targetTitle={listing.title}
+      />
     </section>
   )
 }

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Clock, Lock, MapPin, Send, Tag, User, X } from 'lucide-react'
+import { Clock, Flag, Lock, MapPin, Send, Tag, User, X } from 'lucide-react'
 import type { Request } from '@/lib/api/requests'
 import {
   CONDITION_LABELS,
@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { ScaleTag } from './ScaleTag'
 import { OfferForm } from './OfferForm'
 import { OffersPanel } from './OffersPanel'
+import { ReportDialog } from './ReportDialog'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -41,6 +42,7 @@ export function RequestDialog({
   onClose: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const [reporting, setReporting] = useState(false)
   const { user } = useAuth()
   const { data: tier } = useSubscription()
   const { data: offerCount } = useRequestOfferCount(request?.id ?? '')
@@ -56,6 +58,7 @@ export function RequestDialog({
   }, [request])
 
   return (
+    <>
     <dialog
       ref={ref}
       onClose={onClose}
@@ -161,6 +164,16 @@ export function RequestDialog({
                 <Tag className="size-3 shrink-0" />
                 {offerCount ?? 0} {offerCount === 1 ? 'oferta' : 'ofertas'}
               </span>
+              {user && !isOwner && (
+                <button
+                  type="button"
+                  onClick={() => setReporting(true)}
+                  className="flex items-center gap-1 uppercase tracking-wide transition-colors hover:text-destructive"
+                >
+                  <Flag className="size-3 shrink-0" />
+                  Reportar
+                </button>
+              )}
             </div>
 
             <OffersPanel offers={requestOffers} isLoading={offersLoading} canRespond={isOwner} />
@@ -202,5 +215,15 @@ export function RequestDialog({
         </div>
       )}
     </dialog>
+
+    {request && (
+      <ReportDialog
+        open={reporting}
+        onClose={() => setReporting(false)}
+        requestId={request.id}
+        targetTitle={request.title}
+      />
+    )}
+    </>
   )
 }
