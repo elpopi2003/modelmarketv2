@@ -22,6 +22,49 @@ function tierFromPrice(priceId: string | undefined): 'pro' | 'retail' | 'free' {
   return 'free'
 }
 
+const TIER_LABEL: Record<string, string> = { pro: 'PRO', retail: 'Retail', free: 'Free' }
+
+/**
+ * Avisa del cambio de plan emitiendo una NOTIFICACIÓN, no un email directo: así pasa por
+ * el despachador (send-notification-email), respeta la preferencia notify_email del
+ * usuario y además le aparece en la campanita. Un solo camino para todos los avisos.
+ *
+ * Solo se emite cuando el tier REALMENTE cambia: Stripe manda varios eventos por una
+ * misma alta (checkout.session.completed y customer.subscription.updated), y comparando
+ * con el tier previo evitamos duplicar el aviso.
+ *
+ * Nunca rompe la sincronización: si esto falla, el plan ya se ha guardado igualmente.
+ */
+async function notifyTierChange(userId: string, previous: string | null, next: string) {
+  if (previous === next) return
+
+  const upgraded = next === 'pro' || next === 'retail'
+  const downgraded = (previous === 'pro' || previous === 'retail') && next === 'free'
+  if (!upgraded && !downgraded) return
+
+  const notification = upgraded
+    ? {
+        title: `Ya eres ${TIER_LABEL[next]} en ModelMarket`,
+        body: 'Has desbloqueado anuncios ilimitados, más fotos, visibilidad inmediata e insignia en tu perfil.',
+        link: '/publicar',
+      }
+    : {
+        title: 'Tu plan ha vuelto a Free',
+        body: 'Seguirás teniendo acceso a ModelMarket con los límites del plan Free. Puedes volver a PRO cuando quieras.',
+        link: '/precios',
+      }
+
+  try {
+    await admin.from('notifications').insert({
+      user_id: userId,
+      type: 'subscription',
+      ...notification,
+    })
+  } catch (e) {
+    console.error('[stripe-webhook] aviso de cambio de plan', e)
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 async function syncSubscription(subscription: any) {
   const userId = subscription.metadata?.user_id
@@ -29,6 +72,14 @@ async function syncSubscription(subscription: any) {
   const priceId = subscription.items?.data?.[0]?.price?.id
   const active = subscription.status === 'active' || subscription.status === 'trialing'
   const tier = active ? tierFromPrice(priceId) : 'free'
+
+  // Tier previo, para saber si el plan cambia (y no duplicar avisos).
+  const { data: current } = await admin
+    .from('subscriptions')
+    .select('tier')
+    .eq('user_id', userId)
+    .maybeSingle()
+  const previousTier = current?.tier ?? null
 
   await admin.from('subscriptions').upsert(
     {
@@ -43,6 +94,8 @@ async function syncSubscription(subscription: any) {
     },
     { onConflict: 'user_id' },
   )
+
+  await notifyTierChange(userId, previousTier, tier)
 }
 
 Deno.serve(async (req) => {
