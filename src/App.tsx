@@ -15,6 +15,10 @@ const Producto = lazy(() => import('@/pages/Producto'))
 const Peticiones = lazy(() => import('@/pages/Peticiones'))
 const Peticion = lazy(() => import('@/pages/Peticion'))
 const Precios = lazy(() => import('@/pages/Precios'))
+const Terminos = lazy(() => import('@/pages/legal/Terminos'))
+const Privacidad = lazy(() => import('@/pages/legal/Privacidad'))
+const Cookies = lazy(() => import('@/pages/legal/Cookies'))
+const Faq = lazy(() => import('@/pages/Faq'))
 const CrearPeticion = lazy(() => import('@/pages/CrearPeticion'))
 const MisPeticiones = lazy(() => import('@/pages/MisPeticiones'))
 const EditarPeticion = lazy(() => import('@/pages/EditarPeticion'))
@@ -49,6 +53,10 @@ function App() {
           <Route path="peticiones" element={<Peticiones />} />
           <Route path="peticion/:id" element={<Peticion />} />
           <Route path="precios" element={<Precios />} />
+          <Route path="terminos" element={<Terminos />} />
+          <Route path="privacidad" element={<Privacidad />} />
+          <Route path="cookies" element={<Cookies />} />
+          <Route path="faq" element={<Faq />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
