@@ -19,6 +19,7 @@ import {
   takeDownContent,
   type ContentKind,
 } from '@/lib/api/admin'
+import { deleteRequest } from '@/lib/api/requests'
 import { handleSupabaseError } from '@/lib/errors'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuth } from '@/hooks/useAuth'
@@ -108,6 +109,22 @@ export function useSetContentStatus() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.requests.all })
+    },
+  })
+}
+
+/**
+ * Elimina una petición definitivamente. Solo para admins (la RLS lo exige).
+ * Arrastra en cascada sus conversaciones, mensajes, ofertas y reportes.
+ */
+export function useDeleteRequestAsAdmin() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (requestId: string) => deleteRequest(requestId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.requests.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all })
     },
   })
 }

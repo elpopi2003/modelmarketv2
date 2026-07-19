@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Ban, ExternalLink, Package, RotateCcw, Search, Target } from 'lucide-react'
-import { useAllListings, useAllRequests, useSetContentStatus } from '@/hooks/useAdmin'
+import { Ban, ExternalLink, Package, RotateCcw, Search, Target, Trash2 } from 'lucide-react'
+import {
+  useAllListings,
+  useAllRequests,
+  useDeleteRequestAsAdmin,
+  useSetContentStatus,
+} from '@/hooks/useAdmin'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime, REQUEST_STATUS_LABELS, STATUS_LABELS } from '@/lib/format'
@@ -40,6 +45,7 @@ function ContentRow({
   hidden,
   restoreTo,
   onToggle,
+  onDelete,
   busy,
 }: {
   title: string
@@ -51,8 +57,11 @@ function ContentRow({
   /** Estado al que volverá si se restaura (null = no consta). */
   restoreTo: string | null
   onToggle: () => void
+  /** Borrado definitivo. Solo se pasa cuando la acción está disponible. */
+  onDelete?: () => void
   busy: boolean
 }) {
+  const [confirming, setConfirming] = useState(false)
   return (
     <div className="flex flex-wrap items-center gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-sm">
       <div className="size-14 shrink-0 overflow-hidden rounded-md border border-border">
@@ -84,22 +93,57 @@ function ContentRow({
         )}
       </div>
 
-      <Button
-        variant={hidden ? 'outline' : 'destructive'}
-        size="sm"
-        disabled={busy}
-        onClick={onToggle}
-      >
-        {hidden ? (
-          <>
-            <RotateCcw /> Restaurar
-          </>
-        ) : (
-          <>
-            <Ban /> Retirar
-          </>
-        )}
-      </Button>
+      {confirming ? (
+        <div className="flex w-full flex-col gap-2 rounded-md border-2 border-destructive/60 bg-destructive/10 p-3 sm:w-auto">
+          <p className="text-sm font-semibold text-destructive">
+            ¿Eliminar definitivamente?
+          </p>
+          <p className="max-w-xs text-xs text-muted-foreground">
+            Se borrarán también sus ofertas, conversaciones y los reportes asociados. No se
+            puede deshacer.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="destructive" size="sm" disabled={busy} onClick={onDelete}>
+              Sí, eliminar
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={hidden ? 'outline' : 'destructive'}
+            size="sm"
+            disabled={busy}
+            onClick={onToggle}
+          >
+            {hidden ? (
+              <>
+                <RotateCcw /> Restaurar
+              </>
+            ) : (
+              <>
+                <Ban /> Retirar
+              </>
+            )}
+          </Button>
+
+          {/* Solo se ofrece sobre contenido ya retirado: retirar es reversible, esto no. */}
+          {onDelete && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => setConfirming(true)}
+              className="border-destructive/40 text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 /> Eliminar
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -110,6 +154,7 @@ export default function AdminContenido() {
   const { data: listings, isLoading: loadingL } = useAllListings()
   const { data: requests, isLoading: loadingR } = useAllRequests()
   const setStatus = useSetContentStatus()
+  const deleteRequest = useDeleteRequestAsAdmin()
 
   const isLoading = tab === 'listings' ? loadingL : loadingR
 
@@ -235,7 +280,7 @@ export default function AdminContenido() {
                     statusLabel={REQUEST_STATUS_LABELS[r.status]}
                     hidden={hidden}
                     restoreTo={r.previous_status ? REQUEST_STATUS_LABELS[r.previous_status] : null}
-                    busy={setStatus.isPending}
+                    busy={setStatus.isPending || deleteRequest.isPending}
                     onToggle={() =>
                       setStatus.mutate({
                         kind: 'request',
@@ -243,6 +288,8 @@ export default function AdminContenido() {
                         action: hidden ? 'restore' : 'takeDown',
                       })
                     }
+                    // El borrado definitivo solo se ofrece si ya está retirada.
+                    onDelete={hidden ? () => deleteRequest.mutate(r.id) : undefined}
                   />
                 )
               })}
