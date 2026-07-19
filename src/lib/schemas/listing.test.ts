@@ -61,7 +61,8 @@ describe('listingSchema', () => {
   })
 
   it('exige acceptsOffers explícito', () => {
-    const { acceptsOffers: _omitido, ...sinCampo } = base
+    const sinCampo: Record<string, unknown> = { ...base }
+    delete sinCampo.acceptsOffers
     expect(listingSchema.safeParse(sinCampo).success).toBe(false)
   })
 
