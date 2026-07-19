@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Ban, ExternalLink, Package, RotateCcw, Target } from 'lucide-react'
+import { Ban, ExternalLink, Package, RotateCcw, Search, Target } from 'lucide-react'
 import { useAllListings, useAllRequests, useSetContentStatus } from '@/hooks/useAdmin'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime, REQUEST_STATUS_LABELS, STATUS_LABELS } from '@/lib/format'
 import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { cn, matchesSearch } from '@/lib/utils'
 
 type Tab = 'listings' | 'requests'
 
@@ -105,12 +106,28 @@ function ContentRow({
 
 export default function AdminContenido() {
   const [tab, setTab] = useState<Tab>('listings')
+  const [search, setSearch] = useState('')
   const { data: listings, isLoading: loadingL } = useAllListings()
   const { data: requests, isLoading: loadingR } = useAllRequests()
   const setStatus = useSetContentStatus()
 
   const isLoading = tab === 'listings' ? loadingL : loadingR
-  const items: (Listing | Request)[] = tab === 'listings' ? (listings ?? []) : (requests ?? [])
+
+  // Se filtra por título y por estado, para poder localizar «lo retirado» de un vistazo.
+  const listingsFiltrados = useMemo(
+    () =>
+      (listings ?? []).filter((l) => matchesSearch(search, [l.title, STATUS_LABELS[l.status]])),
+    [listings, search],
+  )
+  const requestsFiltradas = useMemo(
+    () =>
+      (requests ?? []).filter((r) =>
+        matchesSearch(search, [r.title, REQUEST_STATUS_LABELS[r.status]]),
+      ),
+    [requests, search],
+  )
+  const items: (Listing | Request)[] =
+    tab === 'listings' ? listingsFiltrados : requestsFiltradas
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -152,6 +169,18 @@ export default function AdminContenido() {
         </button>
       </div>
 
+      <div className="relative mt-4">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          className="pl-9"
+          placeholder="Buscar por título o estado (p. ej. «archivado»)…"
+          aria-label="Buscar contenido"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       {isLoading ? (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -160,12 +189,16 @@ export default function AdminContenido() {
         </div>
       ) : items.length === 0 ? (
         <div className="mt-6 rounded-lg border-2 border-dashed border-border p-12 text-center">
-          <p className="text-muted-foreground">No hay contenido en esta sección.</p>
+          <p className="text-muted-foreground">
+            {search
+              ? `Nada coincide con «${search}» en esta pestaña.`
+              : 'No hay contenido en esta sección.'}
+          </p>
         </div>
       ) : (
         <div className="mt-6 space-y-3">
           {tab === 'listings'
-            ? (listings ?? []).map((l) => {
+            ? listingsFiltrados.map((l) => {
                 const hidden = l.status === HIDDEN_LISTING
                 return (
                   <ContentRow
@@ -188,7 +221,7 @@ export default function AdminContenido() {
                   />
                 )
               })
-            : (requests ?? []).map((r) => {
+            : requestsFiltradas.map((r) => {
                 const hidden = r.status === HIDDEN_REQUEST
                 return (
                   <ContentRow

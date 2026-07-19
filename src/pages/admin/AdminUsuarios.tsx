@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Flag, MapPin, Package, Shield, ShieldOff, Target, Trash2, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Flag, MapPin, Package, Search, Shield, ShieldOff, Target, Trash2, Users } from 'lucide-react'
 import { useAdminUsers, useDeleteUserAsAdmin, useSetUserAdmin } from '@/hooks/useAdmin'
 import { useAuth } from '@/hooks/useAuth'
 import type { AdminUser } from '@/lib/api/admin'
@@ -7,6 +7,8 @@ import { getErrorMessage } from '@/lib/errors'
 import { TierBadge } from '@/components/marketplace/TierBadge'
 import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { matchesSearch } from '@/lib/utils'
 
 function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
   const setAdmin = useSetUserAdmin()
@@ -147,6 +149,15 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
 export default function AdminUsuarios() {
   const { user } = useAuth()
   const { data: users, isLoading, error } = useAdminUsers()
+  const [search, setSearch] = useState('')
+
+  const filtrados = useMemo(
+    () =>
+      (users ?? []).filter((u) =>
+        matchesSearch(search, [u.email, u.display_name, u.username, u.location]),
+      ),
+    [users, search],
+  )
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -156,8 +167,24 @@ export default function AdminUsuarios() {
         <Users className="size-7" /> Usuarios
       </h1>
       <p className="mt-1 text-muted-foreground">
-        {users ? `${users.length} ${users.length === 1 ? 'cuenta' : 'cuentas'}` : 'Cargando…'}
+        {users
+          ? search
+            ? `${filtrados.length} de ${users.length} ${users.length === 1 ? 'cuenta' : 'cuentas'}`
+            : `${users.length} ${users.length === 1 ? 'cuenta' : 'cuentas'}`
+          : 'Cargando…'}
       </p>
+
+      <div className="relative mt-6">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          className="pl-9"
+          placeholder="Buscar por email, nombre, usuario o ubicación…"
+          aria-label="Buscar usuarios"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
       {error ? (
         <p className="mt-6 rounded-lg border-2 border-destructive/60 bg-destructive/10 p-4 text-sm text-destructive">
@@ -169,9 +196,15 @@ export default function AdminUsuarios() {
             <div key={i} className="h-36 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
+      ) : filtrados.length === 0 ? (
+        <div className="mt-6 rounded-lg border-2 border-dashed border-border p-12 text-center">
+          <p className="text-muted-foreground">
+            Ningún usuario coincide con «{search}».
+          </p>
+        </div>
       ) : (
         <div className="mt-6 space-y-4">
-          {(users ?? []).map((u) => (
+          {filtrados.map((u) => (
             <UserRow key={u.id} user={u} isSelf={u.id === user?.id} />
           ))}
         </div>
