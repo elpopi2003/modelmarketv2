@@ -19,11 +19,14 @@ export function OfferForm({
   listingId,
   requestId,
   suggestedAmountEuros,
+  /** Mínimo admitido: el vendedor no acepta ofertas por debajo del precio. */
+  minAmountEuros,
   onSent,
 }: {
   listingId?: string
   requestId?: string
   suggestedAmountEuros?: number
+  minAmountEuros?: number
   onSent?: () => void
 }) {
   const createOffer = useCreateOffer()
@@ -41,6 +44,13 @@ export function OfferForm({
 
   async function onSubmit(values: OfferFormValues) {
     setServerError(null)
+    // Aviso temprano; la BD lo vuelve a comprobar en create_offer.
+    if (minAmountEuros != null && values.amountEuros < minAmountEuros) {
+      setServerError(
+        `Este vendedor no acepta ofertas por debajo del precio publicado (${minAmountEuros}€).`,
+      )
+      return
+    }
     try {
       const conversationId = await createOffer.mutateAsync({
         listingId,
@@ -63,10 +73,15 @@ export function OfferForm({
           id="amountEuros"
           type="number"
           step="0.01"
-          min="0"
+          min={minAmountEuros ?? 0}
           placeholder="0.00"
           {...register('amountEuros')}
         />
+        {minAmountEuros != null && (
+          <p className="text-xs text-muted-foreground">
+            Este vendedor no acepta ofertas por debajo del precio publicado.
+          </p>
+        )}
         {errors.amountEuros?.message && (
           <p className="text-sm text-destructive">{errors.amountEuros.message}</p>
         )}

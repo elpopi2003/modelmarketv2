@@ -18,7 +18,7 @@ import {
 import type { ComponentType, ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useGetOrCreateConversation } from '@/hooks/useMessages'
-import { useListing } from '@/hooks/useListings'
+import { useListing, useSetListingReserved } from '@/hooks/useListings'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { incrementListingViews } from '@/lib/api/listings'
 import { fetchPublicProfile } from '@/lib/api/profiles'
@@ -37,6 +37,7 @@ import { useListingOffers } from '@/hooks/useOffers'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
 import { TierBadge } from '@/components/marketplace/TierBadge'
+import { VerifiedSeller } from '@/components/marketplace/VerifiedSeller'
 import { useFavoriteCount } from '@/hooks/useFavorites'
 import { usePublicTiers } from '@/hooks/useSubscription'
 import { Button } from '@/components/ui/button'
@@ -97,6 +98,7 @@ export default function Producto() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const getOrCreateConversation = useGetOrCreateConversation()
+  const setReserved = useSetListingReserved()
 
   // Una visita por anuncio cargado.
   useEffect(() => {
@@ -321,13 +323,35 @@ export default function Producto() {
               </div>
 
               {isOwner ? (
-                <Button asChild variant="outline" size="lg" className="w-full">
-                  <Link to={`/anuncio/${listing.id}/editar`}>Editar mi anuncio</Link>
-                </Button>
+                <div className="space-y-3">
+                  <Button asChild variant="outline" size="lg" className="w-full">
+                    <Link to={`/anuncio/${listing.id}/editar`}>Editar mi anuncio</Link>
+                  </Button>
+                  <label className="flex items-start gap-2.5 rounded-md border border-border bg-muted/40 p-3">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 size-4 rounded border-input"
+                      checked={listing.status === 'reserved'}
+                      disabled={setReserved.isPending || listing.status === 'sold'}
+                      onChange={(e) =>
+                        setReserved.mutate({ id: listing.id, reserved: e.target.checked })
+                      }
+                    />
+                    <span>
+                      <span className="text-sm font-medium">Marcar como reservado</span>
+                      <span className="block text-xs text-muted-foreground">
+                        Sigue visible en el catálogo, pero con el sello «Reservado».
+                      </span>
+                    </span>
+                  </label>
+                </div>
               ) : offering ? (
                 <OfferForm
                   listingId={listing.id}
                   suggestedAmountEuros={listing.price_cents / 100}
+                  minAmountEuros={
+                    listing.accepts_offers ? undefined : listing.price_cents / 100
+                  }
                   onSent={() => setOffering(false)}
                 />
               ) : (
@@ -377,9 +401,10 @@ export default function Producto() {
                     </span>
                   )}
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <p className="truncate font-semibold">{sellerName}</p>
-                      <TierBadge tier={sellerTiers?.[listing.user_id]} />
+                      <VerifiedSeller tier={sellerTiers?.[listing.user_id]} />
+                      <TierBadge tier={sellerTiers?.[listing.user_id]} className="ml-0.5" />
                     </div>
                     {memberSince && (
                       <p className="text-xs text-muted-foreground">Desde {memberSince}</p>

@@ -5,6 +5,7 @@ import {
   fetchListingById,
   fetchListings,
   fetchMyListings,
+  setListingReserved,
   updateListing,
   type ListingFilters,
   type ListingInsert,
@@ -56,6 +57,18 @@ export function useUpdateListing() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
       queryClient.setQueryData(queryKeys.listings.detail(data.id), data)
+    },
+  })
+}
+
+/** Marca/desmarca el anuncio como reservado (solo su dueño). */
+export function useSetListingReserved() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reserved }: { id: string; reserved: boolean }) =>
+      setListingReserved(id, reserved),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
     },
   })
 }

@@ -28,6 +28,8 @@ export const listingSchema = z
     // Entrega: pueden ofrecerse ambas, pero al menos una (ver superRefine).
     shippingInpost: z.boolean(),
     handDelivery: z.boolean(),
+    /** Admite ofertas por debajo del precio publicado. */
+    acceptsOffers: z.boolean(),
     scale: z.string().trim().min(1, 'La escala es obligatoria').max(20, 'Máximo 20 caracteres'),
     categoryId: z.string().uuid('Selecciona una categoría'),
     // uuid de una marca existente, o 'other' para crear una nueva.

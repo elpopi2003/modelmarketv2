@@ -136,6 +136,8 @@ export interface Database {
           decals: DecalsStatus
           shipping_inpost: boolean
           hand_delivery: boolean
+          /** El vendedor admite ofertas por debajo del precio publicado. */
+          accepts_offers: boolean
           ref_number: number
           views: number
           scale: string | null
@@ -160,6 +162,7 @@ export interface Database {
           decals?: DecalsStatus
           shipping_inpost?: boolean
           hand_delivery?: boolean
+          accepts_offers?: boolean
           ref_number?: number
           views?: number
           scale?: string | null
@@ -182,6 +185,7 @@ export interface Database {
           decals?: DecalsStatus
           shipping_inpost?: boolean
           hand_delivery?: boolean
+          accepts_offers?: boolean
           ref_number?: number
           views?: number
           scale?: string | null

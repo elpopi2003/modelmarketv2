@@ -9,6 +9,7 @@ const base = {
   decals: 'perfect' as const,
   shippingInpost: true,
   handDelivery: false,
+  acceptsOffers: true,
   scale: '1:35',
   categoryId: '00000000-0000-0000-0000-000000000001',
   brandId: '00000000-0000-0000-0000-000000000002',
@@ -52,6 +53,16 @@ describe('listingSchema', () => {
     expect(
       listingSchema.safeParse({ ...base, shippingInpost: false, handDelivery: true }).success,
     ).toBe(true)
+  })
+
+  it('acepta ambos valores de acceptsOffers', () => {
+    expect(listingSchema.safeParse({ ...base, acceptsOffers: false }).success).toBe(true)
+    expect(listingSchema.safeParse({ ...base, acceptsOffers: true }).success).toBe(true)
+  })
+
+  it('exige acceptsOffers explícito', () => {
+    const { acceptsOffers: _omitido, ...sinCampo } = base
+    expect(listingSchema.safeParse(sinCampo).success).toBe(false)
   })
 
   it('rechaza un estado de calcas inválido', () => {

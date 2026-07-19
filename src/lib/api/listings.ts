@@ -9,6 +9,18 @@ export type ListingUpdate = Database['public']['Tables']['listings']['Update']
 export type ListingSort = 'recent' | 'price_asc' | 'price_desc'
 
 /**
+ * Marca o desmarca el anuncio como reservado. Solo para su dueño (la RLS lo exige).
+ * Sirve para avisar de que hay un comprador en firme antes de cerrar la venta.
+ */
+export async function setListingReserved(listingId: string, reserved: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('listings')
+    .update({ status: reserved ? 'reserved' : 'active' })
+    .eq('id', listingId)
+  if (error) handleSupabaseError(error)
+}
+
+/**
  * Suma una visita al anuncio (RPC SECURITY DEFINER: el visitante no tiene UPDATE).
  * Silencioso a propósito: un contador que falla nunca debe romper la ficha.
  */

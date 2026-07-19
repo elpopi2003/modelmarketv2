@@ -63,6 +63,7 @@ export function ListingForm({
           decals: listing.decals,
           shippingInpost: listing.shipping_inpost,
           handDelivery: listing.hand_delivery,
+          acceptsOffers: listing.accepts_offers,
           scale: listing.scale ?? '',
           categoryId: listing.category_id ?? '',
           brandId: listing.brand_id ?? '',
@@ -73,6 +74,7 @@ export function ListingForm({
           decals: 'perfect',
           shippingInpost: true,
           handDelivery: false,
+          acceptsOffers: true,
           title: '',
           description: '',
           scale: '',
@@ -105,6 +107,7 @@ export function ListingForm({
         decals: values.decals,
         shipping_inpost: values.shippingInpost,
         hand_delivery: values.handDelivery,
+        accepts_offers: values.acceptsOffers,
         scale: values.scale?.trim() || null,
         category_id: values.categoryId || null,
         brand_id: brandId || null,
@@ -156,6 +159,20 @@ export function ListingForm({
           <FieldError message={errors.condition?.message} />
         </div>
       </div>
+
+      <label className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3">
+        <input
+          type="checkbox"
+          className="mt-0.5 size-4 rounded border-input"
+          {...register('acceptsOffers')}
+        />
+        <span>
+          <span className="text-sm font-medium">Acepto ofertas por debajo del precio</span>
+          <span className="block text-xs text-muted-foreground">
+            Si lo desmarcas, solo podrán ofrecerte el precio publicado: nadie podrá regatear.
+          </span>
+        </span>
+      </label>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
