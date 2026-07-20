@@ -19,6 +19,7 @@ import {
   takeDownContent,
   type ContentKind,
 } from '@/lib/api/admin'
+import { deleteListing } from '@/lib/api/listings'
 import { deleteRequest } from '@/lib/api/requests'
 import { handleSupabaseError } from '@/lib/errors'
 import { queryKeys } from '@/lib/queryKeys'
@@ -124,6 +125,23 @@ export function useDeleteRequestAsAdmin() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.requests.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all })
+    },
+  })
+}
+
+/**
+ * Elimina un anuncio definitivamente. Solo para admins (la RLS lo exige).
+ * Imprescindible desde que la moderación tiene prioridad: el dueño no puede borrar lo
+ * retirado, así que sin esto quedaría sin nadie capaz de eliminarlo.
+ */
+export function useDeleteListingAsAdmin() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (listingId: string) => deleteListing(listingId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all })
     },
   })

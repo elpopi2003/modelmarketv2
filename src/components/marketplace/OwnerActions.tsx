@@ -33,6 +33,32 @@ export function OwnerActions({
 }) {
   const [confirming, setConfirming] = useState(false)
 
+  // Retirado por un administrador: la moderación tiene prioridad sobre el dueño, así que
+  // no se ofrece ni reactivar ni eliminar. Ambas las rechaza la base de datos; mostrarlas
+  // solo serviría para dar un error, y ocultar el motivo sería peor.
+  if (moderated) {
+    return (
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        className={cn(
+          'flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2.5',
+          align === 'end' && 'justify-end text-right',
+        )}
+      >
+        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
+        <p className="text-xs text-muted-foreground">
+          <span className="font-semibold text-destructive">Retirado por moderación.</span> Solo un
+          administrador puede restaurarlo o eliminarlo. Si crees que es un error, escríbenos desde{' '}
+          <a href="/contacto" className="underline underline-offset-2 hover:text-foreground">
+            contacto
+          </a>
+          .
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -60,24 +86,17 @@ export function OwnerActions({
         </>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          {moderated ? (
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <ShieldAlert className="size-3.5 shrink-0 text-destructive" />
-              Retirado por moderación
-            </span>
-          ) : (
-            <Button variant="outline" size="sm" disabled={busy} onClick={onToggleSuspend}>
-              {suspended ? (
-                <>
-                  <Eye /> Reactivar
-                </>
-              ) : (
-                <>
-                  <EyeOff /> Suspender
-                </>
-              )}
-            </Button>
-          )}
+          <Button variant="outline" size="sm" disabled={busy} onClick={onToggleSuspend}>
+            {suspended ? (
+              <>
+                <Eye /> Reactivar
+              </>
+            ) : (
+              <>
+                <EyeOff /> Suspender
+              </>
+            )}
+          </Button>
           <Button
             variant="outline"
             size="sm"

@@ -4,6 +4,7 @@ import { Ban, ExternalLink, Package, RotateCcw, Search, Target, Trash2 } from 'l
 import {
   useAllListings,
   useAllRequests,
+  useDeleteListingAsAdmin,
   useDeleteRequestAsAdmin,
   useSetContentStatus,
 } from '@/hooks/useAdmin'
@@ -155,6 +156,7 @@ export default function AdminContenido() {
   const { data: requests, isLoading: loadingR } = useAllRequests()
   const setStatus = useSetContentStatus()
   const deleteRequest = useDeleteRequestAsAdmin()
+  const deleteListing = useDeleteListingAsAdmin()
 
   const isLoading = tab === 'listings' ? loadingL : loadingR
 
@@ -255,7 +257,7 @@ export default function AdminContenido() {
                     statusLabel={STATUS_LABELS[l.status]}
                     hidden={hidden}
                     restoreTo={l.previous_status ? STATUS_LABELS[l.previous_status] : null}
-                    busy={setStatus.isPending}
+                    busy={setStatus.isPending || deleteListing.isPending}
                     onToggle={() =>
                       setStatus.mutate({
                         kind: 'listing',
@@ -263,6 +265,8 @@ export default function AdminContenido() {
                         action: hidden ? 'restore' : 'takeDown',
                       })
                     }
+                    // El borrado definitivo solo se ofrece si ya esta retirado.
+                    onDelete={hidden ? () => deleteListing.mutate(l.id) : undefined}
                   />
                 )
               })
