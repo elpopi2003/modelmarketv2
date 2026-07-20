@@ -41,11 +41,34 @@ export async function setUserAdmin(userId: string, makeAdmin: boolean): Promise<
 
 /** Elimina la cuenta de otro usuario vía Edge Function (rol verificado server-side). */
 export async function deleteUserAsAdmin(userId: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke('admin-delete-user', {
-    body: { userId },
-  })
-  if (error) throw error
-  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo eliminar el usuario')
+  await invokeAdminFunction('admin-delete-user', { userId }, 'No se pudo eliminar el usuario')
+}
+
+/**
+ * Invoca una Edge Function y devuelve su `data`, con el mensaje de error de verdad.
+ *
+ * `supabase.functions.invoke` no lee el cuerpo cuando la respuesta no es 2xx: lanza un
+ * `FunctionsHttpError` genérico ("non-2xx status code") y deja la explicación dentro de
+ * `error.context`. Sin esto, todo el cuidado puesto en los mensajes del servidor se pierde
+ * justo donde hace falta, y quien administra no sabe qué ha pasado ni qué hacer.
+ */
+async function invokeAdminFunction(
+  name: string,
+  body: Record<string, unknown>,
+  fallback: string,
+): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase.functions.invoke(name, { body })
+
+  if (error) {
+    const context = (error as { context?: Response }).context
+    if (context && typeof context.json === 'function') {
+      const cuerpo = await context.json().catch(() => null)
+      if (cuerpo?.error) throw new Error(cuerpo.error)
+    }
+    throw new Error(error.message || fallback)
+  }
+  if (data && data.ok === false) throw new Error(data.error ?? fallback)
+  return (data?.data ?? {}) as Record<string, unknown>
 }
 
 export interface ModerationResult {
@@ -59,22 +82,22 @@ export interface ModerationResult {
  * porque se le envía a la persona por email.
  */
 export async function suspendUser(userId: string, reason: string): Promise<ModerationResult> {
-  const { data, error } = await supabase.functions.invoke('admin-suspend-user', {
-    body: { userId, action: 'suspend', reason },
-  })
-  if (error) throw error
-  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo suspender la cuenta')
-  return { emailSent: Boolean(data?.data?.emailSent), emailError: data?.data?.emailError ?? null }
+  const d = await invokeAdminFunction(
+    'admin-suspend-user',
+    { userId, action: 'suspend', reason },
+    'No se pudo suspender la cuenta',
+  )
+  return { emailSent: Boolean(d.emailSent), emailError: (d.emailError as string) ?? null }
 }
 
 /** Levanta la suspensión: devuelve el acceso y vuelve a mostrar su contenido. */
 export async function unsuspendUser(userId: string): Promise<ModerationResult> {
-  const { data, error } = await supabase.functions.invoke('admin-suspend-user', {
-    body: { userId, action: 'unsuspend' },
-  })
-  if (error) throw error
-  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo reactivar la cuenta')
-  return { emailSent: Boolean(data?.data?.emailSent), emailError: data?.data?.emailError ?? null }
+  const d = await invokeAdminFunction(
+    'admin-suspend-user',
+    { userId, action: 'unsuspend' },
+    'No se pudo reactivar la cuenta',
+  )
+  return { emailSent: Boolean(d.emailSent), emailError: (d.emailError as string) ?? null }
 }
 
 /**
@@ -85,15 +108,11 @@ export async function setUserTier(
   userId: string,
   tier: SubscriptionPlan,
 ): Promise<ModerationResult & { stripeAction: string }> {
-  const { data, error } = await supabase.functions.invoke('admin-set-tier', {
-    body: { userId, tier },
-  })
-  if (error) throw error
-  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo cambiar el plan')
+  const d = await invokeAdminFunction('admin-set-tier', { userId, tier }, 'No se pudo cambiar el plan')
   return {
-    emailSent: Boolean(data?.data?.emailSent),
-    emailError: data?.data?.emailError ?? null,
-    stripeAction: data?.data?.stripeAction ?? 'none',
+    emailSent: Boolean(d.emailSent),
+    emailError: (d.emailError as string) ?? null,
+    stripeAction: (d.stripeAction as string) ?? 'none',
   }
 }
 

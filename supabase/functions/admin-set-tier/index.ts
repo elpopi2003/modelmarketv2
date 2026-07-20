@@ -5,9 +5,13 @@
 // revertiría, y encima seguiríamos cobrando. Se actúa sobre Stripe y la base se actualiza
 // en el mismo sentido, de forma que el webhook llegue a confirmar lo mismo:
 //
-//   → free           cancela la suscripción (deja de pagar)
-//   pro ↔ retail     cambia el precio de la suscripción, con prorrateo
-//   sin suscripción  solo se escribe el tier (nada que cancelar)
+//   → free                    cancela la suscripción (deja de pagar)
+//   pro ↔ retail (con sub)    cambia el precio de la suscripción, con prorrateo
+//   → pro/retail (sin sub)    se rechaza: ver abajo
+//
+// Por qué se rechaza conceder un plan de pago a mano: `check-subscription` reconcilia el
+// tier consultando Stripe, así que un plan regalado sin suscripción volvería a Free en la
+// siguiente reconciliación. Un cambio que se deshace solo es peor que un no.
 //
 // Secretos: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY,
 // STRIPE_PRICE_PRO, STRIPE_PRICE_RETAIL, RESEND_API_KEY, EMAIL_FROM, APP_URL.
@@ -21,6 +25,9 @@ import { tierChangedByAdminEmail } from '../_shared/moderation-emails.ts'
 
 type Tier = 'free' | 'pro' | 'retail'
 const TIERS: Tier[] = ['free', 'pro', 'retail']
+
+/** Estados en los que Stripe ya no deja modificar la suscripción. */
+const MUERTA = ['canceled', 'incomplete_expired']
 
 function priceFor(tier: Exclude<Tier, 'free'>): string | undefined {
   return tier === 'pro' ? Deno.env.get('STRIPE_PRICE_PRO') : Deno.env.get('STRIPE_PRICE_RETAIL')
@@ -69,32 +76,57 @@ Deno.serve(async (req) => {
     const currentTier = (sub?.tier ?? 'free') as Tier
     if (currentTier === tier) return fail(`Ese usuario ya está en ${tier}`, 400)
 
-    const subscriptionId = sub?.stripe_subscription_id ?? null
+    const storedId = sub?.stripe_subscription_id ?? null
     let stripeAction: 'cancelled' | 'price_changed' | 'none' = 'none'
+    /** Id a guardar. Se limpia si la suscripción ya no está viva. */
+    let keepSubscriptionId: string | null = null
 
-    if (subscriptionId) {
+    let stripe: Stripe | null = null
+    if (storedId) {
       const secret = Deno.env.get('STRIPE_SECRET_KEY')
       if (!secret) return fail('Falta STRIPE_SECRET_KEY: no se puede tocar la suscripción', 500)
-      const stripe = new Stripe(secret, {
+      stripe = new Stripe(secret, {
         apiVersion: '2024-06-20',
         httpClient: Stripe.createFetchHttpClient(),
       })
+    }
 
+    // El id guardado puede apuntar a una suscripción ya muerta: al cancelar, el webhook
+    // la reescribe en la fila. Hay que mirar su estado antes de operar, porque Stripe
+    // rechaza cualquier cambio sobre una suscripción cancelada.
+    const existing = storedId
+      ? await stripe!.subscriptions.retrieve(storedId).catch(() => null)
+      : null
+    const viva = existing != null && !MUERTA.includes(existing.status)
+
+    if (!viva && tier !== 'free') {
+      return fail(
+        `No tiene una suscripción activa en Stripe, así que ponerle ${tier} desde aquí no se mantendría: ` +
+          'la reconciliación con Stripe lo devolvería a Free. Tiene que suscribirse desde la página de precios.',
+        409,
+      )
+    }
+
+    if (viva) {
       try {
         if (tier === 'free') {
-          await stripe.subscriptions.cancel(subscriptionId)
+          await stripe!.subscriptions.cancel(storedId!)
           stripeAction = 'cancelled'
         } else {
           const price = priceFor(tier)
           if (!price) return fail(`Falta el precio de Stripe para ${tier}`, 500)
-          const current = await stripe.subscriptions.retrieve(subscriptionId)
-          const itemId = current.items.data[0]?.id
+          const itemId = existing!.items.data[0]?.id
           if (!itemId) return fail('La suscripción de Stripe no tiene líneas', 502)
-          await stripe.subscriptions.update(subscriptionId, {
+          await stripe!.subscriptions.update(storedId!, {
             items: [{ id: itemId, price }],
             proration_behavior: 'create_prorations',
+            // El metadata se actualiza junto al precio. El webhook deduce el plan del
+            // precio, así que dejarlo sin tocar no rompe nada hoy, pero quedaría un
+            // `tier` mintiendo en Stripe que alguien acabaría dando por bueno.
+            metadata: { ...existing!.metadata, tier },
           })
           stripeAction = 'price_changed'
+          keepSubscriptionId = storedId
         }
       } catch (e) {
         // Que ya no exista en Stripe no es un error si íbamos a cancelar: el objetivo
@@ -115,7 +147,7 @@ Deno.serve(async (req) => {
         tier,
         status: tier === 'free' ? 'canceled' : 'active',
         stripe_customer_id: sub?.stripe_customer_id ?? null,
-        stripe_subscription_id: tier === 'free' ? null : subscriptionId,
+        stripe_subscription_id: keepSubscriptionId,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },
