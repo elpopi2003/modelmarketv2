@@ -2,8 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useDeleteRequest, useRequests } from '@/hooks/useRequests'
+import {
+  useDeleteRequest,
+  useMyRequests,
+  useRequests,
+  useUpdateRequest,
+} from '@/hooks/useRequests'
 import { useAuth } from '@/hooks/useAuth'
+import { usePagination } from '@/hooks/usePagination'
+import { filterOwnRequests } from '@/lib/localFilters'
+import { Pagination } from '@/components/ui/pagination'
+import { SectionHeading } from '@/components/marketplace/SectionHeading'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { fetchPublicProfiles } from '@/lib/api/profiles'
 import { queryKeys } from '@/lib/queryKeys'
@@ -15,6 +24,14 @@ import { Input } from '@/components/ui/input'
 
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+
+/**
+ * Dos columnas a partir de `lg`. Antes se quedan a una: la tarjeta es horizontal
+ * (miniatura + texto + presupuesto) y por debajo de eso se estrangula.
+ */
+function RequestGrid({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-4 lg:grid-cols-2">{children}</div>
+}
 
 export default function Peticiones() {
   const [search, setSearch] = useState('')
@@ -39,9 +56,27 @@ export default function Peticiones() {
 
   const { user } = useAuth()
   const { data: requests, isLoading } = useRequests(filters)
+  // Las propias vienen de su propia consulta: el listado público solo trae las abiertas,
+  // así que desde ahí no se podría ver ni reactivar una que hayas suspendido.
+  const { data: myRequests } = useMyRequests()
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
   const deleteRequest = useDeleteRequest()
+  const updateRequest = useUpdateRequest()
+
+  const ownRequests = useMemo(
+    () => (user ? filterOwnRequests(myRequests ?? [], filters) : []),
+    [myRequests, filters, user],
+  )
+  // Se excluyen las propias del listado general para no verlas dos veces.
+  const otherRequests = useMemo(
+    () => (requests ?? []).filter((r) => r.user_id !== user?.id),
+    [requests, user?.id],
+  )
+
+  const ownPage = usePagination(ownRequests)
+  const othersPage = usePagination(otherRequests)
+  const busy = deleteRequest.isPending || updateRequest.isPending
 
   const brandNames = useMemo(() => new Map((brands ?? []).map((b) => [b.id, b.name])), [brands])
   const categoryNames = useMemo(
@@ -49,7 +84,11 @@ export default function Peticiones() {
     [categories],
   )
 
-  const authorIds = useMemo(() => (requests ?? []).map((r) => r.user_id), [requests])
+  // Incluye al propio usuario: sus peticiones ya no salen del listado general.
+  const authorIds = useMemo(
+    () => [...new Set([...(requests ?? []).map((r) => r.user_id), ...(user ? [user.id] : [])])],
+    [requests, user],
+  )
   const { data: authors } = useQuery({
     queryKey: [...queryKeys.profile.all, 'list', authorIds],
     queryFn: () => fetchPublicProfiles(authorIds),
@@ -111,40 +150,91 @@ export default function Peticiones() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
-      ) : !requests || requests.length === 0 ? (
+      ) : ownRequests.length === 0 && otherRequests.length === 0 ? (
         <div className="rounded-lg border-2 border-dashed border-border p-12 text-center">
           <p className="text-muted-foreground">
-            Todavía no hay peticiones. ¿Buscas algo? Publica la primera.
+            {debouncedSearch || brandId
+              ? 'Ninguna petición coincide con tu búsqueda.'
+              : 'Todavía no hay peticiones. ¿Buscas algo? Publica la primera.'}
           </p>
         </div>
       ) : (
         <>
-          <p className="mb-4 text-sm text-muted-foreground">
-            {requests.length} {requests.length === 1 ? 'petición encontrada' : 'peticiones encontradas'}
-          </p>
-          <div className="space-y-4">
-            {requests.map((request) => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                brandName={request.brand_id ? brandNames.get(request.brand_id) : undefined}
-                authorName={nameOf(request.user_id)}
-                authorLocation={authorById.get(request.user_id)?.location}
-                isOwn={request.user_id === user?.id}
-                onOpen={() => setSelected(request)}
-                onDelete={
-                  request.user_id === user?.id
-                    ? () => deleteRequest.mutate(request.id)
-                    : undefined
-                }
+          {ownRequests.length > 0 && (
+            <section className="mb-10">
+              <SectionHeading
+                title="Tus peticiones"
+                count={ownRequests.length}
+                singular="petición"
+                plural="peticiones"
               />
-            ))}
-          </div>
+              <RequestGrid>
+                {ownPage.visible.map((request) => (
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    brandName={request.brand_id ? brandNames.get(request.brand_id) : undefined}
+                    authorName={nameOf(request.user_id)}
+                    authorLocation={authorById.get(request.user_id)?.location}
+                    isOwn
+                    busy={busy}
+                    onOpen={() => setSelected(request)}
+                    onDelete={() => deleteRequest.mutate(request.id)}
+                    onToggleSuspend={() =>
+                      updateRequest.mutate({
+                        id: request.id,
+                        updates: { status: request.status === 'closed' ? 'open' : 'closed' },
+                      })
+                    }
+                  />
+                ))}
+              </RequestGrid>
+              {ownPage.needsPagination && (
+                <Pagination
+                  page={ownPage.page}
+                  totalPages={ownPage.totalPages}
+                  onGoTo={ownPage.goTo}
+                  label="Paginación de tus peticiones"
+                />
+              )}
+            </section>
+          )}
+
+          {otherRequests.length > 0 && (
+            <section>
+              <SectionHeading
+                title={ownRequests.length > 0 ? 'Todas las peticiones' : 'Peticiones'}
+                count={otherRequests.length}
+                singular="petición"
+                plural="peticiones"
+              />
+              <RequestGrid>
+                {othersPage.visible.map((request) => (
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    brandName={request.brand_id ? brandNames.get(request.brand_id) : undefined}
+                    authorName={nameOf(request.user_id)}
+                    authorLocation={authorById.get(request.user_id)?.location}
+                    onOpen={() => setSelected(request)}
+                  />
+                ))}
+              </RequestGrid>
+              {othersPage.needsPagination && (
+                <Pagination
+                  page={othersPage.page}
+                  totalPages={othersPage.totalPages}
+                  onGoTo={othersPage.goTo}
+                  label="Paginación de todas las peticiones"
+                />
+              )}
+            </section>
+          )}
         </>
       )}
 

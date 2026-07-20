@@ -2,7 +2,9 @@ import { Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Listing } from '@/lib/api/listings'
 import { formatPriceShort } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import { ConditionBadge } from './ConditionBadge'
+import { OwnerActions } from './OwnerActions'
 import { ScaleTag } from './ScaleTag'
 import { FavoriteButton } from './FavoriteButton'
 
@@ -20,6 +22,10 @@ export function ProductCard({
   sellerAvatarUrl,
   shippingAvailable = false,
   reserved = false,
+  isOwn = false,
+  onDelete,
+  onToggleSuspend,
+  busy = false,
 }: {
   listing: Listing
   brandName?: string
@@ -27,13 +33,40 @@ export function ProductCard({
   sellerAvatarUrl?: string | null
   shippingAvailable?: boolean
   reserved?: boolean
+  /** El anuncio es del usuario que está viendo la lista. */
+  isOwn?: boolean
+  /** Borrado por su dueño. Solo se pasa cuando el anuncio es propio. */
+  onDelete?: () => void
+  /** Alterna entre activo y suspendido. Solo se pasa cuando el anuncio es propio. */
+  onToggleSuspend?: () => void
+  busy?: boolean
 }) {
   const cover = listing.photos[0]
+  // "Archivado" es el estado con el que se oculta del catálogo público.
+  const suspended = listing.status === 'archived'
+  // previous_status solo lo rellena la retirada administrativa.
+  const moderated = listing.previous_status != null
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border-2 border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/10">
-      <Link to={`/producto/${listing.id}`} className="block">
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+    <div
+      className={cn(
+        'group relative flex flex-col overflow-hidden rounded-lg border-2 bg-card text-card-foreground shadow-sm transition-all duration-300',
+        isOwn
+          ? 'border-primary/50 bg-primary/[0.04] hover:border-primary hover:shadow-lg hover:shadow-primary/10'
+          : 'border-border hover:border-primary hover:shadow-lg hover:shadow-primary/10',
+        suspended && 'border-destructive/30 bg-muted/40',
+      )}
+    >
+      {/* flex-1: iguala la altura del cuerpo para que los pies de acciones se alineen
+          entre tarjetas de la misma fila. */}
+      <Link to={`/producto/${listing.id}`} className="block flex-1">
+        <div
+          className={cn(
+            'relative aspect-[4/3] overflow-hidden bg-muted',
+            // Suspendido: se apaga la foto, para que se lea "esto no lo ve nadie".
+            suspended && 'opacity-60 grayscale',
+          )}
+        >
           {cover ? (
             <img
               src={cover}
@@ -56,12 +89,26 @@ export function ProductCard({
             />
           )}
 
-          {reserved && (
+          {isOwn && (
+            <span className="absolute right-3 top-3 inline-flex items-center rounded-md border border-primary/40 bg-card/95 px-2 py-0.5 font-mono text-[0.7rem] font-bold uppercase tracking-wide text-primary shadow-sm">
+              Tu anuncio
+            </span>
+          )}
+
+          {suspended ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="rotate-[-12deg] scale-110 rounded-md bg-accent px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground shadow-lg">
-                Reservado
+              <span className="rounded-md bg-destructive px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-destructive-foreground shadow-lg">
+                {moderated ? 'Retirado' : 'Suspendido'}
               </span>
             </div>
+          ) : (
+            reserved && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="rotate-[-12deg] scale-110 rounded-md bg-accent px-4 py-1.5 text-sm font-semibold uppercase tracking-wide text-accent-foreground shadow-lg">
+                  Reservado
+                </span>
+              </div>
+            )
           )}
         </div>
 
@@ -107,8 +154,22 @@ export function ProductCard({
         </div>
       </Link>
 
-      {/* Fuera del <Link> para no anidar interactivos; ocupa el hueco de acciones del diseño. */}
-      <FavoriteButton listingId={listing.id} className="absolute bottom-4 right-4 rounded-full" />
+      {/* Fuera del <Link> para no anidar interactivos. En lo propio se sustituye por las
+          acciones de dueño: guardar tu propio anuncio en favoritos no tiene sentido. */}
+      {isOwn && onDelete && onToggleSuspend ? (
+        <div className="border-t border-primary/20 p-4">
+          <OwnerActions
+            suspended={suspended}
+            moderated={moderated}
+            onToggleSuspend={onToggleSuspend}
+            onDelete={onDelete}
+            busy={busy}
+            cascadeNote="Se borrarán también sus fotos, conversaciones y favoritos."
+          />
+        </div>
+      ) : (
+        <FavoriteButton listingId={listing.id} className="absolute bottom-4 right-4 rounded-full" />
+      )}
     </div>
   )
 }

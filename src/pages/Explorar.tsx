@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useListings } from '@/hooks/useListings'
+import {
+  useDeleteListing,
+  useListings,
+  useMyListings,
+  useUpdateListing,
+} from '@/hooks/useListings'
+import { useAuth } from '@/hooks/useAuth'
+import { usePagination } from '@/hooks/usePagination'
+import { filterOwnListings } from '@/lib/localFilters'
+import { Pagination } from '@/components/ui/pagination'
+import { SectionHeading } from '@/components/marketplace/SectionHeading'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { fetchPublicProfiles } from '@/lib/api/profiles'
 import { queryKeys } from '@/lib/queryKeys'
@@ -13,6 +23,10 @@ import { Input } from '@/components/ui/input'
 
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+
+function ListingGrid({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{children}</div>
+}
 
 export default function Explorar() {
   const [search, setSearch] = useState('')
@@ -38,9 +52,29 @@ export default function Explorar() {
     [debouncedSearch, categoryId, brandId, condition, sort],
   )
 
+  const { user } = useAuth()
   const { data: listings, isLoading } = useListings(filters)
+  // Los propios vienen de su propia consulta: el catálogo público solo trae activos y
+  // reservados, así que desde ahí no se podría ver ni reactivar uno suspendido.
+  const { data: myListings } = useMyListings()
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
+  const deleteListing = useDeleteListing()
+  const updateListing = useUpdateListing()
+
+  const ownListings = useMemo(
+    () => (user ? filterOwnListings(myListings ?? [], filters) : []),
+    [myListings, filters, user],
+  )
+  // Se excluyen los propios del catálogo general para no verlos dos veces.
+  const otherListings = useMemo(
+    () => (listings ?? []).filter((l) => l.user_id !== user?.id),
+    [listings, user?.id],
+  )
+
+  const ownPage = usePagination(ownListings)
+  const othersPage = usePagination(otherListings)
+  const busy = deleteListing.isPending || updateListing.isPending
 
   // Soporta llegar con ?cat=<slug> (tarjetas de categoría de la home).
   const [searchParams] = useSearchParams()
@@ -55,7 +89,11 @@ export default function Explorar() {
     () => new Map((brands ?? []).map((b) => [b.id, b.name])),
     [brands],
   )
-  const ownerIds = useMemo(() => (listings ?? []).map((l) => l.user_id), [listings])
+  // Incluye al propio usuario: sus anuncios ya no salen del catálogo general.
+  const ownerIds = useMemo(
+    () => [...new Set([...(listings ?? []).map((l) => l.user_id), ...(user ? [user.id] : [])])],
+    [listings, user],
+  )
   const { data: sellers } = useQuery({
     queryKey: [...queryKeys.profile.all, 'list', ownerIds],
     queryFn: () => fetchPublicProfiles(ownerIds),
@@ -134,27 +172,93 @@ export default function Explorar() {
             <ProductCardSkeleton key={i} />
           ))}
         </div>
-      ) : !listings || listings.length === 0 ? (
+      ) : ownListings.length === 0 && otherListings.length === 0 ? (
         <div className="mm-border-technical rounded-md p-12 text-center">
           <p className="text-muted-foreground">No hay anuncios que coincidan con tu búsqueda.</p>
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {listings.map((listing) => {
-            const seller = sellerById.get(listing.user_id)
-            return (
-              <ProductCard
-                key={listing.id}
-                listing={listing}
-                brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
-                sellerName={seller?.display_name || seller?.username || undefined}
-                sellerAvatarUrl={seller?.avatar_url}
-                shippingAvailable={listing.shipping_inpost}
-                reserved={listing.status === 'reserved'}
+        <>
+          {ownListings.length > 0 && (
+            <section className="mb-10">
+              <SectionHeading
+                title="Tus anuncios"
+                count={ownListings.length}
+                singular="anuncio"
+                plural="anuncios"
               />
-            )
-          })}
-        </div>
+              <ListingGrid>
+                {ownPage.visible.map((listing) => {
+                  const seller = sellerById.get(listing.user_id)
+                  return (
+                    <ProductCard
+                      key={listing.id}
+                      listing={listing}
+                      brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
+                      sellerName={seller?.display_name || seller?.username || undefined}
+                      sellerAvatarUrl={seller?.avatar_url}
+                      shippingAvailable={listing.shipping_inpost}
+                      reserved={listing.status === 'reserved'}
+                      isOwn
+                      busy={busy}
+                      onDelete={() => deleteListing.mutate(listing.id)}
+                      onToggleSuspend={() =>
+                        updateListing.mutate({
+                          id: listing.id,
+                          updates: {
+                            status: listing.status === 'archived' ? 'active' : 'archived',
+                          },
+                        })
+                      }
+                    />
+                  )
+                })}
+              </ListingGrid>
+              {ownPage.needsPagination && (
+                <Pagination
+                  page={ownPage.page}
+                  totalPages={ownPage.totalPages}
+                  onGoTo={ownPage.goTo}
+                  label="Paginación de tus anuncios"
+                />
+              )}
+            </section>
+          )}
+
+          {otherListings.length > 0 && (
+            <section>
+              <SectionHeading
+                title={ownListings.length > 0 ? 'Todos los anuncios' : 'Anuncios'}
+                count={otherListings.length}
+                singular="anuncio"
+                plural="anuncios"
+              />
+              <ListingGrid>
+                {othersPage.visible.map((listing) => {
+                  const seller = sellerById.get(listing.user_id)
+                  return (
+                    <ProductCard
+                      key={listing.id}
+                      listing={listing}
+                      brandName={listing.brand_id ? brandNames.get(listing.brand_id) : undefined}
+                      sellerName={seller?.display_name || seller?.username || undefined}
+                      sellerAvatarUrl={seller?.avatar_url}
+                      shippingAvailable={listing.shipping_inpost}
+                      reserved={listing.status === 'reserved'}
+                    />
+                  )
+                })}
+              </ListingGrid>
+              {othersPage.needsPagination && (
+                <Pagination
+                  page={othersPage.page}
+                  totalPages={othersPage.totalPages}
+                  onGoTo={othersPage.goTo}
+                  label="Paginación de todos los anuncios"
+                />
+              )}
+            </section>
+          )}
+        </>
       )}
     </section>
   )
