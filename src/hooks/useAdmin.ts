@@ -16,7 +16,10 @@ import {
   fetchAllRequests,
   restoreContent,
   setUserAdmin,
+  setUserTier,
+  suspendUser,
   takeDownContent,
+  unsuspendUser,
   type ContentKind,
 } from '@/lib/api/admin'
 import { deleteListing } from '@/lib/api/listings'
@@ -24,7 +27,7 @@ import { deleteRequest } from '@/lib/api/requests'
 import { handleSupabaseError } from '@/lib/errors'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuth } from '@/hooks/useAuth'
-import type { ReportStatus } from '@/integrations/supabase/types'
+import type { ReportStatus, SubscriptionPlan } from '@/integrations/supabase/types'
 
 /**
  * ¿El usuario actual es administrador? Vía RPC has_role (SECURITY DEFINER).
@@ -83,6 +86,36 @@ export function useDeleteUserAsAdmin() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.requests.all })
+    },
+  })
+}
+
+/**
+ * Suspende o reactiva una cuenta. Invalida también listings/requests: suspender oculta
+ * el contenido del usuario para todos los demás.
+ */
+export function useSuspendUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, reason }: { userId: string; reason?: string }) =>
+      reason === undefined ? unsuspendUser(userId) : suspendUser(userId, reason),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.requests.all })
+    },
+  })
+}
+
+/** Cambia el plan de un usuario (y su suscripción en Stripe). */
+export function useSetUserTier() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, tier }: { userId: string; tier: SubscriptionPlan }) =>
+      setUserTier(userId, tier),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription.all })
     },
   })
 }

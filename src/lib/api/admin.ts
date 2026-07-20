@@ -17,6 +17,10 @@ export interface AdminUser {
   requests_count: number
   reports_count: number
   created_at: string
+  /** Fecha de suspensión, o null si la cuenta está activa. */
+  suspended_at: string | null
+  /** Motivo que se le comunicó por email. Solo lo ven admins y el propio usuario. */
+  suspension_reason: string | null
 }
 
 /** Usuarios con email y actividad. La RPC comprueba el rol en la BD. */
@@ -42,6 +46,55 @@ export async function deleteUserAsAdmin(userId: string): Promise<void> {
   })
   if (error) throw error
   if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo eliminar el usuario')
+}
+
+export interface ModerationResult {
+  /** El email pudo fallar sin que la acción se deshaga: hay que poder avisarlo. */
+  emailSent: boolean
+  emailError: string | null
+}
+
+/**
+ * Suspende una cuenta: bloquea el acceso y oculta su contenido. El motivo es obligatorio
+ * porque se le envía a la persona por email.
+ */
+export async function suspendUser(userId: string, reason: string): Promise<ModerationResult> {
+  const { data, error } = await supabase.functions.invoke('admin-suspend-user', {
+    body: { userId, action: 'suspend', reason },
+  })
+  if (error) throw error
+  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo suspender la cuenta')
+  return { emailSent: Boolean(data?.data?.emailSent), emailError: data?.data?.emailError ?? null }
+}
+
+/** Levanta la suspensión: devuelve el acceso y vuelve a mostrar su contenido. */
+export async function unsuspendUser(userId: string): Promise<ModerationResult> {
+  const { data, error } = await supabase.functions.invoke('admin-suspend-user', {
+    body: { userId, action: 'unsuspend' },
+  })
+  if (error) throw error
+  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo reactivar la cuenta')
+  return { emailSent: Boolean(data?.data?.emailSent), emailError: data?.data?.emailError ?? null }
+}
+
+/**
+ * Cambia el plan de un usuario. Actúa también sobre Stripe (cancela o cambia el precio):
+ * escribir solo en la base duraría hasta el siguiente evento del webhook.
+ */
+export async function setUserTier(
+  userId: string,
+  tier: SubscriptionPlan,
+): Promise<ModerationResult & { stripeAction: string }> {
+  const { data, error } = await supabase.functions.invoke('admin-set-tier', {
+    body: { userId, tier },
+  })
+  if (error) throw error
+  if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo cambiar el plan')
+  return {
+    emailSent: Boolean(data?.data?.emailSent),
+    emailError: data?.data?.emailError ?? null,
+    stripeAction: data?.data?.stripeAction ?? 'none',
+  }
 }
 
 /**
