@@ -1,6 +1,9 @@
-import { Clock, MapPin, User } from 'lucide-react'
+import { useState } from 'react'
+import { Clock, MapPin, Trash2, User } from 'lucide-react'
 import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime } from '@/lib/format'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { ScaleTag } from './ScaleTag'
 
 /**
@@ -13,15 +16,22 @@ export function RequestCard({
   brandName,
   authorName,
   authorLocation,
+  /** La petición es del usuario que está viendo la lista. */
+  isOwn = false,
   onOpen,
+  onDelete,
 }: {
   request: Request
   brandName?: string
   authorName?: string
   authorLocation?: string | null
+  isOwn?: boolean
   onOpen: () => void
+  /** Borrado por su autor. Solo se pasa cuando la petición es propia. */
+  onDelete?: () => void
 }) {
   const cover = request.photos[0]
+  const [confirming, setConfirming] = useState(false)
 
   return (
     <div
@@ -35,9 +45,21 @@ export function RequestCard({
         }
       }}
       aria-label={`Ver petición: ${request.title}`}
-      className="group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:border-accent hover:shadow-lg hover:shadow-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className={cn(
+        'group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed bg-card text-card-foreground shadow-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        isOwn
+          ? // Las propias se distinguen con el azul de marca y un fondo tenue, para
+            // localizarlas de un vistazo entre las del resto.
+            'border-primary/50 bg-primary/[0.04] hover:border-primary hover:shadow-lg hover:shadow-primary/10'
+          : 'border-border hover:border-accent hover:shadow-lg hover:shadow-accent/10',
+      )}
     >
-      <div className="absolute right-0 top-0 size-24 rounded-bl-[4rem] transition-all duration-300 group-hover:bg-accent/5" />
+      <div
+        className={cn(
+          'absolute right-0 top-0 size-24 rounded-bl-[4rem] transition-all duration-300',
+          isOwn ? 'group-hover:bg-primary/5' : 'group-hover:bg-accent/5',
+        )}
+      />
 
       <div className="relative z-10 p-4 md:p-5">
         <div className="flex items-start gap-3 md:gap-4">
@@ -54,6 +76,11 @@ export function RequestCard({
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
+                {isOwn && (
+                  <span className="inline-flex items-center rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[0.7rem] font-bold uppercase tracking-wide text-primary">
+                    Tu petición
+                  </span>
+                )}
                 {request.scale && <ScaleTag scale={request.scale} />}
                 {brandName && (
                   <span className="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 font-mono text-xs font-semibold text-secondary-foreground">
@@ -68,7 +95,12 @@ export function RequestCard({
               )}
             </div>
 
-            <h3 className="mb-1 line-clamp-2 text-base font-semibold text-foreground transition-colors duration-300 group-hover:text-accent md:truncate md:text-lg">
+            <h3
+              className={cn(
+                'mb-1 line-clamp-2 text-base font-semibold text-foreground transition-colors duration-300 md:truncate md:text-lg',
+                isOwn ? 'group-hover:text-primary' : 'group-hover:text-accent',
+              )}
+            >
               {request.title}
             </h3>
 
@@ -98,20 +130,55 @@ export function RequestCard({
             </div>
           </div>
 
-          {/* Columna derecha (escritorio): presupuesto + llamada a la acción */}
-          {request.max_price_cents != null && (
-            <div className="hidden shrink-0 flex-col items-end gap-2 md:flex">
+          {/* Columna derecha (escritorio): presupuesto y acción según de quién sea */}
+          <div className="hidden shrink-0 flex-col items-end gap-2 md:flex">
+            {request.max_price_cents != null && (
               <div className="text-right">
                 <p className="mm-mono text-xs text-muted-foreground">Ofrezco máximo:</p>
                 <p className="mm-mono text-2xl font-bold text-accent">
                   {formatPriceShort(request.max_price_cents)}
                 </p>
               </div>
-              <span className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 font-display text-sm font-extrabold uppercase tracking-wide text-accent-foreground shadow-sm transition-colors group-hover:bg-accent/90">
-                Enviar oferta
-              </span>
-            </div>
-          )}
+            )}
+
+            {isOwn ? (
+              onDelete && (
+                // stopPropagation: la tarjeta entera abre el diálogo, y borrar no debe abrirlo.
+                <div onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  {confirming ? (
+                    <div className="flex flex-col items-end gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        Se borrarán también sus ofertas y conversaciones.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button variant="destructive" size="sm" onClick={onDelete}>
+                          Sí, eliminar
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setConfirming(true)}
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 /> Eliminar
+                    </Button>
+                  )}
+                </div>
+              )
+            ) : (
+              request.max_price_cents != null && (
+                <span className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 font-display text-sm font-extrabold uppercase tracking-wide text-accent-foreground shadow-sm transition-colors group-hover:bg-accent/90">
+                  Enviar oferta
+                </span>
+              )
+            )}
+          </div>
         </div>
       </div>
     </div>

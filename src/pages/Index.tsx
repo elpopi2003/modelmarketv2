@@ -260,6 +260,7 @@ export default function Index() {
                   brandName={request.brand_id ? brandNames.get(request.brand_id) : undefined}
                   authorName={nameOf(request.user_id)}
                   authorLocation={personById.get(request.user_id)?.location}
+                  isOwn={request.user_id === user?.id}
                   onOpen={() => setSelected(request)}
                 />
               ))}

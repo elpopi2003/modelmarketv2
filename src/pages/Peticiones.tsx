@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useRequests } from '@/hooks/useRequests'
+import { useDeleteRequest, useRequests } from '@/hooks/useRequests'
+import { useAuth } from '@/hooks/useAuth'
 import { useBrands, useCategories } from '@/hooks/useCatalogs'
 import { fetchPublicProfiles } from '@/lib/api/profiles'
 import { queryKeys } from '@/lib/queryKeys'
@@ -36,9 +37,11 @@ export default function Peticiones() {
     [debouncedSearch, brandId, sort],
   )
 
+  const { user } = useAuth()
   const { data: requests, isLoading } = useRequests(filters)
   const { data: brands } = useBrands()
   const { data: categories } = useCategories()
+  const deleteRequest = useDeleteRequest()
 
   const brandNames = useMemo(() => new Map((brands ?? []).map((b) => [b.id, b.name])), [brands])
   const categoryNames = useMemo(
@@ -132,7 +135,13 @@ export default function Peticiones() {
                 brandName={request.brand_id ? brandNames.get(request.brand_id) : undefined}
                 authorName={nameOf(request.user_id)}
                 authorLocation={authorById.get(request.user_id)?.location}
+                isOwn={request.user_id === user?.id}
                 onOpen={() => setSelected(request)}
+                onDelete={
+                  request.user_id === user?.id
+                    ? () => deleteRequest.mutate(request.id)
+                    : undefined
+                }
               />
             ))}
           </div>
