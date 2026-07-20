@@ -6,6 +6,7 @@ import { formatPriceShort, formatRelativeTime, OFFER_STATUS_LABELS } from '@/lib
 import { useRespondToOffer } from '@/hooks/useOffers'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { MaybeLink } from '@/components/ui/maybe-link'
 
 /** Tinte del sello según el estado de la oferta. */
 const STATUS_STYLES: Record<OfferStatus, string> = {
@@ -44,7 +45,7 @@ export function OfferCard({ item, box }: { item: OfferListItem; box: 'received' 
   return (
     <div className="relative overflow-hidden rounded-lg border-2 border-border bg-card p-4 shadow-sm transition-colors hover:border-primary/50 md:p-5">
       <div className="flex items-start gap-3 md:gap-4">
-        <Link
+        <MaybeLink
           to={item.subjectLink}
           className="size-16 shrink-0 overflow-hidden rounded-lg border border-border md:size-20"
         >
@@ -55,7 +56,7 @@ export function OfferCard({ item, box }: { item: OfferListItem; box: 'received' 
               <span className="mm-mono text-[0.6rem] text-muted-foreground">SIN FOTO</span>
             </div>
           )}
-        </Link>
+        </MaybeLink>
 
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -65,12 +66,17 @@ export function OfferCard({ item, box }: { item: OfferListItem; box: 'received' 
             <OfferStatusBadge status={offer.status} />
           </div>
 
-          <Link
+          <MaybeLink
             to={item.subjectLink}
-            className="line-clamp-1 font-semibold text-foreground transition-colors hover:text-primary"
+            className={cn(
+              'line-clamp-1 font-semibold transition-colors',
+              item.subjectAvailable
+                ? 'text-foreground hover:text-primary'
+                : 'italic text-muted-foreground',
+            )}
           >
             {item.subjectTitle}
-          </Link>
+          </MaybeLink>
 
           <p className="mt-1 text-sm text-muted-foreground">
             {box === 'received' ? 'De' : 'Para'}{' '}

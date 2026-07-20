@@ -57,8 +57,11 @@ export interface OfferListItem {
   /** Sobre qué se ofertó. */
   subjectKind: 'listing' | 'request'
   subjectTitle: string
+  /** false si se borró o si la moderación lo retiró: la RLS deja de entregarlo. */
+  subjectAvailable: boolean
   subjectCover: string | null
-  subjectLink: string
+  /** null cuando el asunto ya no está disponible: enlazar llevaría a "no encontrado". */
+  subjectLink: string | null
   /** La otra parte (quien oferta si es recibida; el dueño si es enviada). */
   counterpartName: string
   counterpartAvatar: string | null
@@ -111,10 +114,15 @@ export async function fetchOffers(userId: string, box: OfferBox): Promise<OfferL
     return {
       offer,
       subjectKind: kind,
-      subjectTitle: subject?.title ?? (kind === 'listing' ? 'Anuncio' : 'Petición'),
+      subjectTitle:
+        subject?.title ?? (kind === 'listing' ? 'Anuncio no disponible' : 'Petición no disponible'),
+      subjectAvailable: Boolean(subject),
       subjectCover: subject?.photos?.[0] ?? null,
-      subjectLink:
-        kind === 'listing' ? `/producto/${offer.listing_id}` : `/peticion/${offer.request_id}`,
+      subjectLink: !subject
+        ? null
+        : kind === 'listing'
+          ? `/producto/${offer.listing_id}`
+          : `/peticion/${offer.request_id}`,
       counterpartName: other?.display_name || other?.username || 'Usuario',
       counterpartAvatar: other?.avatar_url ?? null,
     }

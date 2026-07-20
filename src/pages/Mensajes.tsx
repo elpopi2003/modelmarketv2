@@ -11,6 +11,7 @@ import type { ConversationListItem } from '@/lib/api/messages'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { MaybeLink } from '@/components/ui/maybe-link'
 
 function ConversationRow({ item, active }: { item: ConversationListItem; active: boolean }) {
   return (
@@ -39,7 +40,7 @@ function ConversationRow({ item, active }: { item: ConversationListItem; active:
           <span className="mm-mono uppercase">
             {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
           </span>{' '}
-          · {item.subjectTitle}
+          · <span className={item.subjectAvailable ? undefined : 'italic'}>{item.subjectTitle}</span>
         </p>
       </div>
     </Link>
@@ -81,15 +82,18 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
         <div className="min-w-0">
           <p className="truncate font-semibold">{item?.otherName ?? 'Conversación'}</p>
           {item && (
-            <Link
+            <MaybeLink
               to={item.subjectLink}
-              className="truncate text-xs text-muted-foreground hover:text-primary"
+              className={cn(
+                'truncate text-xs text-muted-foreground',
+                item.subjectAvailable && 'hover:text-primary',
+              )}
             >
               <span className="mm-mono uppercase">
                 {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
               </span>{' '}
-              · {item.subjectTitle}
-            </Link>
+              · <span className={item.subjectAvailable ? undefined : 'italic'}>{item.subjectTitle}</span>
+            </MaybeLink>
           )}
         </div>
       </div>

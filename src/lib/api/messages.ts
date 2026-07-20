@@ -14,9 +14,16 @@ export interface ConversationListItem {
   otherName: string
   subjectKind: ConversationSubjectKind
   subjectTitle: string
+  /**
+   * ¿Sigue existiendo el anuncio/petición para quien mira? Es false si se borró o si
+   * la moderación lo retiró: en ambos casos la RLS deja de entregarlo y no hay adónde
+   * enlazar. La conversación se conserva, porque lo hablado sigue siendo suyo.
+   */
+  subjectAvailable: boolean
   subjectCover: string | null
   /** Ruta al anuncio o petición de origen. */
-  subjectLink: string
+  /** null cuando el asunto ya no está disponible: enlazar llevaría a "no encontrado". */
+  subjectLink: string | null
 }
 
 /** Conversaciones del usuario (enriquecidas con su asunto y el otro participante). */
@@ -66,10 +73,15 @@ export async function fetchConversationList(userId: string): Promise<Conversatio
       otherUserId: otherId(conversation),
       otherName: profile?.display_name || profile?.username || 'Usuario',
       subjectKind: kind,
-      subjectTitle: subject?.title ?? (kind === 'listing' ? 'Anuncio' : 'Petición'),
+      subjectTitle:
+        subject?.title ?? (kind === 'listing' ? 'Anuncio no disponible' : 'Petición no disponible'),
+      subjectAvailable: Boolean(subject),
       subjectCover: subject?.photos?.[0] ?? null,
-      subjectLink:
-        kind === 'listing' ? `/producto/${conversation.listing_id}` : `/peticion/${conversation.request_id}`,
+      subjectLink: !subject
+        ? null
+        : kind === 'listing'
+          ? `/producto/${conversation.listing_id}`
+          : `/peticion/${conversation.request_id}`,
     }
   })
 }
