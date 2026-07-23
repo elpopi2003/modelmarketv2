@@ -17,11 +17,13 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
 - [x] **M4 · Requests, favoritos, mensajería, notificaciones** — peticiones (CRUD + gating), favoritos (toggle + contador RPC), mensajería (conversaciones/hilo + "Contactar" + no leídos) y notificaciones (triggers mensaje/favorito + campanita). RLS y RPCs SECURITY DEFINER; verificado en vivo con 2 usuarios.
 - [x] **M5 · Suscripciones/Stripe** — tabla `subscriptions` + vista pública, página `/precios` (feature matrix), Edge Functions (create-checkout, check-subscription, customer-portal, stripe-webhook) y tier real conectado. Verificado end-to-end: pago test (4242) → webhook → `pro/active` → gating desbloqueado.
 - [ ] **M6 · Admin, moderación, Edge Functions, emails**.
-- [~] **M7 · SEO, rendimiento, tests e2e** — SEO por ruta (`<Seo/>` con hoisting nativo de
-  React 19: título/meta/OG/canonical, JSON-LD Product y FAQPage) ✅; rendimiento (hero PNG 2 MB
-  → AVIF ~54 KB vía `<picture>`, lazy-loading auditado) ✅; e2e Playwright con cobertura de
-  flujos públicos ✅. **Pendiente**: e2e de flujos autenticados (publicar, mensajería, checkout)
-  — requiere decidir estrategia de cuentas de prueba.
+- [x] **M7 · SEO, rendimiento, tests e2e** — SEO por ruta (`<Seo/>` con hoisting nativo de
+  React 19: título/meta/OG/canonical, JSON-LD Product y FAQPage); rendimiento (hero PNG 2 MB
+  → AVIF ~54 KB vía `<picture>`, `npm run optimize:hero`, lazy-loading auditado); e2e Playwright
+  (`npm run test:e2e`) cubriendo flujos públicos + login por la interfaz y rutas protegidas
+  (credenciales vía `E2E_EMAIL`/`E2E_PASSWORD`, nunca en el repo). Los e2e que mutan datos
+  (publicar con foto, mensajería entre dos usuarios, checkout Stripe) se dejan fuera a propósito
+  para no ensuciar el backend real; se verifican a mano y por los tests de Vitest de la lógica.
 
 ### Desviaciones respecto al doc original (decididas)
 
