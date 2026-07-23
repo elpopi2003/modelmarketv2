@@ -156,12 +156,30 @@ export function ListingForm({
         <FieldError message={errors.title?.message} />
       </div>
 
+      {/* Precio + acepta ofertas */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="priceEuros">Precio (€)</Label>
           <Input id="priceEuros" type="number" step="0.01" min="0" placeholder="0.00" {...register('priceEuros')} />
           <FieldError message={errors.priceEuros?.message} />
         </div>
+        <label className="flex items-start gap-2.5 self-end rounded-lg border border-border bg-muted/40 p-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 size-4 rounded border-input"
+            {...register('acceptsOffers')}
+          />
+          <span>
+            <span className="text-sm font-medium">Acepto ofertas por debajo del precio</span>
+            <span className="block text-xs text-muted-foreground">
+              Si lo desmarcas, solo podrán ofrecerte el precio publicado: nadie podrá regatear.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      {/* Estado + calcas */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="condition">Estado</Label>
           <select id="condition" className={selectClass} {...register('condition')}>
@@ -173,23 +191,6 @@ export function ListingForm({
           </select>
           <FieldError message={errors.condition?.message} />
         </div>
-      </div>
-
-      <label className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3">
-        <input
-          type="checkbox"
-          className="mt-0.5 size-4 rounded border-input"
-          {...register('acceptsOffers')}
-        />
-        <span>
-          <span className="text-sm font-medium">Acepto ofertas por debajo del precio</span>
-          <span className="block text-xs text-muted-foreground">
-            Si lo desmarcas, solo podrán ofrecerte el precio publicado: nadie podrá regatear.
-          </span>
-        </span>
-      </label>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="decals">Calcas</Label>
           <select id="decals" className={selectClass} {...register('decals')}>
@@ -201,50 +202,11 @@ export function ListingForm({
           </select>
           <FieldError message={errors.decals?.message} />
         </div>
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-medium leading-none">Método de entrega</legend>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="size-4 rounded border-input" {...register('shippingInpost')} />
-            Envíos disponibles
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="size-4 rounded border-input" {...register('handDelivery')} />
-            Entrega en mano
-          </label>
-          <FieldError message={errors.shippingInpost?.message} />
-        </fieldset>
       </div>
 
-      {/* Aviso legal a ancho completo (fuera del grid): al ofrecer envíos, ModelMarket no
-          interviene ni en la logística ni en el pago, y conviene dejarlo por escrito. Aquí
-          no estira la columna del método de entrega. */}
-      {watch('shippingInpost') && (
-        <div
-          role="note"
-          className="space-y-2 rounded-md border border-accent/40 bg-accent/5 p-4 text-xs leading-relaxed text-muted-foreground sm:text-sm"
-        >
-          <p className="font-semibold uppercase tracking-wide text-accent">
-            Aviso sobre los envíos
-          </p>
-          <p>
-            ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y no
-            interviene en la entrega de los artículos. La logística del envío —incluida la
-            elección del proveedor o empresa de transporte, la generación y contratación de
-            etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
-            responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
-            condiciones de mutuo acuerdo.
-          </p>
-          <p>
-            Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
-            derivada de las operaciones entre sus usuarios y, en particular, no percibe comisión
-            sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva entre
-            comprador y vendedor, quedando ModelMarket ajena y exenta de toda responsabilidad
-            respecto de dichas transacciones.
-          </p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Categoría + marca + escala. Los campos condicionales (marca/escala nuevas) caen
+          bajo su propia columna. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="categoryId">Categoría</Label>
           <select id="categoryId" className={selectClass} {...register('categoryId')}>
@@ -284,32 +246,31 @@ export function ListingForm({
             </div>
           )}
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="scale">Escala</Label>
-        <select id="scale" className={selectClass} {...register('scale')}>
-          <option value="" disabled>
-            Selecciona escala
-          </option>
-          {SCALE_OPTIONS.map((value) => (
-            <option key={value} value={value}>
-              {value}
+        <div className="space-y-2">
+          <Label htmlFor="scale">Escala</Label>
+          <select id="scale" className={selectClass} {...register('scale')}>
+            <option value="" disabled>
+              Selecciona escala
             </option>
-          ))}
-          <option value="other">Otra…</option>
-        </select>
-        <FieldError message={errors.scale?.message} />
-        {watch('scale') === 'other' && (
-          <div className="space-y-2 pt-1">
-            <Input
-              aria-label="Otra escala"
-              placeholder="Escribe la escala (p. ej. 1:9)"
-              {...register('customScale')}
-            />
-            <FieldError message={errors.customScale?.message} />
-          </div>
-        )}
+            {SCALE_OPTIONS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+            <option value="other">Otra…</option>
+          </select>
+          <FieldError message={errors.scale?.message} />
+          {watch('scale') === 'other' && (
+            <div className="space-y-2 pt-1">
+              <Input
+                aria-label="Otra escala"
+                placeholder="Escribe la escala (p. ej. 1:9)"
+                {...register('customScale')}
+              />
+              <FieldError message={errors.customScale?.message} />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -325,6 +286,48 @@ export function ListingForm({
         max={maxPhotosPerItem}
         canAddMore={uploader.canAddMore}
       />
+
+      {/* Método de entrega, a ancho completo al final. */}
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium leading-none">Método de entrega</legend>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" className="size-4 rounded border-input" {...register('shippingInpost')} />
+          Envíos disponibles
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" className="size-4 rounded border-input" {...register('handDelivery')} />
+          Entrega en mano
+        </label>
+        <FieldError message={errors.shippingInpost?.message} />
+      </fieldset>
+
+      {/* Aviso legal: al ofrecer envíos, ModelMarket no interviene ni en la logística ni en
+          el pago, y conviene dejarlo por escrito. */}
+      {watch('shippingInpost') && (
+        <div
+          role="note"
+          className="space-y-2 rounded-md border border-accent/40 bg-accent/5 p-4 text-xs leading-relaxed text-muted-foreground sm:text-sm"
+        >
+          <p className="font-semibold uppercase tracking-wide text-accent">
+            Aviso sobre los envíos
+          </p>
+          <p>
+            ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y no
+            interviene en la entrega de los artículos. La logística del envío —incluida la
+            elección del proveedor o empresa de transporte, la generación y contratación de
+            etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
+            responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
+            condiciones de mutuo acuerdo.
+          </p>
+          <p>
+            Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
+            derivada de las operaciones entre sus usuarios y, en particular, no percibe comisión
+            sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva entre
+            comprador y vendedor, quedando ModelMarket ajena y exenta de toda responsabilidad
+            respecto de dichas transacciones.
+          </p>
+        </div>
+      )}
 
       <FieldError message={serverError ?? undefined} />
 
