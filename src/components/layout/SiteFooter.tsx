@@ -1,14 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Logo } from '@/components/layout/Logo'
+import { useCategories } from '@/hooks/useCatalogs'
 
 type FooterLink = { label: string; to: string }
-
-const EXPLORE_LINKS: FooterLink[] = [
-  { label: 'Militar', to: '/explorar' },
-  { label: 'Aviación', to: '/explorar' },
-  { label: 'Automoción', to: '/explorar' },
-  { label: 'Naval', to: '/explorar' },
-]
 
 const LEGAL_LINKS: FooterLink[] = [
   { label: 'Términos de uso', to: '/terminos' },
@@ -40,6 +34,15 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
 
 /** Pie de página global: marca + columnas de navegación + línea legal. */
 export function SiteFooter() {
+  const { data: categories } = useCategories()
+
+  // Todas las categorías reales, cada una enlazando a su filtro en Explorar (?cat=slug).
+  // Dinámico a propósito: así el footer no se queda desincronizado del catálogo.
+  const exploreLinks: FooterLink[] = (categories ?? []).map((c) => ({
+    label: c.name,
+    to: `/explorar?cat=${c.slug}`,
+  }))
+
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
@@ -51,7 +54,7 @@ export function SiteFooter() {
               pasión.
             </p>
           </div>
-          <FooterColumn title="Explorar" links={EXPLORE_LINKS} />
+          <FooterColumn title="Explorar" links={exploreLinks} />
           <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
