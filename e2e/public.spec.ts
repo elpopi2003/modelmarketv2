@@ -81,3 +81,10 @@ test.describe('SEO por ruta', () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
   })
 })
+
+test.describe('Guard de rutas', () => {
+  test('sin sesión, una ruta protegida redirige a /auth', async ({ page }) => {
+    await page.goto('/publicar')
+    await expect(page).toHaveURL(/\/auth/)
+  })
+})
