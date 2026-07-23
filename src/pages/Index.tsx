@@ -17,6 +17,8 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
+import heroAvif from '@/assets/hero-background.avif'
+import heroWebp from '@/assets/hero-background.webp'
 import heroUrl from '@/assets/hero-background.png'
 import { useAuth } from '@/hooks/useAuth'
 import { useListings } from '@/hooks/useListings'
@@ -103,14 +105,20 @@ export default function Index() {
         titleExact
         description="Marketplace de maquetas y modelos a escala con 0% de comisión entre coleccionistas. Compra, vende y encuentra esa pieza descatalogada."
       />
-      {/* Hero — colores sobre fotografía: independientes del tema a propósito */}
+      {/* Hero — colores sobre fotografía: independientes del tema a propósito.
+          AVIF (~54 KB) → WebP (~85 KB) → PNG (~2 MB) de reserva. El navegador coge el
+          primer formato que soporta; el PNG solo para los muy antiguos. */}
       <section className="relative overflow-hidden">
-        <img
-          src={heroUrl}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-          fetchPriority="high"
-        />
+        <picture>
+          <source srcSet={heroAvif} type="image/avif" />
+          <source srcSet={heroWebp} type="image/webp" />
+          <img
+            src={heroUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            fetchPriority="high"
+          />
+        </picture>
         <div className="absolute inset-0 bg-black/60" />
 
         <div className="relative mx-auto flex max-w-4xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32">
