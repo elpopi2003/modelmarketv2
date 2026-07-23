@@ -197,36 +197,37 @@ export function ListingForm({
             Entrega en mano
           </label>
           <FieldError message={errors.shippingInpost?.message} />
-
-          {/* Aviso legal: solo al ofrecer envíos. ModelMarket no interviene ni en la
-              logística ni en el pago, y conviene dejarlo por escrito ante el usuario. */}
-          {watch('shippingInpost') && (
-            <div
-              role="note"
-              className="mt-2 space-y-2 rounded-md border border-accent/40 bg-accent/5 p-3 text-xs leading-relaxed text-muted-foreground"
-            >
-              <p className="font-semibold uppercase tracking-wide text-accent">
-                Aviso sobre los envíos
-              </p>
-              <p>
-                ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y
-                no interviene en la entrega de los artículos. La logística del envío —incluida
-                la elección del proveedor o empresa de transporte, la generación y contratación
-                de etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
-                responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
-                condiciones de mutuo acuerdo.
-              </p>
-              <p>
-                Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
-                derivada de las operaciones entre sus usuarios y, en particular, no percibe
-                comisión sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva
-                entre comprador y vendedor, quedando ModelMarket ajena y exenta de toda
-                responsabilidad respecto de dichas transacciones.
-              </p>
-            </div>
-          )}
         </fieldset>
       </div>
+
+      {/* Aviso legal a ancho completo (fuera del grid): al ofrecer envíos, ModelMarket no
+          interviene ni en la logística ni en el pago, y conviene dejarlo por escrito. Aquí
+          no estira la columna del método de entrega. */}
+      {watch('shippingInpost') && (
+        <div
+          role="note"
+          className="space-y-2 rounded-md border border-accent/40 bg-accent/5 p-4 text-xs leading-relaxed text-muted-foreground sm:text-sm"
+        >
+          <p className="font-semibold uppercase tracking-wide text-accent">
+            Aviso sobre los envíos
+          </p>
+          <p>
+            ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y no
+            interviene en la entrega de los artículos. La logística del envío —incluida la
+            elección del proveedor o empresa de transporte, la generación y contratación de
+            etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
+            responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
+            condiciones de mutuo acuerdo.
+          </p>
+          <p>
+            Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
+            derivada de las operaciones entre sus usuarios y, en particular, no percibe comisión
+            sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva entre
+            comprador y vendedor, quedando ModelMarket ajena y exenta de toda responsabilidad
+            respecto de dichas transacciones.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
