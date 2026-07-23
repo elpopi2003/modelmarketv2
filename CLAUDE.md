@@ -17,7 +17,11 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
 - [x] **M4 · Requests, favoritos, mensajería, notificaciones** — peticiones (CRUD + gating), favoritos (toggle + contador RPC), mensajería (conversaciones/hilo + "Contactar" + no leídos) y notificaciones (triggers mensaje/favorito + campanita). RLS y RPCs SECURITY DEFINER; verificado en vivo con 2 usuarios.
 - [x] **M5 · Suscripciones/Stripe** — tabla `subscriptions` + vista pública, página `/precios` (feature matrix), Edge Functions (create-checkout, check-subscription, customer-portal, stripe-webhook) y tier real conectado. Verificado end-to-end: pago test (4242) → webhook → `pro/active` → gating desbloqueado.
 - [ ] **M6 · Admin, moderación, Edge Functions, emails**.
-- [ ] **M7 · SEO, rendimiento, tests e2e**.
+- [~] **M7 · SEO, rendimiento, tests e2e** — SEO por ruta (`<Seo/>` con hoisting nativo de
+  React 19: título/meta/OG/canonical, JSON-LD Product y FAQPage) ✅; rendimiento (hero PNG 2 MB
+  → AVIF ~54 KB vía `<picture>`, lazy-loading auditado) ✅; e2e Playwright con cobertura de
+  flujos públicos ✅. **Pendiente**: e2e de flujos autenticados (publicar, mensajería, checkout)
+  — requiere decidir estrategia de cuentas de prueba.
 
 ### Desviaciones respecto al doc original (decididas)
 
