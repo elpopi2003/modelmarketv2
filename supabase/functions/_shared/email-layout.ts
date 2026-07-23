@@ -7,6 +7,16 @@ function appUrl(): string {
   return Deno.env.get('APP_URL') ?? 'https://modelmarket.es'
 }
 
+/**
+ * Logotipo servido desde el bucket público `brand`.
+ *
+ * URL absoluta y fija a propósito: un cliente de correo abre la imagen desde fuera, sin
+ * sesión y sin saber nada de la aplicación. No puede depender de APP_URL, que apunta al
+ * sitio desplegado y dejaría el logo roto en cuanto el dominio no responda.
+ */
+const LOGO_URL =
+  'https://shanozqxmmdiqvqhffbz.supabase.co/storage/v1/object/public/brand/logo.png'
+
 export interface LayoutOptions {
   heading: string
   intro?: string
@@ -35,6 +45,10 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
+// Cabecera con banda BLANCA (no el azul de marca): el logotipo es azul marino sobre
+// transparente y sobre azul resultaba ilegible. La franja naranja inferior conserva el
+// acento de la cabecera anterior. El `alt` está cuidado porque muchos clientes de correo
+// bloquean las imágenes por defecto: si el logo no carga, se lee el nombre, no un hueco.
 export function layout(opts: LayoutOptions): string {
   const base = appUrl()
   const paras = (opts.paragraphs ?? [])
@@ -51,8 +65,9 @@ export function layout(opts: LayoutOptions): string {
 <html lang="es">
   <body style="margin:0;background:#F4F6F9;padding:24px;font-family:Arial,Helvetica,sans-serif;">
     <div style="max-width:520px;margin:0 auto;background:#ffffff;border:2px solid #E1E7EF;border-radius:6px;overflow:hidden;box-shadow:4px 4px 0 0 #E1E7EF;">
-      <div style="background:#1B3A5F;padding:18px 24px;">
-        <span style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:0.5px;">Model<span style="color:#F7941D;">Market</span></span>
+      <div style="background:#ffffff;padding:20px 24px 16px;border-bottom:3px solid #F7941D;">
+        <img src="${LOGO_URL}" alt="ModelMarket" width="220"
+             style="display:block;border:0;outline:none;text-decoration:none;width:220px;max-width:100%;height:auto;" />
       </div>
       <div style="padding:24px;">
         <h1 style="margin:0 0 12px;color:#1B3A5F;font-size:20px;line-height:1.3;">${opts.heading}</h1>

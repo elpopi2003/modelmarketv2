@@ -21,7 +21,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import { corsHeaders } from '../_shared/cors.ts'
 import { fail, ok } from '../_shared/response.ts'
 import { sendEmail } from '../_shared/resend.ts'
-import { tierChangedByAdminEmail } from '../_shared/moderation-emails.ts'
+import { tierChangedByAdminEmail } from '../_shared/account-emails.ts'
 
 type Tier = 'free' | 'pro' | 'retail'
 const TIERS: Tier[] = ['free', 'pro', 'retail']

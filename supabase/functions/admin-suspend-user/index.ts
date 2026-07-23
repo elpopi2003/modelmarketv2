@@ -20,7 +20,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import { corsHeaders } from '../_shared/cors.ts'
 import { fail, ok } from '../_shared/response.ts'
 import { sendEmail } from '../_shared/resend.ts'
-import { reinstatementEmail, suspensionEmail } from '../_shared/moderation-emails.ts'
+import { reinstatementEmail, suspensionEmail } from '../_shared/account-emails.ts'
 
 /** ~100 años. La suspensión es indefinida: se levanta a mano, no caduca sola. */
 const BAN_FOREVER = '876000h'

@@ -12,6 +12,8 @@ import Stripe from 'https://esm.sh/stripe@17.7.0?target=deno'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno'
 import { corsHeaders } from '../_shared/cors.ts'
 import { fail, ok } from '../_shared/response.ts'
+import { sendEmail } from '../_shared/resend.ts'
+import { accountDeletedByAdminEmail } from '../_shared/account-emails.ts'
 
 /** Cancela la suscripción del usuario si la tiene. Devuelve el id cancelado o null. */
 // deno-lint-ignore no-explicit-any
@@ -88,10 +90,34 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Los datos de contacto se leen ANTES de borrar: después no hay a quién preguntar.
+    const { data: targetUser } = await admin.auth.admin.getUserById(targetId)
+    const destinatario = targetUser?.user?.email
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('display_name, username')
+      .eq('id', targetId)
+      .maybeSingle()
+    const nombre = profile?.display_name || profile?.username || 'coleccionista'
+
     const { error } = await admin.auth.admin.deleteUser(targetId)
     if (error) return fail(error.message, 500)
 
-    return ok({ deleted: targetId, cancelledSubscription: cancelled })
+    // Y se envía DESPUÉS: avisar antes de borrar podría anunciar una baja que luego falla.
+    // El fallo del email no revierte nada, pero se devuelve para poder avisar al admin.
+    let emailSent = false
+    let emailError: string | null = null
+    if (destinatario) {
+      try {
+        const { subject, html } = accountDeletedByAdminEmail(nombre)
+        await sendEmail({ to: destinatario, subject, html })
+        emailSent = true
+      } catch (e) {
+        emailError = String(e)
+      }
+    }
+
+    return ok({ deleted: targetId, cancelledSubscription: cancelled, emailSent, emailError })
   } catch (e) {
     return fail(String(e), 500)
   }

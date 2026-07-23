@@ -2,6 +2,13 @@
 // El maquetado comun vive en email-layout.ts.
 
 import { layout, type EmailContent } from './email-layout.ts'
+import {
+  accountDeletedByAdminEmail,
+  accountDeletedEmail,
+  reinstatementEmail,
+  suspensionEmail,
+  tierChangedByAdminEmail,
+} from './account-emails.ts'
 
 export type { EmailContent }
 
@@ -227,6 +234,11 @@ export function allSampleEmails(): { type: string; subject: string; html: string
         message: 'Hola, tengo una duda sobre los planes PRO.',
       }),
     },
+    { type: 'suspension', content: suspensionEmail('Alfredo', 'Anuncios repetidos tras dos avisos.') },
+    { type: 'reinstatement', content: reinstatementEmail('Alfredo') },
+    { type: 'tier-changed', content: tierChangedByAdminEmail('Alfredo', 'retail') },
+    { type: 'account-deleted', content: accountDeletedEmail('Alfredo') },
+    { type: 'account-deleted-admin', content: accountDeletedByAdminEmail('Alfredo') },
   ]
 
   return samples.map((s) => ({ type: s.type, subject: s.content.subject, html: s.content.html }))
