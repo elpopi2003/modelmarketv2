@@ -113,7 +113,7 @@ Tablas clave en `public`:
 | ------ | ---------- | -------- | ---------- | ----- | ------------------------ | ---------------------------------- |
 | Free   | 0€         | 1        | 1          | 2     | Retardada 24h            | —                                  |
 | PRO    | 4,99€/mes  | ∞        | ∞          | 5     | Inmediata                | Insignia, prioridad sobre Free     |
-| Retail | 19,99€/mes | ∞        | ∞          | ∞     | Inmediata, máx prioridad | Carga masiva CSV, herramientas pro |
+| Retail | 19,99€/mes | ∞        | ∞          | ∞     | Inmediata, máx prioridad | Herramientas pro                   |
 
 Modelo tipado desde el inicio: `SubscriptionTier = "free" | "pro" | "retail"` con la feature matrix
 centralizada en `src/lib/subscription.ts`. **Nada de `isPro: boolean`.**
@@ -211,7 +211,6 @@ npm run format
 
 - El webhook de Stripe es la fuente de verdad de la suscripción: desplegar en orden DB → funciones → UI.
 - Vistas SECURITY DEFINER minimalistas; no añadir columnas sensibles sin revisión.
-- Carga masiva CSV puede saturar RLS/rate limits: procesar en lotes con backoff.
 
 ---
 

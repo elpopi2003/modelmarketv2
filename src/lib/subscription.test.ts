@@ -86,12 +86,6 @@ describe('jerarquía de tiers', () => {
 })
 
 describe('capacidades específicas', () => {
-  it('solo retail tiene importación CSV', () => {
-    expect(getCapabilities('free').csvBulkImport).toBe(false)
-    expect(getCapabilities('pro').csvBulkImport).toBe(false)
-    expect(getCapabilities('retail').csvBulkImport).toBe(true)
-  })
-
   it('free tiene visibilidad retardada 24h; pro/retail inmediata', () => {
     expect(getCapabilities('free').immediateVisibility).toBe(false)
     expect(getCapabilities('free').visibilityDelayHours).toBe(24)

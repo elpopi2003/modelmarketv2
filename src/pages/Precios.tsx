@@ -37,7 +37,6 @@ function featureRows(tier: SubscriptionTier) {
       value: c.immediateVisibility ? 'Inmediata' : `Retardada ${c.visibilityDelayHours}h`,
     },
     { label: 'Insignia de plan', value: c.hasBadge },
-    { label: 'Carga masiva CSV', value: c.csvBulkImport },
   ]
 }
 
