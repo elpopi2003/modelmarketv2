@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
+import { Seo } from '@/components/seo/Seo'
 
 export default function NotFound() {
   return (
     <section className="grid place-items-center px-6 py-24 text-center">
+      <Seo title="Página no encontrada" noindex />
       <div className="space-y-4">
         <p className="text-sm font-medium text-muted-foreground">404</p>
         <h1 className="text-3xl font-bold tracking-tight">Página no encontrada</h1>

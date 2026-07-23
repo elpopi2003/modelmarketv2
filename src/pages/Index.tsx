@@ -29,6 +29,7 @@ import { ProductCard } from '@/components/marketplace/ProductCard'
 import { RequestCard } from '@/components/marketplace/RequestCard'
 import { RequestDialog } from '@/components/marketplace/RequestDialog'
 import { Button } from '@/components/ui/button'
+import { Seo } from '@/components/seo/Seo'
 
 /** Icono y descripción de cada categoría del catálogo, por slug. */
 const CATEGORY_META: Record<string, { Icon: LucideIcon; description: string }> = {
@@ -97,6 +98,11 @@ export default function Index() {
 
   return (
     <>
+      <Seo
+        title="ModelMarket — Maquetas y modelos a escala"
+        titleExact
+        description="Marketplace de maquetas y modelos a escala con 0% de comisión entre coleccionistas. Compra, vende y encuentra esa pieza descatalogada."
+      />
       {/* Hero — colores sobre fotografía: independientes del tema a propósito */}
       <section className="relative overflow-hidden">
         <img

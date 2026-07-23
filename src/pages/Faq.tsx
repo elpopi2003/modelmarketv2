@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
+import { Seo } from '@/components/seo/Seo'
 
 interface FaqGroup {
   group: string
@@ -150,8 +151,26 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function Faq() {
+  // JSON-LD FAQPage: permite que Google muestre las preguntas desplegables en el resultado.
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.flatMap((g) =>
+      g.items.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
+    ),
+  }
+
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <Seo
+        title="Preguntas frecuentes"
+        description="Resolvemos tus dudas sobre ModelMarket: cómo comprar y vender maquetas, comisiones, envíos, planes y seguridad."
+        jsonLd={faqJsonLd}
+      />
       <span className="mm-mono inline-block rounded-md border border-border bg-card px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Centro de ayuda
       </span>

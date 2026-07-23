@@ -20,6 +20,7 @@ import { CONDITION_LABELS } from '@/lib/format'
 import type { ListingFilters, ListingSort } from '@/lib/api/listings'
 import type { ListingCondition } from '@/integrations/supabase/types'
 import { Input } from '@/components/ui/input'
+import { Seo } from '@/components/seo/Seo'
 
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -103,6 +104,10 @@ export default function Explorar() {
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
+      <Seo
+        title="Explorar anuncios"
+        description="Explora maquetas y modelos a escala en venta: militares, aviación, barcos, coches, figuras y más. 0% de comisión entre coleccionistas."
+      />
       <div className="mm-section-header">
         <span className="mm-section-header__label">Catálogo</span>
       </div>

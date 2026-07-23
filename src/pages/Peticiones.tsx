@@ -21,6 +21,7 @@ import { RequestDialog } from '@/components/marketplace/RequestDialog'
 import type { Request, RequestFilters, RequestSort } from '@/lib/api/requests'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Seo } from '@/components/seo/Seo'
 
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -103,6 +104,10 @@ export default function Peticiones() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <Seo
+        title="Peticiones"
+        description="¿Buscas una maqueta descatalogada o difícil de encontrar? Publica tu petición y deja que otros coleccionistas te ayuden a localizarla."
+      />
       <h1 className="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl">Peticiones</h1>
 
       <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row">

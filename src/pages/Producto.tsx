@@ -29,6 +29,7 @@ import {
   DECALS_LABELS,
   formatPriceShort,
 } from '@/lib/format'
+import { Seo } from '@/components/seo/Seo'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { OfferForm } from '@/components/marketplace/OfferForm'
 import { OffersPanel } from '@/components/marketplace/OffersPanel'
@@ -116,6 +117,7 @@ export default function Producto() {
   if (!listing) {
     return (
       <section className="mx-auto max-w-7xl px-4 py-24 text-center sm:px-6">
+        <Seo title="Anuncio no encontrado" noindex />
         <h1 className="text-3xl font-extrabold tracking-tight">Anuncio no encontrado</h1>
         <p className="mt-2 text-muted-foreground">Puede que se haya vendido o retirado.</p>
         <Button asChild variant="outline" className="mt-6">
@@ -152,8 +154,54 @@ export default function Producto() {
     setTimeout(() => setShared(false), 2000)
   }
 
+  // Condición del anuncio mapeada al vocabulario de schema.org.
+  const schemaCondition =
+    listing.condition === 'sealed'
+      ? 'https://schema.org/NewCondition'
+      : 'https://schema.org/UsedCondition'
+
+  const priceEuros = (listing.price_cents / 100).toFixed(2)
+  const seoDescription = [
+    brandName,
+    listing.title,
+    listing.scale ? `a escala ${listing.scale}` : null,
+    `· ${CONDITION_LABELS[listing.condition]}`,
+    `· ${formatPriceShort(listing.price_cents, listing.currency)}`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // JSON-LD Product: ayuda a que Google muestre precio y disponibilidad en el resultado.
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.title,
+    ...(listing.description ? { description: listing.description } : {}),
+    ...(listing.photos.length > 0 ? { image: listing.photos } : {}),
+    ...(categoryName ? { category: categoryName } : {}),
+    ...(brandName ? { brand: { '@type': 'Brand', name: brandName } } : {}),
+    offers: {
+      '@type': 'Offer',
+      price: priceEuros,
+      priceCurrency: listing.currency ?? 'EUR',
+      itemCondition: schemaCondition,
+      availability:
+        listing.status === 'reserved'
+          ? 'https://schema.org/OutOfStock'
+          : 'https://schema.org/InStock',
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+    },
+  }
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <Seo
+        title={listing.title}
+        description={seoDescription}
+        image={listing.photos[0]}
+        type="product"
+        jsonLd={productJsonLd}
+      />
       {/* Miga de pan */}
       <nav aria-label="Miga de pan" className="mb-6 flex flex-wrap items-center gap-1 text-sm">
         <Link to="/" className="text-muted-foreground hover:text-primary">

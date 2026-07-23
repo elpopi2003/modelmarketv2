@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Seo } from '@/components/seo/Seo'
 
 const MAX_MESSAGE = 2000
 
@@ -56,6 +57,10 @@ export default function Contacto() {
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+      <Seo
+        title="Contacto"
+        description="¿Dudas, sugerencias o algún problema con ModelMarket? Escríbenos y te responderemos lo antes posible."
+      />
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Contacto</h1>
       <p className="mt-2 text-muted-foreground">
         ¿Tienes alguna duda, sugerencia o problema? Escríbenos y te responderemos lo antes posible.

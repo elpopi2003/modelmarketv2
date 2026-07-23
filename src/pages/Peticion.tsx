@@ -11,6 +11,7 @@ import {
   URGENCY_LABELS,
 } from '@/lib/format'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
+import { Seo } from '@/components/seo/Seo'
 
 export default function Peticion() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +36,7 @@ export default function Peticion() {
   if (!request) {
     return (
       <section className="mx-auto max-w-3xl px-6 py-24 text-center">
+        <Seo title="Petición no encontrada" noindex />
         <h1 className="text-3xl font-extrabold tracking-tight">Petición no encontrada</h1>
         <p className="mt-2 text-muted-foreground">Puede que se haya cerrado o retirado.</p>
         <Link to="/peticiones" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
@@ -50,8 +52,19 @@ export default function Peticion() {
     : null
   const requesterName = requester?.display_name || requester?.username || 'Usuario'
 
+  const seoDescription = [
+    'Se busca:',
+    brandName,
+    request.title,
+    request.scale ? `a escala ${request.scale}` : null,
+    request.max_price_cents != null ? `· hasta ${formatPrice(request.max_price_cents)}` : null,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <section className="mx-auto max-w-3xl px-6 py-12">
+      <Seo title={request.title} description={seoDescription} type="article" />
       <Link
         to="/peticiones"
         className="mm-mono mb-6 inline-block text-xs uppercase text-muted-foreground hover:text-accent"

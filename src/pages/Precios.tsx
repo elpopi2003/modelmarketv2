@@ -12,6 +12,7 @@ import {
 import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Seo } from '@/components/seo/Seo'
 
 /**
  * Planes que se ofrecen en la página de precios. Retail se excluye de la venta pública:
@@ -58,6 +59,10 @@ export default function Precios() {
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-16">
+      <Seo
+        title="Planes y precios"
+        description="Vende y compra con 0% de comisión. Empieza gratis o hazte PRO para anuncios ilimitados, más fotos y visibilidad inmediata."
+      />
       <div className="mb-10 text-center">
         <div className="mm-section-header justify-center">
           <span className="mm-section-header__label">Planes</span>
