@@ -190,13 +190,41 @@ export function ListingForm({
           <legend className="text-sm font-medium leading-none">Método de entrega</legend>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" className="size-4 rounded border-input" {...register('shippingInpost')} />
-            Envío por InPost
+            Envíos disponibles
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" className="size-4 rounded border-input" {...register('handDelivery')} />
             Entrega en mano
           </label>
           <FieldError message={errors.shippingInpost?.message} />
+
+          {/* Aviso legal: solo al ofrecer envíos. ModelMarket no interviene ni en la
+              logística ni en el pago, y conviene dejarlo por escrito ante el usuario. */}
+          {watch('shippingInpost') && (
+            <div
+              role="note"
+              className="mt-2 space-y-2 rounded-md border border-accent/40 bg-accent/5 p-3 text-xs leading-relaxed text-muted-foreground"
+            >
+              <p className="font-semibold uppercase tracking-wide text-accent">
+                Aviso sobre los envíos
+              </p>
+              <p>
+                ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y
+                no interviene en la entrega de los artículos. La logística del envío —incluida
+                la elección del proveedor o empresa de transporte, la generación y contratación
+                de etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
+                responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
+                condiciones de mutuo acuerdo.
+              </p>
+              <p>
+                Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
+                derivada de las operaciones entre sus usuarios y, en particular, no percibe
+                comisión sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva
+                entre comprador y vendedor, quedando ModelMarket ajena y exenta de toda
+                responsabilidad respecto de dichas transacciones.
+              </p>
+            </div>
+          )}
         </fieldset>
       </div>
 
