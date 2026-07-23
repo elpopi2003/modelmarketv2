@@ -13,6 +13,13 @@ import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+/**
+ * Planes que se ofrecen en la página de precios. Retail se excluye de la venta pública:
+ * el tier sigue existiendo en el modelo de datos, en el panel de administración y en
+ * Stripe (para quien ya lo tuviera), pero no se ofrece aquí para contratar.
+ */
+const PRICING_TIERS = SUBSCRIPTION_TIERS.filter((tier) => tier !== 'retail')
+
 function priceLabel(priceMonthly: number): string {
   if (priceMonthly === 0) return 'Gratis'
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(priceMonthly)
@@ -69,8 +76,8 @@ export default function Precios() {
         </p>
       )}
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {SUBSCRIPTION_TIERS.map((tier) => {
+      <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+        {PRICING_TIERS.map((tier) => {
           const c = TIER_CAPABILITIES[tier]
           const highlighted = tier === 'pro'
           const isFree = tier === 'free'
