@@ -30,7 +30,9 @@ export const listingSchema = z
     handDelivery: z.boolean(),
     /** Admite ofertas por debajo del precio publicado. */
     acceptsOffers: z.boolean(),
-    scale: z.string().trim().min(1, 'La escala es obligatoria').max(20, 'Máximo 20 caracteres'),
+    // Una de las escalas del desplegable, o 'other' para escribir una a mano en customScale.
+    scale: z.string().min(1, 'La escala es obligatoria'),
+    customScale: z.string().trim().max(20, 'Máximo 20 caracteres').optional(),
     categoryId: z.string().uuid('Selecciona una categoría'),
     // uuid de una marca existente, o 'other' para crear una nueva.
     brandId: z.string().min(1, 'Selecciona una marca'),
@@ -42,6 +44,13 @@ export const listingSchema = z
         code: z.ZodIssueCode.custom,
         path: ['newBrand'],
         message: 'Escribe el nombre de la marca (mín. 2)',
+      })
+    }
+    if (data.scale === 'other' && (!data.customScale || data.customScale.length < 1)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['customScale'],
+        message: 'Escribe la escala',
       })
     }
     if (!data.shippingInpost && !data.handDelivery) {

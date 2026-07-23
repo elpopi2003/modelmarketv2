@@ -46,6 +46,13 @@ describe('listingSchema', () => {
     expect(listingSchema.safeParse({ ...base, brandId: '' }).success).toBe(false)
   })
 
+  it('con escala "other" exige la escala escrita a mano', () => {
+    // "other" sin customScale no vale: el desplegable no guarda "other" como escala.
+    expect(listingSchema.safeParse({ ...base, scale: 'other' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '1:9' }).success).toBe(true)
+  })
+
   it('exige al menos un método de entrega', () => {
     expect(
       listingSchema.safeParse({ ...base, shippingInpost: false, handDelivery: false }).success,

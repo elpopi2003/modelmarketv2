@@ -23,9 +23,20 @@ import { Textarea } from '@/components/ui/textarea'
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 
+/** Escalas ofrecidas en el desplegable. "Otra" abre un campo para escribir una a mano. */
+const SCALE_OPTIONS = [
+  '1:144', '1:72', '1:48', '1:35', '1:32', '1:12', '1:24', '1:25',
+  '1:350', '1:700', '1:200', '1:87', '1:160', '1:220',
+] as const
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
   return <p className="text-sm text-destructive">{message}</p>
+}
+
+/** ¿La escala coincide con una opción del desplegable? Decide si se edita como "Otra". */
+function isPresetScale(scale: string | null | undefined): boolean {
+  return !!scale && (SCALE_OPTIONS as readonly string[]).includes(scale)
 }
 
 export function ListingForm({
@@ -64,7 +75,9 @@ export function ListingForm({
           shippingInpost: listing.shipping_inpost,
           handDelivery: listing.hand_delivery,
           acceptsOffers: listing.accepts_offers,
-          scale: listing.scale ?? '',
+          // Si la escala guardada no está entre las del desplegable, se edita como "Otra".
+          scale: isPresetScale(listing.scale) ? listing.scale! : 'other',
+          customScale: isPresetScale(listing.scale) ? '' : (listing.scale ?? ''),
           categoryId: listing.category_id ?? '',
           brandId: listing.brand_id ?? '',
           newBrand: '',
@@ -78,6 +91,7 @@ export function ListingForm({
           title: '',
           description: '',
           scale: '',
+          customScale: '',
           categoryId: '',
           brandId: '',
           newBrand: '',
@@ -108,7 +122,8 @@ export function ListingForm({
         shipping_inpost: values.shippingInpost,
         hand_delivery: values.handDelivery,
         accepts_offers: values.acceptsOffers,
-        scale: values.scale?.trim() || null,
+        // "Otra" guarda lo escrito a mano; cualquier otra opción, el valor del desplegable.
+        scale: (values.scale === 'other' ? values.customScale?.trim() : values.scale) || null,
         category_id: values.categoryId || null,
         brand_id: brandId || null,
         photos: await uploader.resolveUrls(user.id),
@@ -273,8 +288,28 @@ export function ListingForm({
 
       <div className="space-y-2">
         <Label htmlFor="scale">Escala</Label>
-        <Input id="scale" placeholder="p. ej. 1:72" {...register('scale')} />
+        <select id="scale" className={selectClass} {...register('scale')}>
+          <option value="" disabled>
+            Selecciona escala
+          </option>
+          {SCALE_OPTIONS.map((value) => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+          <option value="other">Otra…</option>
+        </select>
         <FieldError message={errors.scale?.message} />
+        {watch('scale') === 'other' && (
+          <div className="space-y-2 pt-1">
+            <Input
+              aria-label="Otra escala"
+              placeholder="Escribe la escala (p. ej. 1:9)"
+              {...register('customScale')}
+            />
+            <FieldError message={errors.customScale?.message} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
