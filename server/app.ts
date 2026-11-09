@@ -42,13 +42,17 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       return reply.status(400).send(fail('bad_request', err.message))
     }
     req.log.error(err)
-    return reply.status(500).send(fail('internal', 'Ha ocurrido un error inesperado. Inténtalo de nuevo.'))
+    return reply
+      .status(500)
+      .send(fail('internal', 'Ha ocurrido un error inesperado. Inténtalo de nuevo.'))
   })
 
   await app.register(
     async (api) => {
       await api.register(healthRoutes)
-      api.setNotFoundHandler((_req, reply) => reply.status(404).send(fail('not_found', 'Ruta no encontrada.')))
+      api.setNotFoundHandler((_req, reply) =>
+        reply.status(404).send(fail('not_found', 'Ruta no encontrada.')),
+      )
     },
     { prefix: '/api' },
   )

@@ -3,7 +3,8 @@
  * El frontend solo tiene que mirar `ok` y, si es false, mostrar `error.message`.
  */
 export type ApiError = { code: string; message: string }
-export type ApiResponse<T> = { ok: true; data: T; error: null } | { ok: false; data: null; error: ApiError }
+export type ApiResponse<T> =
+  { ok: true; data: T; error: null } | { ok: false; data: null; error: ApiError }
 
 export const ok = <T>(data: T): ApiResponse<T> => ({ ok: true, data, error: null })
 
@@ -28,8 +29,11 @@ export class HttpError extends Error {
   }
 }
 
-export const badRequest = (message: string, code = 'bad_request') => new HttpError(400, code, message)
-export const unauthorized = (message = 'Necesitas iniciar sesión.') => new HttpError(401, 'unauthorized', message)
-export const forbidden = (message = 'No tienes permiso para hacer esto.') => new HttpError(403, 'forbidden', message)
+export const badRequest = (message: string, code = 'bad_request') =>
+  new HttpError(400, code, message)
+export const unauthorized = (message = 'Necesitas iniciar sesión.') =>
+  new HttpError(401, 'unauthorized', message)
+export const forbidden = (message = 'No tienes permiso para hacer esto.') =>
+  new HttpError(403, 'forbidden', message)
 export const notFound = (message = 'No encontrado.') => new HttpError(404, 'not_found', message)
 export const conflict = (message: string, code = 'conflict') => new HttpError(409, code, message)

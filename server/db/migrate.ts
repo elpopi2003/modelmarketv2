@@ -1,4 +1,9 @@
-import { Migrator, type Migration, type MigrationProvider, type MigrationResultSet } from 'kysely/migration'
+import {
+  Migrator,
+  type Migration,
+  type MigrationProvider,
+  type MigrationResultSet,
+} from 'kysely/migration'
 import type { Db } from './client'
 import { migrations } from './migrations'
 
@@ -38,7 +43,9 @@ function unwrap(error: unknown, results: MigrationResultSet['results']): string[
   const failed = results?.find((r) => r.status === 'Error')
   if (error || failed) {
     const name = failed ? ` (${failed.migrationName})` : ''
-    throw new Error(`La migración falló${name}: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      `La migración falló${name}: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
   return (results ?? []).map((r) => `${r.direction === 'Up' ? '↑' : '↓'} ${r.migrationName}`)
 }

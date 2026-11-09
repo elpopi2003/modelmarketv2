@@ -10,7 +10,10 @@ export const TEST_DB_URL = process.env.DATABASE_URL_TEST
 /** Configuración mínima para tests. Nunca apunta a la base de datos de desarrollo. */
 export function testConfig(overrides: Partial<Config> = {}): Config {
   return {
-    ...loadConfig({ NODE_ENV: 'test', DATABASE_URL: TEST_DB_URL ?? 'mysql://test@127.0.0.1:1/none' }),
+    ...loadConfig({
+      NODE_ENV: 'test',
+      DATABASE_URL: TEST_DB_URL ?? 'mysql://test@127.0.0.1:1/none',
+    }),
     ...overrides,
   }
 }
@@ -22,7 +25,8 @@ export function testConfig(overrides: Partial<Config> = {}): Config {
 export async function resetTestDb(): Promise<Db> {
   if (!TEST_DB_URL) throw new Error('DATABASE_URL_TEST no definida')
   const dbName = new URL(TEST_DB_URL).pathname.slice(1)
-  if (!dbName.endsWith('_test')) throw new Error(`Me niego a vaciar "${dbName}": no termina en _test`)
+  if (!dbName.endsWith('_test'))
+    throw new Error(`Me niego a vaciar "${dbName}": no termina en _test`)
 
   const db = createDb(TEST_DB_URL)
   const { rows } = await sql<{ name: string }>`

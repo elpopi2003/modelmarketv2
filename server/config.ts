@@ -24,7 +24,9 @@ export type Config = z.infer<typeof envSchema>
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const parsed = envSchema.safeParse(env)
   if (!parsed.success) {
-    const detail = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n')
+    const detail = parsed.error.issues
+      .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
+      .join('\n')
     throw new Error(`Configuración inválida del servidor:\n${detail}`)
   }
   return parsed.data

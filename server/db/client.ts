@@ -21,6 +21,14 @@ export function createDb(databaseUrl: string): Db {
     charset: 'utf8mb4_unicode_ci',
     supportBigNumbers: true,
     bigNumberStrings: true,
+    // TINYINT(1) es el BOOLEAN de MariaDB: se entrega como true/false, no como 1/0.
+    typeCast(field, next) {
+      if (field.type === 'TINY' && field.length === 1) {
+        const v = field.string()
+        return v === null ? null : v === '1'
+      }
+      return next()
+    },
   })
   pool.on('connection', (conn) => {
     conn.query("SET time_zone = '+00:00'")
