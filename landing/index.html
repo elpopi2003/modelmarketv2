@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ModelMarket — Beta privada · 12 meses de PRO gratis</title>
+    <meta
+      name="description"
+      content="Únete a la beta de ModelMarket, el marketplace de maquetas y modelos a escala con 0% de comisión. Prueba la plataforma y llévate 12 meses de PRO gratis."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ModelMarket — Beta privada · 12 meses de PRO gratis" />
+    <meta
+      property="og:description"
+      content="El marketplace de maquetas con 0% de comisión busca beta testers. Prueba, aporta y llévate un año de PRO gratis."
+    />
+    <meta property="og:image" content="logo.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ===== ModelMarket Design System — "Blueprint / Industrial" ===== */
+      :root {
+        --primary: 213 56% 24%;
+        --primary-foreground: 210 40% 98%;
+        --accent: 32 95% 52%;
+        --accent-foreground: 0 0% 100%;
+        --background: 210 20% 98%;
+        --foreground: 213 31% 15%;
+        --card: 0 0% 100%;
+        --muted: 210 14% 96%;
+        --muted-foreground: 213 16% 45%;
+        --secondary: 210 14% 93%;
+        --border: 213 20% 88%;
+        --sealed: 142 71% 45%;
+        --pro: 270 60% 55%;
+        --grid-color: 213 30% 92%;
+
+        --font-display: 'Raleway', system-ui, sans-serif;
+        --font-sans: 'Montserrat', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+        --radius: 0.375rem;
+        --radius-lg: 0.75rem;
+        --radius-full: 9999px;
+        --shadow-blueprint: 4px 4px 0 0 hsl(var(--border)),
+          inset 0 0 0 1px hsl(var(--border) / 0.5);
+        --shadow-lg: 0 10px 15px -3px hsl(var(--foreground) / 0.1);
+        --ease-out: cubic-bezier(0, 0, 0.2, 1);
+        --container: 1120px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family: var(--font-sans);
+        color: hsl(var(--foreground));
+        background: hsl(var(--background));
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.6;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        line-height: 1.1;
+        margin: 0;
+      }
+      p {
+        margin: 0;
+      }
+      a {
+        color: hsl(var(--primary));
+        text-decoration: none;
+        transition: color 0.2s var(--ease-out);
+      }
+      a:hover {
+        color: hsl(var(--accent));
+      }
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      .wrap {
+        max-width: var(--container);
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .mono {
+        font-family: var(--font-mono);
+        letter-spacing: 0.05em;
+      }
+
+      /* Blueprint grid background */
+      .grid-bg {
+        background-image:
+          linear-gradient(hsl(var(--grid-color) / 0.6) 1px, transparent 1px),
+          linear-gradient(90deg, hsl(var(--grid-color) / 0.6) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+
+      /* Section header — rotated accent square + rule */
+      .section-head {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .section-head::before {
+        content: '';
+        width: 0.7rem;
+        height: 0.7rem;
+        background: hsl(var(--accent));
+        transform: rotate(45deg);
+        flex: none;
+      }
+      .section-head::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: hsl(var(--border));
+      }
+      .section-head span {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: hsl(var(--muted-foreground));
+      }
+
+      /* Blueprint card */
+      .bp-card {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid hsl(var(--border));
+        background: hsl(var(--card));
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-blueprint);
+        padding: 1.75rem;
+      }
+      .bp-card::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 4px;
+        background: hsl(var(--primary));
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-family: var(--font-display);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.95rem;
+        padding: 0.9rem 1.75rem;
+        border-radius: var(--radius);
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition:
+          transform 0.15s var(--ease-out),
+          background 0.2s var(--ease-out),
+          box-shadow 0.2s var(--ease-out);
+      }
+      .btn-accent {
+        background: hsl(var(--accent));
+        color: hsl(var(--accent-foreground));
+        box-shadow: var(--shadow-lg);
+      }
+      .btn-accent:hover {
+        transform: translateY(-2px);
+        color: hsl(var(--accent-foreground));
+      }
+      .btn-ghost {
+        background: transparent;
+        color: hsl(var(--primary-foreground));
+        border-color: hsl(var(--primary-foreground) / 0.35);
+      }
+      .btn-ghost:hover {
+        border-color: hsl(var(--accent));
+        color: hsl(var(--accent));
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Pills */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+        padding: 0.4rem 0.85rem;
+        border-radius: var(--radius-full);
+        border: 1px solid hsl(var(--accent) / 0.6);
+        color: hsl(var(--accent));
+        background: hsl(var(--accent) / 0.08);
+      }
+
+      /* ===== Header ===== */
+      header.site {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: hsl(var(--card) / 0.92);
+        backdrop-filter: saturate(1.2) blur(6px);
+        border-bottom: 1px solid hsl(var(--border));
+      }
+      header.site .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+      }
+      header.site img {
+        height: 30px;
+        width: auto;
+      }
+      header.site .btn {
+        padding: 0.55rem 1.1rem;
+        font-size: 0.8rem;
+      }
+
+      /* ===== Hero ===== */
+      .hero {
+        position: relative;
+        overflow: hidden;
+        background:
+          linear-gradient(hsl(var(--primary) / 0.86), hsl(var(--primary) / 0.92)),
+          url('assets/hero.webp') center/cover no-repeat;
+        color: hsl(var(--primary-foreground));
+      }
+      .hero .wrap {
+        padding-top: 5.5rem;
+        padding-bottom: 5.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero h1 {
+        color: #fff;
+        font-size: clamp(2.25rem, 6vw, 3.75rem);
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+        max-width: 18ch;
+        margin: 1.25rem 0 0;
+      }
+      .hero .lead {
+        margin-top: 1.25rem;
+        max-width: 60ch;
+        font-size: 1.125rem;
+        color: hsl(210 30% 90%);
+      }
+      .hero .cta-row {
+        margin-top: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        justify-content: center;
+      }
+      .hero .note {
+        margin-top: 1.25rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: hsl(210 30% 78%);
+      }
+
+      /* ===== Peticiones — feature estrella (fondo azul marino) ===== */
+      .peticiones {
+        position: relative;
+        overflow: hidden;
+        background: hsl(var(--primary));
+        color: #fff;
+        padding: 5rem 0;
+      }
+      .peticiones::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(hsl(210 40% 98% / 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, hsl(210 40% 98% / 0.06) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+      }
+      .peticiones .wrap {
+        position: relative;
+      }
+      .peticiones-shell {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5rem;
+        align-items: center;
+      }
+      .peticiones .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: hsl(var(--accent));
+        font-weight: 600;
+      }
+      .peticiones h2 {
+        color: #fff;
+        font-size: clamp(1.9rem, 4vw, 2.9rem);
+        letter-spacing: -0.02em;
+        text-wrap: balance;
+        margin-top: 1rem;
+      }
+      .peticiones .lead {
+        margin-top: 1.1rem;
+        color: hsl(210 30% 88%);
+        font-size: 1.1rem;
+        max-width: 46ch;
+      }
+      .peticiones-steps {
+        margin: 1.75rem 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 0.9rem;
+      }
+      .peticiones-steps li {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        color: hsl(210 25% 92%);
+      }
+      .peticiones-steps .d {
+        margin-top: 0.5rem;
+        width: 0.55rem;
+        height: 0.55rem;
+        background: hsl(var(--accent));
+        transform: rotate(45deg);
+        flex: none;
+      }
+      .peticiones .btn {
+        margin-top: 2rem;
+      }
+
+      /* Maqueta de tarjeta "se busca" */
+      .req-stack {
+        position: relative;
+      }
+      .req-stack::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 2px dashed hsl(210 40% 98% / 0.22);
+        border-radius: var(--radius);
+        transform: rotate(3deg) translate(14px, 16px);
+        pointer-events: none;
+      }
+      .req-card {
+        position: relative;
+        background: #fff;
+        color: hsl(var(--foreground));
+        border: 2px dashed hsl(var(--accent) / 0.65);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: 0 24px 45px -14px hsl(213 60% 4% / 0.55);
+        transform: rotate(-1.5deg);
+      }
+      .req-card .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.85rem;
+      }
+      .req-tag {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: hsl(var(--accent));
+        background: hsl(var(--accent) / 0.1);
+        border: 1px solid hsl(var(--accent) / 0.4);
+        padding: 0.2rem 0.55rem;
+        border-radius: var(--radius);
+      }
+      .req-scale {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: hsl(var(--primary));
+        background: hsl(var(--primary) / 0.1);
+        border: 1px solid hsl(var(--primary) / 0.3);
+        padding: 0.2rem 0.55rem;
+        border-radius: var(--radius);
+      }
+      .req-brand {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: hsl(var(--foreground));
+        background: hsl(var(--secondary));
+        padding: 0.2rem 0.55rem;
+        border-radius: var(--radius);
+      }
+      .req-card h3 {
+        font-size: 1.3rem;
+        letter-spacing: -0.01em;
+      }
+      .req-card .desc {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .req-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 0.85rem;
+        font-size: 0.78rem;
+        color: hsl(var(--muted-foreground));
+      }
+      .req-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .req-meta svg {
+        width: 13px;
+        height: 13px;
+        flex: none;
+      }
+      .req-bottom {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.25rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid hsl(var(--border));
+      }
+      .req-budget .l {
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: hsl(var(--muted-foreground));
+      }
+      .req-budget .v {
+        font-family: var(--font-mono);
+        font-size: 1.85rem;
+        font-weight: 600;
+        color: hsl(var(--accent));
+        line-height: 1;
+        margin-top: 0.15rem;
+      }
+      .req-btn {
+        font-family: var(--font-display);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.76rem;
+        color: #fff;
+        background: hsl(var(--accent));
+        padding: 0.6rem 1rem;
+        border-radius: var(--radius);
+        white-space: nowrap;
+      }
+
+      /* ===== Sections ===== */
+      section.block {
+        padding: 4.5rem 0;
+      }
+      .section-title {
+        font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+        letter-spacing: -0.01em;
+        max-width: 22ch;
+      }
+
+      .grid-3 {
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 2.5rem;
+      }
+      .feature h3 {
+        font-size: 1.15rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.6rem;
+      }
+      .feature .num {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: hsl(var(--accent));
+        font-weight: 600;
+      }
+      .feature p {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.95rem;
+      }
+
+      /* PRO panel */
+      .pro-wrap {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      .pro-list {
+        list-style: none;
+        margin: 1.5rem 0 0;
+        padding: 0;
+        display: grid;
+        gap: 0.85rem;
+      }
+      .pro-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7rem;
+        font-weight: 500;
+      }
+      .pro-list svg {
+        flex: none;
+        margin-top: 2px;
+        color: hsl(var(--sealed));
+      }
+      .price-card {
+        text-align: center;
+      }
+      .price-card .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #fff;
+        background: hsl(var(--pro));
+        padding: 0.3rem 0.7rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+      }
+      .price-card .old {
+        font-family: var(--font-mono);
+        color: hsl(var(--muted-foreground));
+        text-decoration: line-through;
+      }
+      .price-card .free {
+        font-family: var(--font-mono);
+        font-size: 3rem;
+        font-weight: 600;
+        color: hsl(var(--primary));
+        line-height: 1;
+        margin: 0.4rem 0;
+      }
+      .price-card .worth {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.9rem;
+      }
+
+      /* Categories */
+      .cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 1.5rem;
+      }
+      .cats .tag {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        padding: 0.45rem 0.9rem;
+        background: hsl(var(--secondary));
+        color: hsl(var(--primary));
+        border: 1px solid hsl(var(--border));
+        border-radius: var(--radius);
+      }
+
+      /* ===== Form ===== */
+      .form-section {
+        background: hsl(var(--muted));
+        border-top: 1px solid hsl(var(--border));
+        border-bottom: 1px solid hsl(var(--border));
+      }
+      .form-shell {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 2.5rem;
+        align-items: start;
+      }
+      .form-copy h2 {
+        font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+      }
+      .form-copy p {
+        color: hsl(var(--muted-foreground));
+        margin-top: 0.75rem;
+      }
+      .form-copy .reassure {
+        margin-top: 1.5rem;
+        display: grid;
+        gap: 0.6rem;
+      }
+      .form-copy .reassure div {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+        font-size: 0.9rem;
+        color: hsl(var(--foreground));
+      }
+      form.signup {
+        display: grid;
+        gap: 1.1rem;
+      }
+      .field {
+        display: grid;
+        gap: 0.4rem;
+      }
+      .field label {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .field .req {
+        color: hsl(var(--accent));
+      }
+      .field input,
+      .field textarea {
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        color: hsl(var(--foreground));
+        background: hsl(var(--card));
+        border: 1px solid hsl(var(--border));
+        border-radius: var(--radius);
+        padding: 0.7rem 0.85rem;
+        width: 100%;
+        transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+      }
+      .field input:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: hsl(var(--primary));
+        box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+      }
+      .field textarea {
+        resize: vertical;
+        min-height: 92px;
+      }
+      .check {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        font-size: 0.85rem;
+        color: hsl(var(--muted-foreground));
+      }
+      .check input {
+        margin-top: 3px;
+        width: 1rem;
+        height: 1rem;
+        flex: none;
+        accent-color: hsl(var(--primary));
+      }
+      .err {
+        color: hsl(var(--destructive, 0 84% 60%));
+        font-size: 0.8rem;
+        min-height: 0;
+      }
+      .recaptcha-note {
+        font-size: 0.72rem;
+        color: hsl(var(--muted-foreground));
+      }
+      .form-msg {
+        display: none;
+        border-radius: var(--radius);
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+      }
+      .form-msg.bad {
+        display: block;
+        background: hsl(0 84% 60% / 0.1);
+        border: 1px solid hsl(0 84% 60% / 0.4);
+        color: hsl(0 60% 40%);
+      }
+
+      /* Success takeover */
+      .success {
+        display: none;
+        text-align: center;
+        padding: 2.5rem;
+      }
+      .success.show {
+        display: block;
+      }
+      .success .tick {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 1rem;
+        border-radius: var(--radius-full);
+        background: hsl(var(--sealed) / 0.15);
+        color: hsl(var(--sealed));
+        display: grid;
+        place-items: center;
+      }
+
+      /* FAQ */
+      .faq details {
+        border-bottom: 1px solid hsl(var(--border));
+        padding: 1.1rem 0;
+      }
+      .faq summary {
+        cursor: pointer;
+        font-weight: 600;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .faq summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq summary::after {
+        content: '+';
+        font-family: var(--font-mono);
+        color: hsl(var(--accent));
+      }
+      .faq details[open] summary::after {
+        content: '−';
+      }
+      .faq p {
+        margin-top: 0.7rem;
+        color: hsl(var(--muted-foreground));
+        font-size: 0.95rem;
+      }
+
+      /* Footer */
+      footer.site {
+        background: hsl(var(--card));
+        border-top: 1px solid hsl(var(--border));
+        padding: 2.5rem 0;
+      }
+      footer.site .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+      }
+      footer.site img {
+        height: 26px;
+      }
+      footer.site .mono {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: hsl(var(--accent));
+      }
+      footer .legal {
+        font-size: 0.8rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      @media (max-width: 860px) {
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .pro-wrap,
+        .form-shell,
+        .peticiones-shell {
+          grid-template-columns: 1fr;
+        }
+        .req-card {
+          transform: none;
+        }
+        .req-stack::before {
+          display: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .btn {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="site">
+      <div class="wrap">
+        <img src="logo.png" alt="ModelMarket" />
+        <a class="btn btn-accent" href="#reserva">Reservar plaza</a>
+      </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="wrap">
+        <span class="pill">● Beta privada · Plazas limitadas</span>
+        <h1>Ayúdanos a arrancar ModelMarket y llévate 12 meses de PRO gratis</h1>
+        <p class="lead">
+          Somos el marketplace especializado en maquetas y modelos a escala, con
+          <strong>0&nbsp;% de comisión</strong>. Buscamos maquetistas que prueben la plataforma y
+          la llenen de contenido. A cambio: un año entero de plan PRO, sin coste.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-accent" href="#reserva">Quiero mi plaza</a>
+          <a class="btn btn-ghost" href="#peticiones">Ver la función estrella</a>
+        </div>
+        <p class="note">Nada de comisiones · Sólo maquetas</p>
+      </div>
+    </section>
+
+    <!-- ===== PETICIONES «SE BUSCA» — feature estrella ===== -->
+    <section class="peticiones" id="peticiones">
+      <div class="wrap">
+        <div class="peticiones-shell">
+          <div>
+            <span class="eyebrow">◆ La base de ModelMarket</span>
+            <h2>¿Buscas esa maqueta imposible? Publica una petición y deja que la comunidad la encuentre</h2>
+            <p class="lead">
+              Es lo que nos hace diferentes. Todos tenemos esa referencia descatalogada que llevamos
+              años persiguiendo… y siempre hay alguien que la tiene en su <em>stash</em>.
+            </p>
+            <ul class="peticiones-steps">
+              <li><span class="d"></span> Publica lo que buscas: escala, marca, estado y tu presupuesto máximo.</li>
+              <li><span class="d"></span> Tu petición se muestra a toda la comunidad de modelistas.</li>
+              <li><span class="d"></span> Quien la tenga te contacta y cerráis el trato directamente. 0&nbsp;% de comisión.</li>
+            </ul>
+            <a class="btn btn-accent" href="#reserva">Quiero probarlo</a>
+          </div>
+
+          <div class="req-stack">
+            <article class="req-card" aria-label="Ejemplo de petición">
+              <div class="tags">
+                <span class="req-tag">● Se busca</span>
+                <span class="req-scale">1:35</span>
+                <span class="req-brand">Tamiya</span>
+              </div>
+              <h3>Busco Tamiya Tiger I 1:35 precintado</h3>
+              <p class="desc">
+                Prefiero caja precintada, pero valoro también kit abierto sin empezar. Envío a
+                acordar entre los dos.
+              </p>
+              <div class="req-meta">
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                  Carlos M.
+                </span>
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Toledo
+                </span>
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                  hace 2 días
+                </span>
+              </div>
+              <div class="req-bottom">
+                <div class="req-budget">
+                  <p class="l">Ofrezco máximo</p>
+                  <p class="v">60&nbsp;€</p>
+                </div>
+                <span class="req-btn">Tengo una →</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== POR QUÉ ===== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><span>Por qué ModelMarket</span></div>
+        <h2 class="section-title">Un marketplace hecho por maquetistas, para maquetistas</h2>
+        <div class="grid-3">
+          <div class="bp-card feature">
+            <p class="num">01</p>
+            <h3>0&nbsp;% de comisión</h3>
+            <p>
+              Vendes por lo que dices. Ni un céntimo de comisión, nunca. El trato es directo entre
+              tú y el comprador; nosotros solo os ponemos en contacto.
+            </p>
+          </div>
+          <div class="bp-card feature">
+            <p class="num">02</p>
+            <h3>Solo modelismo</h3>
+            <p>
+              Nada de cajones de sastre. Militar, aviación, naval, figuras, ciencia ficción, trenes
+              y accesorios. Gente que habla tu idioma y sabe lo que busca.
+            </p>
+          </div>
+          <div class="bp-card feature">
+            <p class="num">03</p>
+            <h3>Trato directo</h3>
+            <p>
+              Chat integrado entre comprador y vendedor. Acordáis precio, pago y envío entre
+              vosotros, sin intermediarios que se lleven una parte.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CÓMO FUNCIONA ===== -->
+    <section class="block" id="como" style="padding-top: 0">
+      <div class="wrap">
+        <div class="section-head"><span>Cómo funciona la beta</span></div>
+        <h2 class="section-title">Tres pasos para tu año de PRO</h2>
+        <div class="grid-3">
+          <div class="bp-card feature">
+            <p class="num">Paso 1</p>
+            <h3>Reserva tu plaza</h3>
+            <p>Déjanos tu nombre y tu email en el formulario. Sin compromiso.</p>
+          </div>
+          <div class="bp-card feature">
+            <p class="num">Paso 2</p>
+            <h3>Te avisamos</h3>
+            <p>
+              Cuando abramos el periodo de pruebas, te escribimos y entras entre los primeros. Se
+              activa tu plan PRO.
+            </p>
+          </div>
+          <div class="bp-card feature">
+            <p class="num">Paso 3</p>
+            <h3>Prueba y aporta</h3>
+            <p>
+              Publica tus anuncios y peticiones, y cuéntanos qué falla y qué mejorarías. A cambio,
+              12 meses de PRO gratis.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRO ===== -->
+    <section class="block" style="padding-top: 0">
+      <div class="wrap">
+        <div class="bp-card" style="padding: 2.5rem">
+          <div class="pro-wrap">
+            <div>
+              <div class="section-head"><span>Lo que te llevas</span></div>
+              <h2 class="section-title" style="text-transform: uppercase; letter-spacing: 0.02em">
+                Plan PRO, un año entero
+              </h2>
+              <ul class="pro-list">
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                  Anuncios ilimitados
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                  Peticiones ilimitadas
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                  Hasta 5 fotos por anuncio
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                  Visibilidad inmediata (sin espera de 24&nbsp;h)
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                  Insignia PRO y prioridad en los listados
+                </li>
+              </ul>
+            </div>
+            <div class="price-card">
+              <span class="badge">Plan PRO</span>
+              <p class="old">4,99 €/mes</p>
+              <p class="free">Gratis</p>
+              <p class="worth">
+                12 meses para los beta testers.<br />Un valor de <strong>≈ 60 €</strong>.
+              </p>
+              <a class="btn btn-accent" href="#reserva" style="margin-top: 1.25rem; width: 100%"
+                >Reservar mi plaza</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CATEGORÍAS ===== -->
+    <section class="block" style="padding-top: 0">
+      <div class="wrap">
+        <div class="section-head"><span>Qué se mueve aquí</span></div>
+        <h2 class="section-title">Todo el modelismo estático, en un sitio</h2>
+        <div class="cats">
+          <span class="tag">Vehículos militares</span>
+          <span class="tag">Aviación</span>
+          <span class="tag">Barcos</span>
+          <span class="tag">Automóviles</span>
+          <span class="tag">Figuras</span>
+          <span class="tag">Ciencia ficción</span>
+          <span class="tag">Trenes</span>
+          <span class="tag">Pinturas y accesorios</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FORMULARIO ===== -->
+    <section class="form-section block grid-bg" id="reserva">
+      <div class="wrap">
+        <div class="form-shell">
+          <div class="form-copy">
+            <div class="section-head"><span>Reserva tu plaza</span></div>
+            <h2>Entra en la beta de ModelMarket</h2>
+            <p>
+              Déjanos tus datos y te avisaremos en cuanto abramos el periodo de pruebas. Plazas
+              limitadas: van por orden de llegada.
+            </p>
+            <div class="reassure">
+              <div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(142 71% 45%)" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                Sin compromiso ni pago: la beta es gratuita.
+              </div>
+              <div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(142 71% 45%)" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                No compartimos tu email con nadie.
+              </div>
+              <div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(142 71% 45%)" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+                Te escribimos solo para la beta.
+              </div>
+            </div>
+          </div>
+
+          <div class="bp-card" style="padding: 1.75rem">
+            <form class="signup" id="signup-form" novalidate>
+              <div class="field">
+                <label for="name">Nombre y apellidos <span class="req">*</span></label>
+                <input id="name" name="name" type="text" autocomplete="name" maxlength="100" required />
+                <p class="err" data-for="name"></p>
+              </div>
+
+              <div class="field">
+                <label for="email">Correo electrónico <span class="req">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" maxlength="120" required />
+                <p class="err" data-for="email"></p>
+              </div>
+
+              <div class="field">
+                <label for="comments">Comentarios <span class="mono" style="color: hsl(var(--muted-foreground)); font-size: 0.75rem">(opcional)</span></label>
+                <textarea id="comments" name="comments" maxlength="1000" placeholder="¿Qué coleccionas? ¿Qué te gustaría encontrar o poder hacer?"></textarea>
+                <p class="err" data-for="comments"></p>
+              </div>
+
+              <label class="check">
+                <input id="privacy" name="privacy" type="checkbox" required />
+                <span>
+                  He leído y acepto la
+                  <a href="privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>
+                  y el tratamiento de mis datos para gestionar mi participación en la beta.
+                  <span class="req">*</span>
+                </span>
+              </label>
+              <p class="err" data-for="privacy"></p>
+
+              <button class="btn btn-accent" type="submit" id="submit-btn" style="width: 100%">
+                Reservar mi plaza
+              </button>
+
+              <p class="recaptcha-note">
+                Este formulario está protegido por reCAPTCHA de Google
+                (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacidad</a> ·
+                <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Términos</a>).
+              </p>
+
+              <p class="form-msg bad" id="form-error"></p>
+            </form>
+
+            <div class="success" id="success">
+              <div class="tick">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5" /></svg>
+              </div>
+              <h3 style="text-transform: uppercase; letter-spacing: 0.03em">¡Plaza reservada!</h3>
+              <p style="color: hsl(var(--muted-foreground)); margin-top: 0.5rem">
+                Gracias por tu confianza. Te hemos enviado un correo de confirmación y te
+                escribiremos en cuanto arranque el periodo de pruebas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="block">
+      <div class="wrap" style="max-width: 760px">
+        <div class="section-head"><span>Dudas rápidas</span></div>
+        <h2 class="section-title">Preguntas frecuentes</h2>
+        <div class="faq" style="margin-top: 1.5rem">
+          <details>
+            <summary>¿En qué os diferenciáis de otros marketplaces de segunda mano?</summary>
+            <p>ModelMarket nace por y para modelistas, porque nosotros también lo somos. Y nuestra experiencia con los marketplaces generalistas ha sido casi siempre frustrante: costes escondidos, comisiones y seguros que suben sin avisar, cambios de proveedor de envío, entregas que se complican… Por eso hemos decidido no meternos donde no aportamos: ni custodiamos el dinero de nadie ni gestionamos la logística. Eso lo dejamos en vuestras manos, que sois quienes mejor sabéis cómo acordar el pago y el envío. Nuestro valor está en otra parte: en las peticiones. Todos perseguimos esa maqueta imposible de encontrar, y todos sabemos que alguien la tiene guardada en su stash. Nuestro trabajo es que os encontréis.</p>
+          </details>
+          <details>
+            <summary>¿Cuánto cuesta participar en la beta?</summary>
+            <p>Nada. La beta es gratuita y encima te llevas 12 meses de PRO sin coste.</p>
+          </details>
+          <details>
+            <summary>¿Cobráis comisión por las ventas?</summary>
+            <p>No, nunca. El 100&nbsp;% del precio acordado es para el vendedor. El método de pago y el envío los acordáis directamente comprador y vendedor.</p>
+          </details>
+          <details>
+            <summary>¿Gestionáis los envíos?</summary>
+            <p>No, la política por la que se rige ModelMarket es no intervenir en las transacciones entre compradores y vendedores, y eso incluye la logística, generar las etiquetas y el seguimiento de los envíos. Al igual que los pagos, los envíos han de ser acordados y gestionados por comprador y vendedor.</p>
+          </details>
+          <details>
+            <summary>¿Qué pasa cuando acaben los 12 meses?</summary>
+            <p>Sigues con PRO si quieres (4,99&nbsp;€/mes) o pasas al plan Free, sin ataduras. Te avisaremos antes de que termine.</p>
+          </details>
+          <details>
+            <summary>¿Cuándo empieza el periodo de pruebas?</summary>
+            <p>Estamos ultimando los detalles. Te escribimos por email en cuanto abramos, y entras entre los primeros.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="site">
+      <div class="wrap">
+        <img src="logo.png" alt="ModelMarket" />
+        <p class="legal">
+          © <span id="year"></span> ModelMarket ·
+          <a href="mailto:hola@modelmarket.es">hola@modelmarket.es</a> ·
+          <a href="privacidad.html">Privacidad</a>
+        </p>
+        <span class="mono">Nada de comisiones · Sólo maquetas</span>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear()
+
+      // ═══════════════════════════════════════════════════════════════════════
+      //  reCAPTCHA v3 — ÚNICO sitio a configurar en el HTML.
+      //  Pon tu clave de SITIO (la pública) entre las comillas. Debe ir EMPAREJADA
+      //  con la clave SECRETA en submit.php: o configuras las dos, o ninguna.
+      //  Para DESACTIVAR reCAPTCHA, déjala vacía ('') y pon $RECAPTCHA_SECRET = ''
+      //  en submit.php. Añade tu dominio en https://www.google.com/recaptcha/admin
+      // ═══════════════════════════════════════════════════════════════════════
+      const RECAPTCHA_SITE_KEY = '6Lfx42EtAAAAAIqMTuiBtNqgW74jCyCl4Pf0i4fG'
+      const RECAPTCHA_ON = RECAPTCHA_SITE_KEY.trim().length > 0
+
+      if (RECAPTCHA_ON) {
+        const s = document.createElement('script')
+        s.src = 'https://www.google.com/recaptcha/api.js?render=' + RECAPTCHA_SITE_KEY
+        s.async = true
+        document.head.appendChild(s)
+      }
+
+      const form = document.getElementById('signup-form')
+      const btn = document.getElementById('submit-btn')
+      const errorBox = document.getElementById('form-error')
+
+      function setError(field, msg) {
+        const el = document.querySelector(`.err[data-for="${field}"]`)
+        if (el) el.textContent = msg || ''
+      }
+      function clearErrors() {
+        document.querySelectorAll('.err').forEach((e) => (e.textContent = ''))
+        errorBox.className = 'form-msg bad'
+        errorBox.textContent = ''
+      }
+      function validEmail(v) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+      }
+
+      async function getToken() {
+        if (!RECAPTCHA_ON || !window.grecaptcha) return null
+        try {
+          await new Promise((r) => window.grecaptcha.ready(r))
+          return await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'beta_signup' })
+        } catch {
+          return null
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault()
+        clearErrors()
+
+        const name = form.name.value.trim()
+        const email = form.email.value.trim()
+        const comments = form.comments.value.trim()
+        const privacy = form.privacy.checked
+
+        let ok = true
+        if (name.length < 2) {
+          setError('name', 'Dinos tu nombre y apellidos.')
+          ok = false
+        }
+        if (!validEmail(email)) {
+          setError('email', 'Introduce un email válido.')
+          ok = false
+        }
+        if (!privacy) {
+          setError('privacy', 'Debes aceptar la Política de Privacidad.')
+          ok = false
+        }
+        if (!ok) return
+
+        btn.disabled = true
+        btn.textContent = 'Enviando…'
+
+        try {
+          const token = await getToken()
+          const res = await fetch('submit.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, comments, privacy, recaptchaToken: token }),
+          })
+          const data = await res.json().catch(() => ({}))
+          if (!res.ok || data.ok === false) {
+            throw new Error(data.error || 'No se pudo enviar. Inténtalo de nuevo.')
+          }
+          form.style.display = 'none'
+          document.getElementById('success').classList.add('show')
+        } catch (err) {
+          errorBox.className = 'form-msg bad'
+          errorBox.textContent = err.message
+          btn.disabled = false
+          btn.textContent = 'Reservar mi plaza'
+        }
+      })
+    </script>
+  </body>
+</html>

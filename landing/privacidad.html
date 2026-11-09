@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Política de Privacidad · ModelMarket</title>
+    <meta name="description" content="Política de Privacidad de ModelMarket: cómo tratamos tus datos personales conforme al RGPD y la LOPDGDD." />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ===== ModelMarket Design System — "Blueprint / Industrial" (subset) ===== */
+      :root {
+        --primary: 213 56% 24%;
+        --accent: 32 95% 52%;
+        --background: 210 20% 98%;
+        --foreground: 213 31% 15%;
+        --card: 0 0% 100%;
+        --muted-foreground: 213 16% 45%;
+        --border: 213 20% 88%;
+        --font-display: 'Raleway', system-ui, sans-serif;
+        --font-sans: 'Montserrat', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        --radius: 0.375rem;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: var(--font-sans);
+        color: hsl(var(--foreground));
+        background: hsl(var(--background));
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: hsl(var(--primary)); text-decoration: none; }
+      a:hover { color: hsl(var(--accent)); }
+      img { display: block; max-width: 100%; }
+      .wrap { max-width: 820px; margin: 0 auto; padding: 0 1.5rem; }
+
+      header.site {
+        border-bottom: 1px solid hsl(var(--border));
+        background: hsl(var(--card));
+      }
+      header.site .row {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      header.site img { height: 30px; }
+      .back {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: hsl(var(--muted-foreground));
+      }
+
+      main { padding: 3.5rem 0 4rem; }
+      h1 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: clamp(1.9rem, 4vw, 2.5rem);
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+      .updated {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: hsl(var(--muted-foreground));
+        margin-top: 0.6rem;
+      }
+      .intro {
+        margin-top: 1.5rem;
+        color: hsl(var(--muted-foreground));
+      }
+      section.doc { margin-top: 2.5rem; }
+      section.doc + section.doc { margin-top: 2.25rem; }
+      h2 {
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 1.15rem;
+        line-height: 1.2;
+        margin: 0 0 0.75rem;
+        color: hsl(var(--foreground));
+      }
+      h2 .n {
+        font-family: var(--font-mono);
+        color: hsl(var(--accent));
+        margin-right: 0.4rem;
+      }
+      p { margin: 0 0 0.85rem; color: hsl(var(--foreground)); }
+      ul { margin: 0.5rem 0 0.85rem; padding: 0; list-style: none; }
+      li {
+        display: flex;
+        gap: 0.7rem;
+        margin-bottom: 0.55rem;
+        color: hsl(var(--foreground));
+      }
+      li::before {
+        content: '';
+        margin-top: 0.62rem;
+        width: 6px;
+        height: 6px;
+        flex: none;
+        border-radius: 9999px;
+        background: hsl(var(--accent));
+      }
+      .footnote {
+        margin-top: 3rem;
+        border-top: 1px solid hsl(var(--border));
+        padding-top: 1.25rem;
+        font-size: 0.9rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      footer.site {
+        background: hsl(var(--card));
+        border-top: 1px solid hsl(var(--border));
+        padding: 2rem 0;
+      }
+      footer.site .row {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+      }
+      footer.site img { height: 24px; }
+      footer .mono {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: hsl(var(--accent));
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="site">
+      <div class="row">
+        <a href="index.html" aria-label="Volver a la portada"><img src="logo.png" alt="ModelMarket" /></a>
+        <a class="back" href="index.html">← Volver</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <h1>Política de Privacidad</h1>
+        <p class="updated">Última actualización: 1 de marzo de 2026</p>
+
+        <p class="intro">
+          Esta Política explica cómo tratamos tus datos personales, tanto los que nos facilitas
+          en el formulario de reserva de plaza de la beta de esta página como los que trataremos
+          cuando te unas a la Plataforma ModelMarket.
+        </p>
+
+        <section class="doc">
+          <h2><span class="n">1.</span>Responsable del tratamiento</h2>
+          <p>
+            El responsable del tratamiento de los datos personales recogidos a través de
+            ModelMarket (en adelante, «la Plataforma») es ModelMarket. Puedes contactarnos en
+            <a href="mailto:hola@modelmarket.es">hola@modelmarket.es</a> para cualquier consulta
+            relacionada con la protección de tus datos personales.
+          </p>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">2.</span>Normativa aplicable</h2>
+          <p>Esta Política de Privacidad se redacta conforme a las siguientes disposiciones legales:</p>
+          <ul>
+            <li>Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo (RGPD).</li>
+            <li>Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).</li>
+            <li>Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE).</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">3.</span>Datos personales que recopilamos</h2>
+          <p>A través del formulario de reserva de plaza de la beta recopilamos:</p>
+          <ul>
+            <li>Nombre y apellidos.</li>
+            <li>Dirección de correo electrónico.</li>
+            <li>Los comentarios que decidas incluir de forma voluntaria.</li>
+          </ul>
+          <p>Cuando te unas a la Plataforma, además trataremos:</p>
+          <ul>
+            <li>Datos de registro: dirección de correo electrónico, nombre de usuario y contraseña.</li>
+            <li>Datos de perfil: nombre visible, avatar, ubicación y biografía (proporcionados voluntariamente).</li>
+            <li>Datos de actividad: anuncios publicados, peticiones creadas, mensajes enviados y favoritos guardados.</li>
+            <li>Datos técnicos: dirección IP, tipo de navegador, sistema operativo y datos de navegación recogidos mediante cookies.</li>
+            <li>Datos de suscripción: información relacionada con el plan contratado (no almacenamos datos bancarios completos).</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">4.</span>Finalidad del tratamiento</h2>
+          <p>Tratamos tus datos personales con las siguientes finalidades:</p>
+          <ul>
+            <li>Gestionar tu solicitud de participación en la beta y avisarte cuando comience el periodo de pruebas.</li>
+            <li>Gestionar tu registro y autenticación en la Plataforma.</li>
+            <li>Permitir la publicación de anuncios, peticiones y la comunicación entre usuarios.</li>
+            <li>Gestionar las suscripciones y los servicios asociados al plan PRO.</li>
+            <li>Enviar notificaciones relacionadas con tu actividad (mensajes recibidos, estado de anuncios, etc.).</li>
+            <li>Mejorar la Plataforma mediante el análisis de uso y rendimiento.</li>
+            <li>Prevenir el fraude y garantizar la seguridad del servicio.</li>
+            <li>Cumplir con las obligaciones legales aplicables.</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">5.</span>Base jurídica del tratamiento</h2>
+          <p>El tratamiento de tus datos se fundamenta en:</p>
+          <ul>
+            <li>Consentimiento: para la gestión de tu solicitud de beta y el envío de comunicaciones relacionadas, así como para el uso de cookies no esenciales (art. 6.1.a RGPD).</li>
+            <li>Ejecución del contrato: el registro y uso de la Plataforma requieren el tratamiento de determinados datos (art. 6.1.b RGPD).</li>
+            <li>Interés legítimo: para la mejora del servicio, la prevención del fraude y la seguridad de la Plataforma (art. 6.1.f RGPD).</li>
+            <li>Obligación legal: para el cumplimiento de normativas fiscales, mercantiles o de otra índole (art. 6.1.c RGPD).</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">6.</span>Conservación de los datos</h2>
+          <p>
+            Los datos personales se conservarán mientras se mantenga la relación con el usuario y,
+            una vez finalizada, durante los plazos de prescripción legal aplicables. En concreto:
+          </p>
+          <ul>
+            <li>Datos del formulario de la beta: hasta que finalice el periodo de pruebas o solicites su supresión, lo que ocurra antes.</li>
+            <li>Datos de la cuenta: mientras la cuenta esté activa y hasta 5 años después de su eliminación.</li>
+            <li>Datos de transacciones: 6 años conforme a la legislación mercantil.</li>
+            <li>Datos de navegación: máximo 2 años.</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">7.</span>Cesión de datos a terceros</h2>
+          <p>
+            No vendemos ni cedemos tus datos personales a terceros con fines comerciales. Solo
+            compartimos datos en los siguientes supuestos:
+          </p>
+          <ul>
+            <li>Proveedores de servicios que actúan como encargados del tratamiento bajo contrato: <strong>Resend</strong> (envío de correo electrónico), <strong>Google reCAPTCHA</strong> (protección anti-spam del formulario) y los proveedores de alojamiento y pasarela de pago de la Plataforma.</li>
+            <li>Obligación legal: cuando sea requerido por autoridades judiciales o administrativas.</li>
+            <li>Otros usuarios: la información de tu perfil público en la Plataforma (nombre visible, avatar, ubicación) es accesible para otros usuarios.</li>
+          </ul>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">8.</span>Transferencias internacionales</h2>
+          <p>
+            Algunos de nuestros proveedores de servicios pueden estar ubicados fuera del Espacio
+            Económico Europeo (EEE). En tales casos, garantizamos que las transferencias se realizan
+            con las salvaguardas adecuadas, incluyendo cláusulas contractuales tipo aprobadas por la
+            Comisión Europea o decisiones de adecuación vigentes.
+          </p>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">9.</span>Derechos del usuario</h2>
+          <p>De conformidad con el RGPD y la LOPDGDD, puedes ejercer los siguientes derechos:</p>
+          <ul>
+            <li>Acceso: conocer qué datos personales tuyos tratamos.</li>
+            <li>Rectificación: corregir datos inexactos o incompletos.</li>
+            <li>Supresión: solicitar la eliminación de tus datos cuando ya no sean necesarios.</li>
+            <li>Oposición: oponerte al tratamiento de tus datos en determinadas circunstancias.</li>
+            <li>Limitación: solicitar la limitación del tratamiento de tus datos.</li>
+            <li>Portabilidad: recibir tus datos en un formato estructurado y de uso común.</li>
+            <li>No ser objeto de decisiones automatizadas: incluida la elaboración de perfiles con efectos jurídicos.</li>
+          </ul>
+          <p>
+            Para ejercer estos derechos, escríbenos a
+            <a href="mailto:hola@modelmarket.es">hola@modelmarket.es</a>. Responderemos en un plazo
+            máximo de 30 días. Si consideras que tus derechos no han sido debidamente atendidos,
+            puedes presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD)
+            en <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>.
+          </p>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">10.</span>Seguridad de los datos</h2>
+          <p>
+            Aplicamos medidas técnicas y organizativas adecuadas para proteger tus datos personales
+            contra el acceso no autorizado, la alteración, la divulgación o la destrucción. Entre
+            otras medidas, utilizamos cifrado SSL/TLS, autenticación segura, control de accesos y
+            copias de seguridad periódicas.
+          </p>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">11.</span>Menores de edad</h2>
+          <p>
+            La Plataforma no está dirigida a menores de 18 años. No recopilamos conscientemente
+            datos personales de menores. Si detectamos que un menor se ha registrado, procederemos
+            a la eliminación inmediata de su cuenta y datos asociados, conforme al artículo 7 de la
+            LOPDGDD.
+          </p>
+        </section>
+
+        <section class="doc">
+          <h2><span class="n">12.</span>Modificaciones</h2>
+          <p>
+            Nos reservamos el derecho de actualizar esta Política de Privacidad. Cualquier
+            modificación será publicada en esta página con la fecha de última actualización. Te
+            recomendamos revisar periódicamente esta política.
+          </p>
+        </section>
+
+        <p class="footnote">
+          Este sitio utiliza Google reCAPTCHA para proteger el formulario frente al spam, lo que
+          implica el uso de cookies de Google. Para más información, consulta la
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Política de Privacidad de Google</a>.
+        </p>
+      </div>
+    </main>
+
+    <footer class="site">
+      <div class="row">
+        <a href="index.html"><img src="logo.png" alt="ModelMarket" /></a>
+        <p style="font-size: 0.8rem; color: hsl(var(--muted-foreground)); margin: 0">
+          © <span id="year"></span> ModelMarket ·
+          <a href="mailto:hola@modelmarket.es">hola@modelmarket.es</a>
+        </p>
+        <span class="mono">Nada de comisiones · Sólo maquetas</span>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear()
+    </script>
+  </body>
+</html>
