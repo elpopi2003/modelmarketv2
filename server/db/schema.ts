@@ -72,6 +72,26 @@ export interface UserSuspensionsTable {
   suspended_by: string | null
 }
 
+export type EmailStatus = 'pending' | 'sending' | 'sent' | 'failed'
+
+export interface EmailOutboxTable {
+  id: string
+  to_email: string
+  subject: string
+  html: string
+  text: string
+  reply_to: string | null
+  /** Se escribe como JSON serializado; mysql2 lo entrega ya convertido en objeto. */
+  headers: ColumnType<Record<string, string> | string | null, string | null, string | null>
+  kind: string
+  status: Defaulted<EmailStatus>
+  attempts: Defaulted<number>
+  last_error: string | null
+  send_after: Defaulted<Date>
+  sent_at: Date | null
+  created_at: AutoDate
+}
+
 export interface Database {
   users: UsersTable
   sessions: SessionsTable
@@ -79,6 +99,7 @@ export interface Database {
   profiles: ProfilesTable
   user_roles: UserRolesTable
   user_suspensions: UserSuspensionsTable
+  email_outbox: EmailOutboxTable
 }
 
 export type User = Selectable<UsersTable>

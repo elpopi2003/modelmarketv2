@@ -45,8 +45,10 @@ export default defineConfig({
           environment: 'node',
           setupFiles: ['./server/test/setup.ts'],
           include: ['server/**/*.test.ts'],
-          // Los tests de integración comparten una única base de datos de pruebas.
-          fileParallelism: false,
+          // Los tests de integración comparten una única base de datos de pruebas: un solo
+          // proceso, ficheros uno detrás de otro.
+          pool: 'forks',
+          poolOptions: { forks: { singleFork: true } },
         },
       },
     ],
