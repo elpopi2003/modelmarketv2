@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'supabase/functions'] },
+  { ignores: ['dist', 'server-dist', 'coverage', 'supabase/functions'] },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -25,5 +25,15 @@ export default tseslint.config(
     rules: {
       'react-refresh/only-export-components': 'off',
     },
+  },
+  {
+    // Servidor Node (Fastify): globals de Node y sin reglas de React.
+    files: ['server/**/*.ts', 'tsup.config.ts'],
+    languageOptions: { globals: globals.node },
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+  {
+    files: ['server/**/*.cjs'],
+    languageOptions: { globals: globals.node, sourceType: 'commonjs' },
   },
 )

@@ -23,11 +23,32 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    css: true,
-    // Vitest solo mira src; los specs de Playwright (e2e/) los ejecuta `npm run test:e2e`.
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // Dos proyectos: el frontend (jsdom) y el servidor (Node). Los specs de Playwright
+    // (e2e/) no entran aquí: los ejecuta `npm run test:e2e`.
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'web',
+          globals: true,
+          environment: 'jsdom',
+          setupFiles: ['./src/test/setup.ts'],
+          css: true,
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'server',
+          globals: true,
+          environment: 'node',
+          setupFiles: ['./server/test/setup.ts'],
+          include: ['server/**/*.test.ts'],
+          // Los tests de integración comparten una única base de datos de pruebas.
+          fileParallelism: false,
+        },
+      },
+    ],
   },
 })

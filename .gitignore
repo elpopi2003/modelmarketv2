@@ -32,3 +32,9 @@ coverage
 /playwright-report/
 /blob-report/
 /.playwright/
+
+# Servidor: ficheros locales (SQL de alta con contraseñas, etc.)
+server/.local/
+
+# Servidor compilado
+/server-dist
