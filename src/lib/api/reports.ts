@@ -14,7 +14,10 @@ export interface CreateReportInput {
 }
 
 /** Crea una denuncia en nombre del usuario actual (la RLS exige reporter_id = uid). */
-export async function createReport(reporterId: string, input: CreateReportInput): Promise<Report> {
+export async function createReport(
+  reporterId: string,
+  input: CreateReportInput,
+): Promise<Report> {
   const { data, error } = await supabase
     .from('reports')
     .insert({

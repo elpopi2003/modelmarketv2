@@ -4,7 +4,11 @@ import { Ban, Check, ExternalLink, Flag, X } from 'lucide-react'
 import { useReports, useResolveReport } from '@/hooks/useAdmin'
 import type { ReportListItem } from '@/lib/api/reports'
 import type { ReportStatus } from '@/integrations/supabase/types'
-import { formatRelativeTime, REPORT_REASON_LABELS, REPORT_STATUS_LABELS } from '@/lib/format'
+import {
+  formatRelativeTime,
+  REPORT_REASON_LABELS,
+  REPORT_STATUS_LABELS,
+} from '@/lib/format'
 import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'

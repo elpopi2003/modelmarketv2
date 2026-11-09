@@ -2,11 +2,7 @@ import { z } from 'zod'
 
 export const requestSchema = z.object({
   title: z.string().trim().min(3, 'Mínimo 3 caracteres').max(120, 'Máximo 120 caracteres'),
-  description: z
-    .string()
-    .trim()
-    .min(10, 'Mínimo 10 caracteres')
-    .max(2000, 'Máximo 2000 caracteres'),
+  description: z.string().trim().min(10, 'Mínimo 10 caracteres').max(2000, 'Máximo 2000 caracteres'),
   maxPriceEuros: z.preprocess(
     (v) => (v === '' || v === null || v === undefined ? undefined : Number(v)),
     z

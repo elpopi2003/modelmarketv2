@@ -22,10 +22,7 @@ export default function EditarPeticion() {
     return (
       <section className="mx-auto max-w-2xl px-6 py-24 text-center">
         <h1 className="text-2xl font-bold tracking-tight">Petición no encontrada</h1>
-        <Link
-          to="/mis-peticiones"
-          className="mt-4 inline-block text-primary underline-offset-4 hover:underline"
-        >
+        <Link to="/mis-peticiones" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
           Volver a tus peticiones
         </Link>
       </section>
@@ -36,10 +33,7 @@ export default function EditarPeticion() {
     return (
       <section className="mx-auto max-w-2xl px-6 py-24 text-center">
         <h1 className="text-2xl font-bold tracking-tight">No puedes editar esta petición</h1>
-        <Link
-          to="/mis-peticiones"
-          className="mt-4 inline-block text-primary underline-offset-4 hover:underline"
-        >
+        <Link to="/mis-peticiones" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
           Volver a tus peticiones
         </Link>
       </section>

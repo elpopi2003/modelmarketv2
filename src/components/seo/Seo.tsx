@@ -33,15 +33,7 @@ export interface SeoProps {
   jsonLd?: Record<string, unknown>
 }
 
-export function Seo({
-  title,
-  titleExact,
-  description,
-  image,
-  type = 'website',
-  noindex,
-  jsonLd,
-}: SeoProps) {
+export function Seo({ title, titleExact, description, image, type = 'website', noindex, jsonLd }: SeoProps) {
   const fullTitle = titleExact ? title : `${title} · ${SITE_NAME}`
   const url = canonicalUrl()
   const ogImage = image ?? DEFAULT_OG_IMAGE

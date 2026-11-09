@@ -21,7 +21,12 @@ export type DecalsRequirement = 'any' | 'perfect' | 'yellowed' | 'unavailable'
 export type RequestUrgency = 'no_rush' | 'normal' | 'urgent'
 export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
 export type ReportReason =
-  'spam' | 'prohibited' | 'counterfeit' | 'misleading' | 'offensive' | 'other'
+  | 'spam'
+  | 'prohibited'
+  | 'counterfeit'
+  | 'misleading'
+  | 'offensive'
+  | 'other'
 export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
 /** Un mensaje generado por una oferta se marca 'offer' (no notifica como mensaje). */
 export type MessageKind = 'text' | 'offer'

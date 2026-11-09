@@ -137,11 +137,7 @@ export default function Producto() {
   const memberSince = seller?.created_at ? new Date(seller.created_at).getFullYear() : null
 
   const ConditionIcon =
-    listing.condition === 'sealed'
-      ? Package
-      : listing.condition === 'opened'
-        ? PackageOpen
-        : Package
+    listing.condition === 'sealed' ? Package : listing.condition === 'opened' ? PackageOpen : Package
 
   async function handleContact() {
     if (!user) {
@@ -338,7 +334,9 @@ export default function Producto() {
 
                 {listing.shipping_inpost ? (
                   <TrustCell Icon={Truck} tone="bg-sealed/10 text-sealed" title="Envío disponible">
-                    <p className="mt-0.5 text-xs text-muted-foreground">Puede enviar el producto</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Puede enviar el producto
+                    </p>
                   </TrustCell>
                 ) : (
                   <TrustCell
@@ -354,9 +352,7 @@ export default function Producto() {
           </div>
 
           {/* Precio */}
-          <div
-            className={cn(panel, 'hover:border-primary hover:shadow-lg hover:shadow-primary/10')}
-          >
+          <div className={cn(panel, 'hover:border-primary hover:shadow-lg hover:shadow-primary/10')}>
             <div className="absolute right-0 top-0 size-20 rounded-bl-[3rem] bg-primary/5 transition-colors duration-300 group-hover:bg-primary/10" />
             <div className="relative z-10 p-6">
               <div className="mb-4 flex items-end justify-between gap-4">
@@ -401,7 +397,9 @@ export default function Producto() {
                 <OfferForm
                   listingId={listing.id}
                   suggestedAmountEuros={listing.price_cents / 100}
-                  minAmountEuros={listing.accepts_offers ? undefined : listing.price_cents / 100}
+                  minAmountEuros={
+                    listing.accepts_offers ? undefined : listing.price_cents / 100
+                  }
                   onSent={() => setOffering(false)}
                 />
               ) : (

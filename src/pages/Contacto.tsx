@@ -119,13 +119,7 @@ export default function Contacto() {
 
           <FieldError message={serverError ?? undefined} />
 
-          <Button
-            type="submit"
-            variant="accent"
-            size="lg"
-            className="w-full"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
             <Send />
             {isSubmitting ? 'Enviando…' : 'Enviar mensaje'}
           </Button>

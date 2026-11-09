@@ -51,10 +51,8 @@ export async function fetchListings(filters: ListingFilters = {}): Promise<Listi
   if (filters.brandId) query = query.eq('brand_id', filters.brandId)
   if (filters.condition) query = query.eq('condition', filters.condition)
   if (filters.search) query = query.ilike('title', `%${filters.search}%`)
-  if (typeof filters.minPriceCents === 'number')
-    query = query.gte('price_cents', filters.minPriceCents)
-  if (typeof filters.maxPriceCents === 'number')
-    query = query.lte('price_cents', filters.maxPriceCents)
+  if (typeof filters.minPriceCents === 'number') query = query.gte('price_cents', filters.minPriceCents)
+  if (typeof filters.maxPriceCents === 'number') query = query.lte('price_cents', filters.maxPriceCents)
 
   const ordered =
     filters.sort === 'price_asc'

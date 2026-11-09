@@ -40,8 +40,7 @@ function ConversationRow({ item, active }: { item: ConversationListItem; active:
           <span className="mm-mono uppercase">
             {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
           </span>{' '}
-          ·{' '}
-          <span className={item.subjectAvailable ? undefined : 'italic'}>{item.subjectTitle}</span>
+          · <span className={item.subjectAvailable ? undefined : 'italic'}>{item.subjectTitle}</span>
         </p>
       </div>
     </Link>
@@ -77,10 +76,7 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
   return (
     <div className="flex h-[70vh] flex-col rounded-md border border-border">
       <div className="flex items-center gap-3 border-b border-border p-3">
-        <Link
-          to="/mensajes"
-          className="text-sm text-muted-foreground hover:text-foreground lg:hidden"
-        >
+        <Link to="/mensajes" className="text-sm text-muted-foreground hover:text-foreground lg:hidden">
           ←
         </Link>
         <div className="min-w-0">
@@ -96,10 +92,7 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
               <span className="mm-mono uppercase">
                 {item.subjectKind === 'listing' ? 'Anuncio' : 'Petición'}
               </span>{' '}
-              ·{' '}
-              <span className={item.subjectAvailable ? undefined : 'italic'}>
-                {item.subjectTitle}
-              </span>
+              · <span className={item.subjectAvailable ? undefined : 'italic'}>{item.subjectTitle}</span>
             </MaybeLink>
           )}
         </div>
@@ -116,7 +109,9 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
                 <p
                   className={cn(
                     'max-w-[75%] whitespace-pre-line rounded-md px-3 py-2 text-sm',
-                    mine ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground',
+                    mine
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-foreground',
                   )}
                 >
                   {m.body}
@@ -125,7 +120,9 @@ function Thread({ conversationId, item }: { conversationId: string; item?: Conve
             )
           })
         ) : (
-          <p className="text-sm text-muted-foreground">Aún no hay mensajes. Escribe el primero.</p>
+          <p className="text-sm text-muted-foreground">
+            Aún no hay mensajes. Escribe el primero.
+          </p>
         )}
         <div ref={bottomRef} />
       </div>

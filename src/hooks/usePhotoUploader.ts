@@ -8,15 +8,9 @@ export type Photo = { kind: 'existing'; url: string } | { kind: 'new'; file: Fil
  * Gestión de fotos para formularios (anuncios y peticiones): fotos existentes + nuevas,
  * previews con object URLs, límite por tier, y subida diferida al enviar.
  */
-export function usePhotoUploader({
-  max,
-  initialUrls = [],
-}: {
-  max: number
-  initialUrls?: string[]
-}) {
-  const [photos, setPhotos] = useState<Photo[]>(() =>
-    initialUrls.map((url) => ({ kind: 'existing', url }) as Photo),
+export function usePhotoUploader({ max, initialUrls = [] }: { max: number; initialUrls?: string[] }) {
+  const [photos, setPhotos] = useState<Photo[]>(
+    () => initialUrls.map((url) => ({ kind: 'existing', url }) as Photo),
   )
 
   // Libera las object URLs de las fotos nuevas al desmontar/cambiar.
@@ -47,9 +41,7 @@ export function usePhotoUploader({
   async function resolveUrls(userId: string): Promise<string[]> {
     const urls: string[] = []
     for (const photo of photos) {
-      urls.push(
-        photo.kind === 'existing' ? photo.url : await uploadListingPhoto(userId, photo.file),
-      )
+      urls.push(photo.kind === 'existing' ? photo.url : await uploadListingPhoto(userId, photo.file))
     }
     return urls
   }

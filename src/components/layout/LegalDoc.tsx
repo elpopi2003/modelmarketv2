@@ -31,10 +31,7 @@ export function LegalDoc({
 }) {
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <Seo
-        title={title}
-        description={`${title} de ModelMarket. Última actualización: ${lastUpdated}.`}
-      />
+      <Seo title={title} description={`${title} de ModelMarket. Última actualización: ${lastUpdated}.`} />
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h1>
       <p className="mm-mono mt-2 text-xs uppercase tracking-wider text-muted-foreground">
         Última actualización: {lastUpdated}

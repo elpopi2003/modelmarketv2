@@ -49,12 +49,8 @@ describe('listingSchema', () => {
   it('con escala "other" exige la escala escrita a mano', () => {
     // "other" sin customScale no vale: el desplegable no guarda "other" como escala.
     expect(listingSchema.safeParse({ ...base, scale: 'other' }).success).toBe(false)
-    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '' }).success).toBe(
-      false,
-    )
-    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '1:9' }).success).toBe(
-      true,
-    )
+    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '' }).success).toBe(false)
+    expect(listingSchema.safeParse({ ...base, scale: 'other', customScale: '1:9' }).success).toBe(true)
   })
 
   it('exige al menos un método de entrega', () => {
@@ -83,9 +79,7 @@ describe('listingSchema', () => {
 
   it('con marca "Otra" exige el nombre de la nueva marca', () => {
     expect(listingSchema.safeParse({ ...base, brandId: 'other' }).success).toBe(false)
-    expect(listingSchema.safeParse({ ...base, brandId: 'other', newBrand: 'A' }).success).toBe(
-      false,
-    )
+    expect(listingSchema.safeParse({ ...base, brandId: 'other', newBrand: 'A' }).success).toBe(false)
     expect(listingSchema.safeParse({ ...base, brandId: 'other', newBrand: 'Meng' }).success).toBe(
       true,
     )

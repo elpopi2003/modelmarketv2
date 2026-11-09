@@ -10,7 +10,11 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle()
   if (error) handleSupabaseError(error)
   return data
 }

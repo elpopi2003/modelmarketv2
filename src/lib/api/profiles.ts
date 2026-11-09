@@ -13,7 +13,10 @@ const PUBLIC_COLUMNS = 'id, username, display_name, avatar_url, location, create
 export async function fetchPublicProfiles(userIds: string[]): Promise<PublicProfile[]> {
   const unique = [...new Set(userIds)]
   if (unique.length === 0) return []
-  const { data, error } = await supabase.from('profiles').select(PUBLIC_COLUMNS).in('id', unique)
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(PUBLIC_COLUMNS)
+    .in('id', unique)
   if (error) handleSupabaseError(error)
   return data ?? []
 }

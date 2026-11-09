@@ -10,9 +10,7 @@ const SECTIONS: LegalSection[] = [
   },
   {
     title: 'Normativa aplicable',
-    paragraphs: [
-      'Esta Política de Privacidad se redacta conforme a las siguientes disposiciones legales:',
-    ],
+    paragraphs: ['Esta Política de Privacidad se redacta conforme a las siguientes disposiciones legales:'],
     list: [
       'Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo (RGPD).',
       'Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).',
@@ -83,9 +81,7 @@ const SECTIONS: LegalSection[] = [
   },
   {
     title: 'Derechos del usuario',
-    paragraphs: [
-      'De conformidad con el RGPD y la LOPDGDD, puedes ejercer los siguientes derechos:',
-    ],
+    paragraphs: ['De conformidad con el RGPD y la LOPDGDD, puedes ejercer los siguientes derechos:'],
     list: [
       'Acceso: conocer qué datos personales tuyos tratamos.',
       'Rectificación: corregir datos inexactos o incompletos.',

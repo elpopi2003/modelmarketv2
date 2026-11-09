@@ -35,12 +35,12 @@ import { Seo } from '@/components/seo/Seo'
 
 /** Icono y descripción de cada categoría del catálogo, por slug. */
 const CATEGORY_META: Record<string, { Icon: LucideIcon; description: string }> = {
-  aviacion: { Icon: Plane, description: 'Aviones, helicópteros y aeronaves' },
+  'aviacion': { Icon: Plane, description: 'Aviones, helicópteros y aeronaves' },
   'vehiculos-militares': { Icon: Shield, description: 'Tanques, vehículos blindados y artillería' },
-  automoviles: { Icon: Car, description: 'Coches, motos y vehículos de calle' },
-  barcos: { Icon: Ship, description: 'Barcos, submarinos y embarcaciones' },
-  trenes: { Icon: TrainFront, description: 'Locomotoras, vagones y ferrocarril' },
-  figuras: { Icon: Users, description: 'Figuras y miniaturas a escala' },
+  'automoviles': { Icon: Car, description: 'Coches, motos y vehículos de calle' },
+  'barcos': { Icon: Ship, description: 'Barcos, submarinos y embarcaciones' },
+  'trenes': { Icon: TrainFront, description: 'Locomotoras, vagones y ferrocarril' },
+  'figuras': { Icon: Users, description: 'Figuras y miniaturas a escala' },
   'ciencia-ficcion': { Icon: Rocket, description: 'Naves, mechas y universos de ficción' },
   'pinturas-accesorios': { Icon: Paintbrush, description: 'Pinturas, herramientas y accesorios' },
 }

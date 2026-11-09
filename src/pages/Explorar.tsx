@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useDeleteListing, useListings, useMyListings, useUpdateListing } from '@/hooks/useListings'
+import {
+  useDeleteListing,
+  useListings,
+  useMyListings,
+  useUpdateListing,
+} from '@/hooks/useListings'
 import { useAuth } from '@/hooks/useAuth'
 import { usePagination } from '@/hooks/usePagination'
 import { filterOwnListings } from '@/lib/localFilters'
@@ -81,7 +86,10 @@ export default function Explorar() {
     if (match) setCategoryId(match.id)
   }, [catSlug, categories])
 
-  const brandNames = useMemo(() => new Map((brands ?? []).map((b) => [b.id, b.name])), [brands])
+  const brandNames = useMemo(
+    () => new Map((brands ?? []).map((b) => [b.id, b.name])),
+    [brands],
+  )
   // Incluye al propio usuario: sus anuncios ya no salen del catálogo general.
   const ownerIds = useMemo(
     () => [...new Set([...(listings ?? []).map((l) => l.user_id), ...(user ? [user.id] : [])])],
