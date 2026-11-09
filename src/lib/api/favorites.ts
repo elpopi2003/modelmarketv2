@@ -23,7 +23,9 @@ export async function fetchMyFavoriteListings(): Promise<Listing[]> {
 }
 
 export async function addFavorite(listingId: string, userId: string): Promise<void> {
-  const { error } = await supabase.from('favorites').insert({ user_id: userId, listing_id: listingId })
+  const { error } = await supabase
+    .from('favorites')
+    .insert({ user_id: userId, listing_id: listingId })
   if (error) handleSupabaseError(error)
 }
 

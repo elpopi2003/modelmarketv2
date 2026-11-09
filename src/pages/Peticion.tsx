@@ -39,7 +39,10 @@ export default function Peticion() {
         <Seo title="Petición no encontrada" noindex />
         <h1 className="text-3xl font-extrabold tracking-tight">Petición no encontrada</h1>
         <p className="mt-2 text-muted-foreground">Puede que se haya cerrado o retirado.</p>
-        <Link to="/peticiones" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
+        <Link
+          to="/peticiones"
+          className="mt-4 inline-block text-primary underline-offset-4 hover:underline"
+        >
           Volver a peticiones
         </Link>
       </section>
@@ -152,7 +155,11 @@ export default function Peticion() {
 
         <p className="mt-4 text-xs text-muted-foreground">
           Responder a las peticiones es una función de los planes PRO y Retail. Puedes enviar tu
-          oferta desde el listado de <Link to="/peticiones" className="underline underline-offset-2">peticiones</Link>.
+          oferta desde el listado de{' '}
+          <Link to="/peticiones" className="underline underline-offset-2">
+            peticiones
+          </Link>
+          .
         </p>
       </article>
     </section>

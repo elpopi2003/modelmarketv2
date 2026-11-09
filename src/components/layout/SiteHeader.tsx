@@ -163,13 +163,25 @@ function AuthedActions() {
             role="menu"
             className="absolute right-0 top-11 z-50 w-56 overflow-hidden rounded-lg border border-border bg-popover py-1 text-popover-foreground shadow-lg"
           >
-            <MenuItem to="/dashboard" icon={<LayoutDashboard className="size-4" />} onNavigate={() => setOpen(false)}>
+            <MenuItem
+              to="/dashboard"
+              icon={<LayoutDashboard className="size-4" />}
+              onNavigate={() => setOpen(false)}
+            >
               Mi panel
             </MenuItem>
-            <MenuItem to="/ofertas" icon={<Tag className="size-4" />} onNavigate={() => setOpen(false)}>
+            <MenuItem
+              to="/ofertas"
+              icon={<Tag className="size-4" />}
+              onNavigate={() => setOpen(false)}
+            >
               Ofertas
             </MenuItem>
-            <MenuItem to="/perfil" icon={<UserIcon className="size-4" />} onNavigate={() => setOpen(false)}>
+            <MenuItem
+              to="/perfil"
+              icon={<UserIcon className="size-4" />}
+              onNavigate={() => setOpen(false)}
+            >
               Mi perfil
             </MenuItem>
             <MenuItem

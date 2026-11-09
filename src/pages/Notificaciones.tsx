@@ -29,7 +29,9 @@ function NotificationRow({ notification }: { notification: Notification }) {
           {formatRelativeTime(notification.created_at)}
         </p>
       </div>
-      {unread && <span className="mt-1 size-2 shrink-0 rounded-full bg-accent" aria-label="No leída" />}
+      {unread && (
+        <span className="mt-1 size-2 shrink-0 rounded-full bg-accent" aria-label="No leída" />
+      )}
     </div>
   )
 

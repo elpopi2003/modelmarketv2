@@ -59,171 +59,171 @@ export function RequestDialog({
 
   return (
     <>
-    <dialog
-      ref={ref}
-      onClose={onClose}
-      onClick={(event) => {
-        // Clic en el backdrop (el propio <dialog>, no su contenido) → cerrar.
-        if (event.target === ref.current) onClose()
-      }}
-      className="m-auto max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl rounded-lg border-2 border-border bg-background p-0 text-foreground shadow-lg backdrop:bg-foreground/50"
-      aria-label={request?.title}
-    >
-      {request && (
-        <div className="max-h-[90vh] overflow-y-auto p-6">
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <h2 className="text-balance text-xl font-semibold tracking-tight">{request.title}</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Cerrar"
-              className="-mr-2 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            {request.photos[0] && (
-              <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
-                <img src={request.photos[0]} alt="" className="h-full w-full object-cover" />
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-2">
-              {request.scale && <ScaleTag scale={request.scale} />}
-              {brandName && (
-                <span className="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                  {brandName}
-                </span>
-              )}
-              {categoryName && (
-                <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
-                  {categoryName}
-                </span>
-              )}
+      <dialog
+        ref={ref}
+        onClose={onClose}
+        onClick={(event) => {
+          // Clic en el backdrop (el propio <dialog>, no su contenido) → cerrar.
+          if (event.target === ref.current) onClose()
+        }}
+        className="m-auto max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl rounded-lg border-2 border-border bg-background p-0 text-foreground shadow-lg backdrop:bg-foreground/50"
+        aria-label={request?.title}
+      >
+        {request && (
+          <div className="max-h-[90vh] overflow-y-auto p-6">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <h2 className="text-balance text-xl font-semibold tracking-tight">{request.title}</h2>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar"
+                className="-mr-2 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
             </div>
 
-            {request.description && (
-              <div>
-                <h3 className="mb-2 text-sm font-medium text-muted-foreground">Descripción</h3>
-                <p className="whitespace-pre-line text-foreground">{request.description}</p>
-              </div>
-            )}
+            <div className="space-y-6">
+              {request.photos[0] && (
+                <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
+                  <img src={request.photos[0]} alt="" className="h-full w-full object-cover" />
+                </div>
+              )}
 
-            <div className="grid grid-cols-2 gap-4">
-              {request.max_price_cents != null && (
+              <div className="flex flex-wrap gap-2">
+                {request.scale && <ScaleTag scale={request.scale} />}
+                {brandName && (
+                  <span className="inline-flex items-center rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                    {brandName}
+                  </span>
+                )}
+                {categoryName && (
+                  <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                    {categoryName}
+                  </span>
+                )}
+              </div>
+
+              {request.description && (
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-muted-foreground">Descripción</h3>
+                  <p className="whitespace-pre-line text-foreground">{request.description}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                {request.max_price_cents != null && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Ofrezco máximo:</p>
+                    <p className="mm-mono text-2xl font-bold text-accent">
+                      {formatPriceShort(request.max_price_cents)}
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Ofrezco máximo:</p>
-                  <p className="mm-mono text-2xl font-bold text-accent">
-                    {formatPriceShort(request.max_price_cents)}
+                  <p className="text-xs text-muted-foreground">Estados aceptados</p>
+                  <div className="flex flex-wrap gap-1">
+                    {(request.accepted_conditions ?? []).map((condition) => (
+                      <span
+                        key={condition}
+                        className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground"
+                      >
+                        {CONDITION_LABELS[condition]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Calcas</p>
+                  <p className="text-sm">{DECALS_REQUIREMENT_LABELS[request.decals_requirement]}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Urgencia</p>
+                  <p className="text-sm">{URGENCY_LABELS[request.urgency]}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
+                {authorName && (
+                  <span className="flex items-center gap-1">
+                    <User className="size-3 shrink-0" />
+                    {authorName}
+                  </span>
+                )}
+                {authorLocation && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="size-3 shrink-0" />
+                    {authorLocation}
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Clock className="size-3 shrink-0" />
+                  {formatRelativeTime(request.created_at)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Tag className="size-3 shrink-0" />
+                  {offerCount ?? 0} {offerCount === 1 ? 'oferta' : 'ofertas'}
+                </span>
+                {user && !isOwner && (
+                  <button
+                    type="button"
+                    onClick={() => setReporting(true)}
+                    className="flex items-center gap-1 uppercase tracking-wide transition-colors hover:text-destructive"
+                  >
+                    <Flag className="size-3 shrink-0" />
+                    Reportar
+                  </button>
+                )}
+              </div>
+
+              <OffersPanel offers={requestOffers} isLoading={offersLoading} canRespond={isOwner} />
+
+              {isOwner ? (
+                !requestOffers?.length && (
+                  <p className="rounded-md bg-muted p-3 text-center text-sm text-muted-foreground">
+                    Esta es tu petición. Recibirás un aviso cuando alguien te haga una oferta.
+                  </p>
+                )
+              ) : !user ? (
+                <Button asChild variant="accent" size="lg" className="w-full">
+                  <Link to="/auth">
+                    <Send /> Enviar oferta
+                  </Link>
+                </Button>
+              ) : canRespond ? (
+                <OfferForm
+                  requestId={request.id}
+                  suggestedAmountEuros={
+                    request.max_price_cents != null ? request.max_price_cents / 100 : undefined
+                  }
+                  onSent={onClose}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <Button asChild variant="accent" size="lg" className="w-full">
+                    <Link to="/precios">
+                      <Lock /> Hazte PRO para enviar ofertas
+                    </Link>
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground">
+                    Las peticiones son públicas, pero responder a su autor es una función PRO y
+                    Retail.
                   </p>
                 </div>
               )}
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Estados aceptados</p>
-                <div className="flex flex-wrap gap-1">
-                  {(request.accepted_conditions ?? []).map((condition) => (
-                    <span
-                      key={condition}
-                      className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-xs font-semibold text-foreground"
-                    >
-                      {CONDITION_LABELS[condition]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Calcas</p>
-                <p className="text-sm">{DECALS_REQUIREMENT_LABELS[request.decals_requirement]}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Urgencia</p>
-                <p className="text-sm">{URGENCY_LABELS[request.urgency]}</p>
-              </div>
             </div>
-
-            <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4 text-xs text-muted-foreground">
-              {authorName && (
-                <span className="flex items-center gap-1">
-                  <User className="size-3 shrink-0" />
-                  {authorName}
-                </span>
-              )}
-              {authorLocation && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="size-3 shrink-0" />
-                  {authorLocation}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Clock className="size-3 shrink-0" />
-                {formatRelativeTime(request.created_at)}
-              </span>
-              <span className="flex items-center gap-1">
-                <Tag className="size-3 shrink-0" />
-                {offerCount ?? 0} {offerCount === 1 ? 'oferta' : 'ofertas'}
-              </span>
-              {user && !isOwner && (
-                <button
-                  type="button"
-                  onClick={() => setReporting(true)}
-                  className="flex items-center gap-1 uppercase tracking-wide transition-colors hover:text-destructive"
-                >
-                  <Flag className="size-3 shrink-0" />
-                  Reportar
-                </button>
-              )}
-            </div>
-
-            <OffersPanel offers={requestOffers} isLoading={offersLoading} canRespond={isOwner} />
-
-            {isOwner ? (
-              !requestOffers?.length && (
-                <p className="rounded-md bg-muted p-3 text-center text-sm text-muted-foreground">
-                  Esta es tu petición. Recibirás un aviso cuando alguien te haga una oferta.
-                </p>
-              )
-            ) : !user ? (
-              <Button asChild variant="accent" size="lg" className="w-full">
-                <Link to="/auth">
-                  <Send /> Enviar oferta
-                </Link>
-              </Button>
-            ) : canRespond ? (
-              <OfferForm
-                requestId={request.id}
-                suggestedAmountEuros={
-                  request.max_price_cents != null ? request.max_price_cents / 100 : undefined
-                }
-                onSent={onClose}
-              />
-            ) : (
-              <div className="space-y-2">
-                <Button asChild variant="accent" size="lg" className="w-full">
-                  <Link to="/precios">
-                    <Lock /> Hazte PRO para enviar ofertas
-                  </Link>
-                </Button>
-                <p className="text-center text-xs text-muted-foreground">
-                  Las peticiones son públicas, pero responder a su autor es una función PRO y
-                  Retail.
-                </p>
-              </div>
-            )}
           </div>
-        </div>
-      )}
-    </dialog>
+        )}
+      </dialog>
 
-    {request && (
-      <ReportDialog
-        open={reporting}
-        onClose={() => setReporting(false)}
-        requestId={request.id}
-        targetTitle={request.title}
-      />
-    )}
+      {request && (
+        <ReportDialog
+          open={reporting}
+          onClose={() => setReporting(false)}
+          requestId={request.id}
+          targetTitle={request.title}
+        />
+      )}
     </>
   )
 }

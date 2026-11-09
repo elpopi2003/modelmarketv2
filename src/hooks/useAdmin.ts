@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
 import {
   createReport,
   fetchAdminStats,
@@ -24,31 +23,17 @@ import {
 } from '@/lib/api/admin'
 import { deleteListing } from '@/lib/api/listings'
 import { deleteRequest } from '@/lib/api/requests'
-import { handleSupabaseError } from '@/lib/errors'
 import { queryKeys } from '@/lib/queryKeys'
 import { useAuth } from '@/hooks/useAuth'
 import type { ReportStatus, SubscriptionPlan } from '@/integrations/supabase/types'
 
 /**
- * ¿El usuario actual es administrador? Vía RPC has_role (SECURITY DEFINER).
- * Es solo para la UI: cada operación sensible vuelve a comprobarlo en la BD.
+ * ¿El usuario actual es administrador? Viene en `/api/auth/me` junto con la sesión.
+ * Es solo para la UI: cada operación sensible vuelve a comprobarlo en el servidor.
  */
 export function useIsAdmin() {
-  const { user } = useAuth()
-  const query = useQuery({
-    queryKey: queryKeys.admin.isAdmin(user?.id ?? ''),
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user!.id,
-        _role: 'admin',
-      })
-      if (error) handleSupabaseError(error)
-      return Boolean(data)
-    },
-    enabled: Boolean(user?.id),
-    staleTime: 5 * 60_000,
-  })
-  return { isAdmin: query.data ?? false, isLoading: query.isLoading }
+  const { user, loading } = useAuth()
+  return { isAdmin: user?.isAdmin ?? false, isLoading: loading }
 }
 
 export function useAdminStats() {
@@ -135,7 +120,11 @@ export function useAllRequests() {
 export function useSetContentStatus() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { kind: ContentKind; id: string; action: 'takeDown' | 'restore' }) => {
+    mutationFn: async (input: {
+      kind: ContentKind
+      id: string
+      action: 'takeDown' | 'restore'
+    }) => {
       if (input.action === 'takeDown') await takeDownContent(input.kind, input.id)
       else await restoreContent(input.kind, input.id)
     },

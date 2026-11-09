@@ -58,7 +58,8 @@ export function RequestForm({
       ? {
           title: request.title,
           description: request.description ?? '',
-          maxPriceEuros: request.max_price_cents != null ? request.max_price_cents / 100 : undefined,
+          maxPriceEuros:
+            request.max_price_cents != null ? request.max_price_cents / 100 : undefined,
           scale: request.scale ?? '',
           categoryId: request.category_id ?? '',
           brandId: request.brand_id ?? '',
@@ -132,7 +133,11 @@ export function RequestForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
       <div className="space-y-2">
         <Label htmlFor="title">¿Qué buscas?</Label>
-        <Input id="title" placeholder="p. ej. Busco Tamiya Tiger I 1:35 precintado" {...register('title')} />
+        <Input
+          id="title"
+          placeholder="p. ej. Busco Tamiya Tiger I 1:35 precintado"
+          {...register('title')}
+        />
         <FieldError message={errors.title?.message} />
       </div>
 
@@ -243,7 +248,12 @@ export function RequestForm({
 
       <div className="space-y-2">
         <Label htmlFor="description">Detalles</Label>
-        <Textarea id="description" rows={5} placeholder="Estado deseado, referencias, etc." {...register('description')} />
+        <Textarea
+          id="description"
+          rows={5}
+          placeholder="Estado deseado, referencias, etc."
+          {...register('description')}
+        />
         <FieldError message={errors.description?.message} />
       </div>
 
@@ -260,11 +270,7 @@ export function RequestForm({
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? 'Guardando…'
-            : mode === 'edit'
-              ? 'Guardar cambios'
-              : 'Publicar petición'}
+          {isSubmitting ? 'Guardando…' : mode === 'edit' ? 'Guardar cambios' : 'Publicar petición'}
         </Button>
         <Button type="button" variant="outline" asChild>
           <Link to="/peticiones">Cancelar</Link>

@@ -20,6 +20,7 @@ import {
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
+import { changePassword } from '@/lib/api/auth'
 import {
   passwordSchema,
   profileSchema,
@@ -61,7 +62,12 @@ function SectionCard({
       )}
     >
       <div className="mb-5 flex items-start gap-2.5">
-        <Icon className={cn('mt-1 size-5 shrink-0', danger ? 'text-destructive' : 'text-muted-foreground')} />
+        <Icon
+          className={cn(
+            'mt-1 size-5 shrink-0',
+            danger ? 'text-destructive' : 'text-muted-foreground',
+          )}
+        />
         <div>
           <h2 className={cn('font-display text-xl font-extrabold', danger && 'text-destructive')}>
             {title}
@@ -202,12 +208,15 @@ export default function Configuracion() {
 
   async function onChangePassword(values: PasswordFormValues) {
     setPasswordStatus(null)
-    const { error } = await supabase.auth.updateUser({ password: values.password })
-    if (error) {
-      setPasswordStatus({ kind: 'error', message: error.message })
-    } else {
+    try {
+      await changePassword(values.password)
       passwordForm.reset({ password: '', confirm: '' })
-      setPasswordStatus({ kind: 'ok', message: 'Contraseña actualizada.' })
+      setPasswordStatus({
+        kind: 'ok',
+        message: 'Contraseña actualizada. Hemos cerrado tu sesión en el resto de dispositivos.',
+      })
+    } catch (error) {
+      setPasswordStatus({ kind: 'error', message: getErrorMessage(error) })
     }
   }
 
@@ -324,7 +333,11 @@ export default function Configuracion() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="location">Ubicación</Label>
-              <Input id="location" placeholder="p. ej. 45003, Toledo" {...profileForm.register('location')} />
+              <Input
+                id="location"
+                placeholder="p. ej. 45003, Toledo"
+                {...profileForm.register('location')}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio">Biografía</Label>
@@ -518,7 +531,13 @@ export default function Configuracion() {
           </p>
         )}
 
-        <Button type="submit" form={PROFILE_FORM_ID} className="w-full" size="lg" disabled={isUpdating}>
+        <Button
+          type="submit"
+          form={PROFILE_FORM_ID}
+          className="w-full"
+          size="lg"
+          disabled={isUpdating}
+        >
           <Save />
           {isUpdating ? 'Guardando…' : 'Guardar cambios'}
         </Button>

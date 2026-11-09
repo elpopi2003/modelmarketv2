@@ -1,15 +1,17 @@
 import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { RequireAdmin } from '@/components/auth/RequireAdmin'
 import Index from '@/pages/Index'
 import Auth from '@/pages/Auth'
-import AuthCallback from '@/pages/AuthCallback'
 import NotFound from '@/pages/NotFound'
 
 // Rutas pesadas: lazy. La home (Index) y Auth van eager por ser puntos de entrada.
+const VerificarEmail = lazy(() => import('@/pages/auth/VerificarEmail'))
+const RecuperarContrasena = lazy(() => import('@/pages/auth/RecuperarContrasena'))
+const RestablecerContrasena = lazy(() => import('@/pages/auth/RestablecerContrasena'))
 const Explorar = lazy(() => import('@/pages/Explorar'))
 const Producto = lazy(() => import('@/pages/Producto'))
 const Peticiones = lazy(() => import('@/pages/Peticiones'))
@@ -39,7 +41,9 @@ const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
 function PageFallback() {
   return (
-    <div className="grid min-h-[50vh] place-items-center text-sm text-muted-foreground">Cargando…</div>
+    <div className="grid min-h-[50vh] place-items-center text-sm text-muted-foreground">
+      Cargando…
+    </div>
   )
 }
 
@@ -63,7 +67,11 @@ function App() {
         </Route>
 
         <Route path="auth" element={<Auth />} />
-        <Route path="auth/callback" element={<AuthCallback />} />
+        <Route path="auth/verificar" element={<VerificarEmail />} />
+        <Route path="auth/recuperar" element={<RecuperarContrasena />} />
+        <Route path="auth/restablecer" element={<RestablecerContrasena />} />
+        {/* Enlaces antiguos del backend anterior (emails ya enviados). */}
+        <Route path="auth/callback" element={<Navigate to="/auth" replace />} />
 
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>

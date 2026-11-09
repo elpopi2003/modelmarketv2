@@ -3,15 +3,17 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { resendVerification } from '@/lib/api/auth'
+import { getErrorMessage } from '@/lib/errors'
 import {
   loginSchema,
   registerSchema,
   type LoginValues,
   type RegisterValues,
 } from '@/lib/schemas/auth'
-import { Logo } from '@/components/layout/Logo'
+import { AuthNotice, AuthShell } from '@/components/auth/AuthShell'
+import { Seo } from '@/components/seo/Seo'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -23,20 +25,56 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-sm text-destructive">{message}</p>
 }
 
+/** Botón para volver a pedir el email de confirmación (caducado o perdido). */
+function ResendConfirmation({ email }: { email: string }) {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [error, setError] = useState<string | null>(null)
+
+  async function resend() {
+    setState('sending')
+    try {
+      await resendVerification(email)
+      setState('sent')
+    } catch (e) {
+      setError(getErrorMessage(e))
+      setState('error')
+    }
+  }
+
+  if (state === 'sent') {
+    return <AuthNotice kind="ok">Te hemos enviado un enlace nuevo a {email}.</AuthNotice>
+  }
+  return (
+    <div className="space-y-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={resend}
+        disabled={state === 'sending'}
+      >
+        {state === 'sending' ? 'Enviando…' : 'Reenviar email de confirmación'}
+      </Button>
+      {state === 'error' && <AuthNotice kind="error">{error}</AuthNotice>}
+    </div>
+  )
+}
+
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const { signIn } = useAuth()
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<{ message: string; code?: string } | null>(null)
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) })
 
   async function onSubmit(values: LoginValues) {
     setServerError(null)
-    const { error } = await signIn(values.email, values.password)
+    const { error, code } = await signIn(values.email, values.password)
     if (error) {
-      setServerError(error)
+      setServerError({ message: error, code })
       return
     }
     onSuccess()
@@ -50,7 +88,16 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         <FieldError message={errors.email?.message} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="login-password">Contraseña</Label>
+        <div className="flex items-baseline justify-between gap-2">
+          <Label htmlFor="login-password">Contraseña</Label>
+          <Link
+            to="/auth/recuperar"
+            state={{ email: getValues('email') }}
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            ¿La has olvidado?
+          </Link>
+        </div>
         <Input
           id="login-password"
           type="password"
@@ -59,7 +106,10 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         />
         <FieldError message={errors.password?.message} />
       </div>
-      <FieldError message={serverError ?? undefined} />
+      {serverError && <AuthNotice kind="error">{serverError.message}</AuthNotice>}
+      {serverError?.code === 'email_not_confirmed' && (
+        <ResendConfirmation email={getValues('email')} />
+      )}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Entrando…' : 'Entrar'}
       </Button>
@@ -67,10 +117,10 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   )
 }
 
-function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+function RegisterForm() {
   const { signUp } = useAuth()
   const [serverError, setServerError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
+  const [sentTo, setSentTo] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -79,24 +129,26 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
   async function onSubmit(values: RegisterValues) {
     setServerError(null)
-    const { error, needsConfirmation } = await signUp(values.email, values.password)
+    const { error } = await signUp(values.email, values.password)
     if (error) {
       setServerError(error)
       return
     }
-    if (needsConfirmation) {
-      setDone(true)
-      return
-    }
-    // Alta con sesión inmediata (confirm-email desactivado): entra directo.
-    onSuccess()
+    setSentTo(values.email.trim())
   }
 
-  if (done) {
+  if (sentTo) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Cuenta creada. Revisa tu email para confirmar el registro.
-      </p>
+      <div className="space-y-4">
+        <AuthNotice kind="ok">
+          Te hemos enviado un enlace a <strong className="text-foreground">{sentTo}</strong>. Ábrelo
+          para activar tu cuenta; caduca en 24 horas.
+        </AuthNotice>
+        <AuthNotice kind="ok">
+          ¿No lo encuentras? Mira en la carpeta de spam o pide otro.
+        </AuthNotice>
+        <ResendConfirmation email={sentTo} />
+      </div>
     )
   }
 
@@ -127,7 +179,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         />
         <FieldError message={errors.confirmPassword?.message} />
       </div>
-      <FieldError message={serverError ?? undefined} />
+      {serverError && <AuthNotice kind="error">{serverError}</AuthNotice>}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Creando…' : 'Crear cuenta'}
       </Button>
@@ -143,54 +195,46 @@ export default function Auth() {
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-background px-6 py-12">
-      <div className="w-full max-w-sm">
-        <Link to="/" className="mb-6 flex justify-center" aria-label="Volver al inicio">
-          <Logo className="h-14" />
-        </Link>
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>{mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</CardTitle>
-            <CardDescription>ModelMarket — 0% de comisión entre coleccionistas.</CardDescription>
-          </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => setMode('login')}
-              className={cn(
-                'rounded px-3 py-1.5 font-medium transition-colors',
-                mode === 'login' ? 'bg-background shadow-sm' : 'text-muted-foreground',
-              )}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('register')}
-              className={cn(
-                'rounded px-3 py-1.5 font-medium transition-colors',
-                mode === 'register' ? 'bg-background shadow-sm' : 'text-muted-foreground',
-              )}
-            >
-              Registrarse
-            </button>
-          </div>
-
-          {mode === 'login' ? (
-            <LoginForm onSuccess={() => navigate(from, { replace: true })} />
-          ) : (
-            <RegisterForm onSuccess={() => navigate(from, { replace: true })} />
+    <AuthShell title={mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}>
+      <Seo
+        title="Entrar"
+        description="Accede a tu cuenta de ModelMarket o crea una nueva."
+        noindex
+      />
+      <div className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1 text-sm">
+        <button
+          type="button"
+          onClick={() => setMode('login')}
+          className={cn(
+            'rounded px-3 py-1.5 font-medium transition-colors',
+            mode === 'login' ? 'bg-background shadow-sm' : 'text-muted-foreground',
           )}
-
-          <p className="text-center text-sm text-muted-foreground">
-            <Link to="/" className="underline-offset-4 hover:underline">
-              Volver al inicio
-            </Link>
-          </p>
-          </CardContent>
-        </Card>
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('register')}
+          className={cn(
+            'rounded px-3 py-1.5 font-medium transition-colors',
+            mode === 'register' ? 'bg-background shadow-sm' : 'text-muted-foreground',
+          )}
+        >
+          Registrarse
+        </button>
       </div>
-    </div>
+
+      {mode === 'login' ? (
+        <LoginForm onSuccess={() => navigate(from, { replace: true })} />
+      ) : (
+        <RegisterForm />
+      )}
+
+      <p className="text-center text-sm text-muted-foreground">
+        <Link to="/" className="underline-offset-4 hover:underline">
+          Volver al inicio
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

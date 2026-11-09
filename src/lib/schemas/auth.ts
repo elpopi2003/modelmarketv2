@@ -19,3 +19,10 @@ export const registerSchema = z
   })
 
 export type RegisterValues = z.infer<typeof registerSchema>
+
+/** "He olvidado mi contraseña" y "reenviar email de confirmación": solo el email. */
+export const emailOnlySchema = z.object({
+  email: z.string().min(1, 'El email es obligatorio').email('Introduce un email válido'),
+})
+
+export type EmailOnlyValues = z.infer<typeof emailOnlySchema>

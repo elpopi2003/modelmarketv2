@@ -6,6 +6,9 @@
  */
 
 export const queryKeys = {
+  auth: {
+    me: ['auth', 'me'] as const,
+  },
   listings: {
     all: ['listings'] as const,
     lists: () => [...queryKeys.listings.all, 'list'] as const,
@@ -56,7 +59,6 @@ export const queryKeys = {
     all: ['admin'] as const,
     stats: () => [...queryKeys.admin.all, 'stats'] as const,
     reports: (status?: string) => [...queryKeys.admin.all, 'reports', status ?? 'all'] as const,
-    isAdmin: (userId: string) => [...queryKeys.admin.all, 'is-admin', userId] as const,
     users: () => [...queryKeys.admin.all, 'users'] as const,
     listings: () => [...queryKeys.admin.all, 'listings'] as const,
     requests: () => [...queryKeys.admin.all, 'requests'] as const,

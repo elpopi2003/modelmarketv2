@@ -50,7 +50,12 @@ export function OfferCard({ item, box }: { item: OfferListItem; box: 'received' 
           className="size-16 shrink-0 overflow-hidden rounded-lg border border-border md:size-20"
         >
           {item.subjectCover ? (
-            <img src={item.subjectCover} alt="" loading="lazy" className="h-full w-full object-cover" />
+            <img
+              src={item.subjectCover}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="mm-grid-subtle grid h-full w-full place-items-center">
               <span className="mm-mono text-[0.6rem] text-muted-foreground">SIN FOTO</span>

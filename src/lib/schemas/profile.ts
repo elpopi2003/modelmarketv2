@@ -17,7 +17,7 @@ export type ProfileFormValues = z.infer<typeof profileSchema>
 /** Cambio de contraseña (Configuración). */
 export const passwordSchema = z
   .object({
-    password: z.string().min(6, 'Mínimo 6 caracteres').max(72, 'Máximo 72 caracteres'),
+    password: z.string().min(8, 'Mínimo 8 caracteres').max(200, 'Máximo 200 caracteres'),
     confirm: z.string(),
   })
   .refine((data) => data.password === data.confirm, {

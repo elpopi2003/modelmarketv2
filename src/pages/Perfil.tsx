@@ -274,7 +274,9 @@ export default function Perfil() {
             {status && (
               <p
                 className={
-                  status.kind === 'ok' ? 'text-sm text-muted-foreground' : 'text-sm text-destructive'
+                  status.kind === 'ok'
+                    ? 'text-sm text-muted-foreground'
+                    : 'text-sm text-destructive'
                 }
               >
                 {status.message}

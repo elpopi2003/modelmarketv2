@@ -25,8 +25,20 @@ const selectClass =
 
 /** Escalas ofrecidas en el desplegable. "Otra" abre un campo para escribir una a mano. */
 const SCALE_OPTIONS = [
-  '1:144', '1:72', '1:48', '1:35', '1:32', '1:12', '1:24', '1:25',
-  '1:350', '1:700', '1:200', '1:87', '1:160', '1:220',
+  '1:144',
+  '1:72',
+  '1:48',
+  '1:35',
+  '1:32',
+  '1:12',
+  '1:24',
+  '1:25',
+  '1:350',
+  '1:700',
+  '1:200',
+  '1:87',
+  '1:160',
+  '1:220',
 ] as const
 
 function FieldError({ message }: { message?: string }) {
@@ -160,7 +172,14 @@ export function ListingForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="priceEuros">Precio (€)</Label>
-          <Input id="priceEuros" type="number" step="0.01" min="0" placeholder="0.00" {...register('priceEuros')} />
+          <Input
+            id="priceEuros"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0.00"
+            {...register('priceEuros')}
+          />
           <FieldError message={errors.priceEuros?.message} />
         </div>
         <label className="flex items-start gap-2.5 self-end rounded-lg border border-border bg-muted/40 p-3">
@@ -291,11 +310,19 @@ export function ListingForm({
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium leading-none">Método de entrega</legend>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4 rounded border-input" {...register('shippingInpost')} />
+          <input
+            type="checkbox"
+            className="size-4 rounded border-input"
+            {...register('shippingInpost')}
+          />
           Envíos disponibles
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" className="size-4 rounded border-input" {...register('handDelivery')} />
+          <input
+            type="checkbox"
+            className="size-4 rounded border-input"
+            {...register('handDelivery')}
+          />
           Entrega en mano
         </label>
         <FieldError message={errors.shippingInpost?.message} />
@@ -313,18 +340,17 @@ export function ListingForm({
           </p>
           <p>
             ModelMarket actúa exclusivamente como plataforma de contacto entre usuarios y no
-            interviene en la entrega de los artículos. La logística del envío —incluida la
-            elección del proveedor o empresa de transporte, la generación y contratación de
-            etiquetas, el embalaje, los plazos, el coste del porte y su abono— es
-            responsabilidad única del vendedor y del comprador, quienes deberán acordar sus
-            condiciones de mutuo acuerdo.
+            interviene en la entrega de los artículos. La logística del envío —incluida la elección
+            del proveedor o empresa de transporte, la generación y contratación de etiquetas, el
+            embalaje, los plazos, el coste del porte y su abono— es responsabilidad única del
+            vendedor y del comprador, quienes deberán acordar sus condiciones de mutuo acuerdo.
           </p>
           <p>
-            Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna
-            derivada de las operaciones entre sus usuarios y, en particular, no percibe comisión
-            sobre las ventas. Cualquier pago se efectúa de forma directa y exclusiva entre
-            comprador y vendedor, quedando ModelMarket ajena y exenta de toda responsabilidad
-            respecto de dichas transacciones.
+            Asimismo, ModelMarket no recauda, custodia ni entrega cantidad económica alguna derivada
+            de las operaciones entre sus usuarios y, en particular, no percibe comisión sobre las
+            ventas. Cualquier pago se efectúa de forma directa y exclusiva entre comprador y
+            vendedor, quedando ModelMarket ajena y exenta de toda responsabilidad respecto de dichas
+            transacciones.
           </p>
         </div>
       )}

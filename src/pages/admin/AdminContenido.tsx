@@ -10,7 +10,12 @@ import {
 } from '@/hooks/useAdmin'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
-import { formatPriceShort, formatRelativeTime, REQUEST_STATUS_LABELS, STATUS_LABELS } from '@/lib/format'
+import {
+  formatPriceShort,
+  formatRelativeTime,
+  REQUEST_STATUS_LABELS,
+  STATUS_LABELS,
+} from '@/lib/format'
 import { AdminNav } from '@/components/admin/AdminNav'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -96,12 +101,10 @@ function ContentRow({
 
       {confirming ? (
         <div className="flex w-full flex-col gap-2 rounded-md border-2 border-destructive/60 bg-destructive/10 p-3 sm:w-auto">
-          <p className="text-sm font-semibold text-destructive">
-            ¿Eliminar definitivamente?
-          </p>
+          <p className="text-sm font-semibold text-destructive">¿Eliminar definitivamente?</p>
           <p className="max-w-xs text-xs text-muted-foreground">
-            Se borrarán también sus ofertas, conversaciones y los reportes asociados. No se
-            puede deshacer.
+            Se borrarán también sus ofertas, conversaciones y los reportes asociados. No se puede
+            deshacer.
           </p>
           <div className="flex gap-2">
             <Button variant="destructive" size="sm" disabled={busy} onClick={onDelete}>
@@ -162,8 +165,7 @@ export default function AdminContenido() {
 
   // Se filtra por título y por estado, para poder localizar «lo retirado» de un vistazo.
   const listingsFiltrados = useMemo(
-    () =>
-      (listings ?? []).filter((l) => matchesSearch(search, [l.title, STATUS_LABELS[l.status]])),
+    () => (listings ?? []).filter((l) => matchesSearch(search, [l.title, STATUS_LABELS[l.status]])),
     [listings, search],
   )
   const requestsFiltradas = useMemo(
@@ -173,8 +175,7 @@ export default function AdminContenido() {
       ),
     [requests, search],
   )
-  const items: (Listing | Request)[] =
-    tab === 'listings' ? listingsFiltrados : requestsFiltradas
+  const items: (Listing | Request)[] = tab === 'listings' ? listingsFiltrados : requestsFiltradas
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">

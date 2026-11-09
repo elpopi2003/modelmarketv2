@@ -10,6 +10,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    // En desarrollo, /api va al servidor Node (npm run server:dev). Mismo origen para el
+    // navegador: la cookie de sesión funciona igual que en producción.
+    proxy: { '/api': 'http://127.0.0.1:3001' },
+  },
   build: {
     rollupOptions: {
       output: {

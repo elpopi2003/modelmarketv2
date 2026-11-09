@@ -22,7 +22,10 @@ export default function EditarAnuncio() {
     return (
       <section className="mx-auto max-w-2xl px-6 py-24 text-center">
         <h1 className="text-2xl font-bold tracking-tight">Anuncio no encontrado</h1>
-        <Link to="/dashboard" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
+        <Link
+          to="/dashboard"
+          className="mt-4 inline-block text-primary underline-offset-4 hover:underline"
+        >
           Volver al panel
         </Link>
       </section>
@@ -33,7 +36,10 @@ export default function EditarAnuncio() {
     return (
       <section className="mx-auto max-w-2xl px-6 py-24 text-center">
         <h1 className="text-2xl font-bold tracking-tight">No puedes editar este anuncio</h1>
-        <Link to="/dashboard" className="mt-4 inline-block text-primary underline-offset-4 hover:underline">
+        <Link
+          to="/dashboard"
+          className="mt-4 inline-block text-primary underline-offset-4 hover:underline"
+        >
           Volver al panel
         </Link>
       </section>

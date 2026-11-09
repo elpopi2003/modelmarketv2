@@ -108,7 +108,11 @@ export async function setUserTier(
   userId: string,
   tier: SubscriptionPlan,
 ): Promise<ModerationResult & { stripeAction: string }> {
-  const d = await invokeAdminFunction('admin-set-tier', { userId, tier }, 'No se pudo cambiar el plan')
+  const d = await invokeAdminFunction(
+    'admin-set-tier',
+    { userId, tier },
+    'No se pudo cambiar el plan',
+  )
   return {
     emailSent: Boolean(d.emailSent),
     emailError: (d.emailError as string) ?? null,

@@ -69,8 +69,9 @@ export default function Precios() {
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight">Elige tu plan</h1>
         <p className="mt-3 text-muted-foreground">
-          Vende y compra con <span className="mm-underline-accent font-semibold">0% de comisión</span>.
-          Mejora solo cuando lo necesites.
+          Vende y compra con{' '}
+          <span className="mm-underline-accent font-semibold">0% de comisión</span>. Mejora solo
+          cuando lo necesites.
         </p>
       </div>
 
