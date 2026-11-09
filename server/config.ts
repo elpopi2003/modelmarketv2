@@ -12,8 +12,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
   /** Origen público de la app, sin barra final (enlaces en emails, cookies, CORS en dev). */
   APP_URL: z.string().url().default('http://localhost:5173'),
-  /** mysql://usuario:contraseña@host:3306/base_de_datos */
-  DATABASE_URL: z.string().startsWith('mysql://'),
+  /** mysql://usuario:contraseña@host:3306/base_de_datos (o DB_HOST/DB_USER/... por partes). */
+  DATABASE_URL: z
+    .string({ required_error: 'Falta DATABASE_URL (o DB_HOST, DB_USER, DB_PASSWORD y DB_NAME)' })
+    .startsWith('mysql://'),
   /** Carpeta de la app compilada (vite build). Vacío = no servir el frontend (dev). */
   STATIC_DIR: z.string().default(''),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
@@ -39,8 +41,23 @@ const envSchema = z.object({
 
 export type Config = z.infer<typeof envSchema>
 
+/**
+ * Si no hay DATABASE_URL pero sí DB_HOST/DB_USER/DB_PASSWORD/DB_NAME (como los muestra
+ * Plesk), se compone la URL codificando cada parte: las contraseñas generadas por Plesk
+ * llevan símbolos (`@`, `#`, `/`…) que romperían una URL escrita a mano.
+ */
+export function databaseUrlFromParts(env: NodeJS.ProcessEnv): string | undefined {
+  const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = env
+  if (!DB_HOST || !DB_USER || !DB_NAME) return undefined
+  const enc = encodeURIComponent
+  return `mysql://${enc(DB_USER)}:${enc(DB_PASSWORD ?? '')}@${DB_HOST}:${DB_PORT || 3306}/${enc(DB_NAME)}`
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
-  const parsed = envSchema.safeParse(env)
+  const parsed = envSchema.safeParse({
+    ...env,
+    DATABASE_URL: env.DATABASE_URL || databaseUrlFromParts(env),
+  })
   if (!parsed.success) {
     const detail = parsed.error.issues
       .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
