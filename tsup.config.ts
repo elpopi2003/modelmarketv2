@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'tsup'
+
+const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string }
 
 // Empaqueta el servidor (server/index.ts) en server-dist/index.mjs. Las dependencias de
 // package.json quedan externas (se instalan con npm ci en el VPS); el código compartido
@@ -14,4 +17,6 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   splitting: false,
+  // Versión de package.json fijada al compilar (Passenger no define npm_package_version).
+  define: { __APP_VERSION__: JSON.stringify(version) },
 })
