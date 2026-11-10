@@ -29,7 +29,24 @@ const toMessage = (e: OutgoingEmail) => ({
 })
 
 /**
- * Entrega por el Postfix del propio VPS. Sin TLS a propósito: la conexión es por loopback
+ * Entrega por el comando `sendmail` del VPS (el mismo camino que usan PHP y Plesk).
+ *
+ * Es el transporte de producción en Plesk: su Postfix rechaza el SMTP sin autenticar
+ * incluso desde 127.0.0.1 ("Relay access denied"), mientras que `sendmail` deja el correo
+ * en la cola local sin necesitar la contraseña de ningún buzón, y Plesk lo firma con DKIM.
+ * `-f` (remitente del sobre) lo pone nodemailer a partir de `from`.
+ */
+export function sendmailTransport(path: string): MailTransport {
+  const t = nodemailer.createTransport({ sendmail: true, newline: 'unix', path })
+  return {
+    async send(email) {
+      await t.sendMail(toMessage(email))
+    },
+  }
+}
+
+/**
+ * Entrega por SMTP sin autenticar a un Postfix que lo permita. Sin TLS a propósito: la conexión es por loopback
  * (127.0.0.1) y el certificado del servidor de correo no está emitido para "localhost",
  * así que STARTTLS fallaría la verificación sin aportar nada. Postfix se encarga de
  * firmar con DKIM y de usar TLS hacia los servidores de destino.
@@ -68,9 +85,14 @@ export function fileTransport(dir: string): MailTransport {
 }
 
 export function createTransport(config: Config): MailTransport {
-  return config.MAIL_TRANSPORT === 'smtp'
-    ? smtpTransport(config)
-    : fileTransport(config.MAIL_FILE_DIR)
+  switch (config.MAIL_TRANSPORT) {
+    case 'sendmail':
+      return sendmailTransport(config.SENDMAIL_PATH)
+    case 'smtp':
+      return smtpTransport(config)
+    case 'file':
+      return fileTransport(config.MAIL_FILE_DIR)
+  }
 }
 
 /** Para tests: guarda los emails en memoria. */

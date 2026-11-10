@@ -25,10 +25,12 @@ const envSchema = z.object({
 
   /**
    * Cómo salen los emails:
-   *  - smtp: por el Postfix del VPS (producción y staging).
+   *  - sendmail: por el comando sendmail del VPS (producción y staging en Plesk).
+   *  - smtp: por SMTP sin autenticar (un Postfix que acepte relay local; Plesk no lo hace).
    *  - file: se guardan como .eml/.html en MAIL_FILE_DIR para verlos sin enviar nada (local).
    */
-  MAIL_TRANSPORT: z.enum(['smtp', 'file']).default('file'),
+  MAIL_TRANSPORT: z.enum(['sendmail', 'smtp', 'file']).default('file'),
+  SENDMAIL_PATH: z.string().default('/usr/sbin/sendmail'),
   SMTP_HOST: z.string().default('127.0.0.1'),
   SMTP_PORT: z.coerce.number().int().positive().default(25),
   MAIL_FROM: z.string().default('ModelMarket <info@modelmarket.es>'),
