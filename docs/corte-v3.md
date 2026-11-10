@@ -144,6 +144,9 @@ mysql -u admin -p"$(cat /etc/psa/.psa.shadow)" modelmarket_prod -e "INSERT IGNOR
 - [ ] Publicar un anuncio con foto; contactar y ofertar con una segunda cuenta.
 - [ ] Contacto → llega a `hola@`.
 - [ ] mail-tester.com con un alta: SPF, DKIM y DMARC en verde.
+- [ ] **Staging**: cambiar `MAIL_LOGO_URL` a `https://modelmarket.es/brand/logo.png`. Hasta el corte
+      usa `https://modelmarket.es/logo.png` (el de la landing), porque el de staging está tras su
+      contraseña y los clientes de correo no pueden descargarlo; al retirar la landing desaparece.
 
 ---
 
