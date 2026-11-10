@@ -6,6 +6,7 @@
  */
 
 export const queryKeys = {
+  platform: ['platform'] as const,
   auth: {
     me: ['auth', 'me'] as const,
   },

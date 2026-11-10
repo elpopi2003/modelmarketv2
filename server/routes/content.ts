@@ -15,7 +15,7 @@ import {
   requestFiltersSchema,
   requestUpdateSchema,
 } from '../content/schemas'
-import { getPublicTiers, getUserTier } from '../content/tier'
+import { getPaidTier, getPublicTiers, getUserTier } from '../content/tier'
 import { viewerOf } from '../content/viewer'
 import { ok } from '../http/reply'
 import { notify } from '../messaging/notifications'
@@ -144,10 +144,13 @@ export const contentRoutes: FastifyPluginAsync = async (app) => {
     return ok({ favorited: false })
   })
 
-  // ── Plan (lectura; el pago con Stripe llega en M8d) ──────────────────────
-  app.get('/subscription', async (req) =>
-    ok({ tier: await getUserTier(db, requireAuth(req).userId) }),
-  )
+  // ── Plan (lectura; el pago con Stripe llega en la fase de pagos) ────────────
+  app.get('/subscription', async (req) => {
+    const { userId } = requireAuth(req)
+    return ok({ tier: await getUserTier(db, userId), paidTier: await getPaidTier(db, userId) })
+  })
+  // Datos públicos de la plataforma que el frontend necesita sin sesión.
+  app.get('/platform', async () => ok({ betaAllPro: config.BETA_ALL_PRO }))
   app.get('/subscription/public-tiers', async (req) => {
     const { ids } = parse(idsQuerySchema, req.query)
     return ok(await getPublicTiers(db, ids))

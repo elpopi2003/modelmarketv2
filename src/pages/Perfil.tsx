@@ -8,6 +8,7 @@ import { fetchMyListings } from '@/lib/api/listings'
 import { fetchMyRequests } from '@/lib/api/requests'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
+import { usePlatform } from '@/hooks/usePlatform'
 import { useCustomerPortal, useSubscription } from '@/hooks/useSubscription'
 import { profileSchema, type ProfileFormValues } from '@/lib/schemas/profile'
 import { DEFAULT_TIER } from '@/lib/subscription'
@@ -47,6 +48,7 @@ export default function Perfil() {
   const { data: tier = DEFAULT_TIER } = useSubscription()
   const { data: stats } = useMyStats(user?.id)
   const portal = useCustomerPortal()
+  const { betaAllPro } = usePlatform()
   const fileRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<{ kind: 'ok' | 'error'; message: string } | null>(null)
   const [avatarBusy, setAvatarBusy] = useState(false)
@@ -188,7 +190,13 @@ export default function Perfil() {
 
           <div className={panel}>
             <h2 className="mb-3 font-display text-base font-extrabold">Suscripción</h2>
-            {tier === 'free' ? (
+            {betaAllPro && tier === 'pro' ? (
+              // Beta sin pagos: PRO de regalo, no hay suscripción que gestionar.
+              <p className="text-sm text-muted-foreground">
+                Durante la beta tienes <strong className="text-foreground">PRO gratis</strong>. Te
+                avisaremos antes de que lleguen los planes de pago.
+              </p>
+            ) : tier === 'free' ? (
               <Button asChild variant="accent" size="sm" className="w-full">
                 <Link to="/precios">Mejorar plan</Link>
               </Button>

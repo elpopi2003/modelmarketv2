@@ -16,6 +16,7 @@ import { healthRoutes } from './routes/health'
 import { messagingRoutes } from './routes/messaging'
 import { profileRoutes } from './routes/profiles'
 import { MAX_UPLOAD_BYTES } from './uploads/images'
+import { configureTiers } from './content/tier'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
@@ -40,6 +41,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     bodyLimit: 1024 * 1024,
   })
   app.decorate('deps', deps)
+  configureTiers({ betaAllPro: config.BETA_ALL_PRO })
 
   await app.register(cookie)
   // Límites por IP solo en las rutas que los declaran (login, alta, recuperación…). En

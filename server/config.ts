@@ -54,6 +54,15 @@ const envSchema = z.object({
    */
   RECAPTCHA_SECRET: z.string().default(''),
   RECAPTCHA_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.5),
+
+  /**
+   * Beta sin pagos: todas las cuentas tienen las ventajas PRO. Las insignias siguen
+   * mostrando solo planes de pago reales. Se apaga ("false") al integrar Stripe.
+   */
+  BETA_ALL_PRO: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 })
 
 export type Config = z.infer<typeof envSchema>

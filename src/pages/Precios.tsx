@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check, Minus } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { usePlatform } from '@/hooks/usePlatform'
 import { useCheckout } from '@/hooks/useSubscription'
 import {
   SUBSCRIPTION_TIERS,
@@ -45,6 +46,7 @@ export default function Precios() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const checkout = useCheckout()
+  const { betaAllPro } = usePlatform()
   const [notice, setNotice] = useState<string | null>(null)
 
   function handleSubscribe(tier: SubscriptionTier) {
@@ -69,10 +71,24 @@ export default function Precios() {
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight">Elige tu plan</h1>
         <p className="mt-3 text-muted-foreground">
-          Vende y compra con <span className="mm-underline-accent font-semibold">0% de comisión</span>.
-          Mejora solo cuando lo necesites.
+          Vende y compra con{' '}
+          <span className="mm-underline-accent font-semibold">0% de comisión</span>. Mejora solo
+          cuando lo necesites.
         </p>
       </div>
+
+      {betaAllPro && (
+        <div
+          role="status"
+          className="mx-auto mb-8 max-w-3xl rounded-md border-2 border-accent bg-accent/10 p-4 text-center"
+        >
+          <p className="font-display text-lg font-extrabold">Beta: PRO gratis para todos</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Mientras dure la beta, todas las cuentas tienen las ventajas PRO sin pagar nada. Te
+            avisaremos con tiempo antes de que lleguen los planes de pago.
+          </p>
+        </div>
+      )}
 
       {notice && (
         <p className="mb-6 rounded-md border border-border bg-muted p-3 text-center text-sm text-muted-foreground">
@@ -113,7 +129,13 @@ export default function Precios() {
                 {isFree ? (
                   <Button asChild variant="outline" className="w-full">
                     <Link to={user ? '/dashboard' : '/auth'}>
-                      {user ? 'Tu plan base' : 'Empezar gratis'}
+                      {user ? (betaAllPro ? 'Ir a mi panel' : 'Tu plan base') : 'Empezar gratis'}
+                    </Link>
+                  </Button>
+                ) : betaAllPro ? (
+                  <Button asChild variant={highlighted ? 'accent' : 'default'} className="w-full">
+                    <Link to={user ? '/dashboard' : '/auth'}>
+                      {user ? 'Ya lo tienes en la beta' : 'Pruébalo gratis'}
                     </Link>
                   </Button>
                 ) : (

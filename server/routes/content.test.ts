@@ -446,8 +446,14 @@ describe.skipIf(!TEST_DB_URL)('API de contenido', () => {
   it('plan: Free sin suscripción, PRO con una activa; las insignias solo muestran planes de pago', async () => {
     const free = await createTestUser(db)
     const pro = await createTestUser(db, { tier: 'pro' })
-    expect((await call('GET', '/subscription', free.cookie)).json().data).toEqual({ tier: 'free' })
-    expect((await call('GET', '/subscription', pro.cookie)).json().data).toEqual({ tier: 'pro' })
+    expect((await call('GET', '/subscription', free.cookie)).json().data).toEqual({
+      tier: 'free',
+      paidTier: 'free',
+    })
+    expect((await call('GET', '/subscription', pro.cookie)).json().data).toEqual({
+      tier: 'pro',
+      paidTier: 'pro',
+    })
     expect(
       (await call('GET', `/subscription/public-tiers?ids=${free.id},${pro.id}`)).json().data,
     ).toEqual({
