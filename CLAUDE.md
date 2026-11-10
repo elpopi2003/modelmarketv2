@@ -34,7 +34,12 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
     conectado (`useAuth` → `/api/auth/me`, pantallas de verificar/recuperar/restablecer).
     Desplegado en `staging.modelmarket.es` con la extensión Git de Plesk
     (`deploy/plesk-deploy.sh`); mail-tester 8.5/10 con SPF, DKIM y DMARC correctos.
-  - [ ] **M8b · Contenido** — anuncios, peticiones, catálogos, fotos en disco, favoritos, filtros.
+  - [x] **M8b · Contenido** — anuncios, peticiones, catálogos (sembrados con los IDs de
+    Supabase), favoritos, perfiles y suscripciones (lectura). Reglas de RLS/triggers en el
+    servidor con tests (visibilidad, suspendidos, moderación por `previous_status`). El plan se
+    cumple en el servidor: límites de activos, fotos y retardo de 24 h del Free (en v2 no se
+    aplicaba; la UI avisa «Público en X h»). Fotos en disco (`UPLOADS_DIR`, fuera del deploy):
+    WebP 1600 px + miniatura 600 px, sin EXIF/GPS, solo subidas propias, borrado al dejar de usarse.
   - [ ] **M8c · Comunicación** — conversaciones, mensajes, ofertas, notificaciones y sus emails.
   - [ ] **M8d · Negocio y admin** — Stripe, panel admin, contacto, borrado de cuenta.
   - [ ] **M8e · Corte** — migración de datos y fotos, ensayo en staging, corte, retirada de
