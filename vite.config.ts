@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     // En desarrollo, /api va al servidor Node (npm run server:dev). Mismo origen para el
     // navegador: la cookie de sesión funciona igual que en producción.
-    proxy: { '/api': 'http://127.0.0.1:3001' },
+    proxy: { '/api': 'http://127.0.0.1:3001', '/uploads': 'http://127.0.0.1:3001' },
   },
   build: {
     rollupOptions: {

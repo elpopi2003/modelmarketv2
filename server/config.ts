@@ -20,6 +20,13 @@ const envSchema = z.object({
   STATIC_DIR: z.string().default(''),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
+  /**
+   * Carpeta de fotos y avatares subidos. En Plesk, una ruta absoluta FUERA de la carpeta
+   * que despliega Git (p. ej. /var/www/vhosts/modelmarket.es/uploads-staging), para que un
+   * despliegue no pueda tocarla.
+   */
+  UPLOADS_DIR: z.string().default('server/.local/uploads'),
+
   /** Días que dura una sesión sin actividad antes de caducar. */
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
 

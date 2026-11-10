@@ -130,3 +130,19 @@ export function compareTiers(a: SubscriptionTier, b: SubscriptionTier): number {
 export function isAtLeast(tier: SubscriptionTier, minimum: SubscriptionTier): boolean {
   return compareTiers(tier, minimum) >= 0
 }
+
+/**
+ * Estados que cuentan para el límite de "anuncios/peticiones activos" del plan. Lo vendido,
+ * archivado o retirado por moderación no ocupa hueco. Compartido con el servidor, que es
+ * quien hace cumplir el límite.
+ */
+export const LISTING_STATUSES_COUNTING = ['draft', 'active', 'reserved'] as const
+export const REQUEST_STATUSES_COUNTING = ['open'] as const
+
+export function countsTowardListingLimit(status: string): boolean {
+  return (LISTING_STATUSES_COUNTING as readonly string[]).includes(status)
+}
+
+export function countsTowardRequestLimit(status: string): boolean {
+  return (REQUEST_STATUSES_COUNTING as readonly string[]).includes(status)
+}

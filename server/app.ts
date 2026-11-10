@@ -1,7 +1,8 @@
 import Fastify, { type FastifyError, type FastifyInstance } from 'fastify'
 import cookie from '@fastify/cookie'
+import multipart from '@fastify/multipart'
 import fastifyStatic from '@fastify/static'
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Config } from './config'
 import type { Db } from './db/client'
@@ -9,7 +10,10 @@ import rateLimit from '@fastify/rate-limit'
 import { authPlugin } from './auth/plugin'
 import { HttpError, fail, forbidden } from './http/reply'
 import { authRoutes } from './routes/auth'
+import { contentRoutes } from './routes/content'
 import { healthRoutes } from './routes/health'
+import { profileRoutes } from './routes/profiles'
+import { MAX_UPLOAD_BYTES } from './uploads/images'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
@@ -58,6 +62,12 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
           ),
         )
     }
+    if (err.statusCode === 413) {
+      const mb = Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)
+      return reply
+        .status(413)
+        .send(fail('too_large', `La imagen pesa demasiado (máximo ${mb} MB).`))
+    }
     if (err.validation || (err.statusCode && err.statusCode >= 400 && err.statusCode < 500)) {
       return reply.status(err.statusCode ?? 400).send(fail('bad_request', 'Petición no válida.'))
     }
@@ -82,6 +92,9 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       await api.register(authPlugin)
       await api.register(healthRoutes)
       await api.register(authRoutes)
+      await api.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 } })
+      await api.register(contentRoutes)
+      await api.register(profileRoutes)
       api.setNotFoundHandler((_req, reply) =>
         reply.status(404).send(fail('not_found', 'Ruta no encontrada.')),
       )
@@ -89,13 +102,26 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
     { prefix: '/api' },
   )
 
+  // Fotos y avatares subidos. Los nombres son UUID que nunca se reutilizan, así que se
+  // pueden cachear para siempre.
+  const uploadsDir = resolve(config.UPLOADS_DIR)
+  mkdirSync(uploadsDir, { recursive: true })
+  await app.register(fastifyStatic, {
+    root: uploadsDir,
+    prefix: '/uploads/',
+    decorateReply: false,
+    index: false,
+    maxAge: '365d',
+    immutable: true,
+  })
+
   // En producción el mismo proceso sirve la SPA compilada. Cualquier ruta que no sea
   // /api ni un fichero existente devuelve index.html (React Router decide la página).
   const staticDir = config.STATIC_DIR ? resolve(config.STATIC_DIR) : ''
   if (staticDir && existsSync(staticDir)) {
     await app.register(fastifyStatic, { root: staticDir, wildcard: false })
     app.setNotFoundHandler((req, reply) => {
-      if (req.method !== 'GET' || req.url.startsWith('/api/')) {
+      if (req.method !== 'GET' || req.url.startsWith('/api/') || req.url.startsWith('/uploads/')) {
         return reply.status(404).send(fail('not_found', 'Ruta no encontrada.'))
       }
       return reply.sendFile('index.html')

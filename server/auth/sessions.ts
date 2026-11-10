@@ -37,6 +37,8 @@ export interface SessionAuth {
   userId: string
   email: string
   emailVerified: boolean
+  /** Rol admin, resuelto en la misma consulta que la sesión. */
+  isAdmin: boolean
 }
 
 /**
@@ -64,6 +66,9 @@ export async function resolveSession(
       'u.email',
       'u.email_verified_at',
       'us.user_id as suspended',
+      sql<number>`EXISTS (SELECT 1 FROM user_roles r WHERE r.user_id = s.user_id AND r.role = 'admin')`.as(
+        'is_admin',
+      ),
     ])
     .where('s.id', '=', id)
     .executeTakeFirst()
@@ -88,6 +93,7 @@ export async function resolveSession(
     userId: row.user_id,
     email: row.email,
     emailVerified: row.email_verified_at !== null,
+    isAdmin: Number(row.is_admin) === 1,
   }
 }
 
