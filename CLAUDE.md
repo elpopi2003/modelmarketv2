@@ -24,6 +24,21 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
   (credenciales vía `E2E_EMAIL`/`E2E_PASSWORD`, nunca en el repo). Los e2e que mutan datos
   (publicar con foto, mensajería entre dos usuarios, checkout Stripe) se dejan fuera a propósito
   para no ensuciar el backend real; se verifican a mano y por los tests de Vitest de la lógica.
+- [ ] **M8 · v3.0: todo en el VPS** (rama `v3.0`; `main` = v2.0 hasta el corte) — sustituir
+  Supabase y Resend por backend propio en el VPS Plesk (Ubuntu 24.04, MariaDB 10.11, Postfix).
+  Servidor Node 22 + Fastify + Kysely en `server/`; Stripe y reCAPTCHA se mantienen.
+  - [x] **M8a · Base** — `server/` (config Zod, `{ ok, data, error }`, migraciones al arrancar),
+    esquema de usuarios/sesiones/perfiles/roles/suspensiones, autenticación propia (cookie
+    httpOnly, argon2id + bcrypt migrado, verificación de email, recuperación, CSRF por Origin,
+    rate limit), cola `email_outbox` con reintentos (transporte `sendmail` en Plesk), frontend
+    conectado (`useAuth` → `/api/auth/me`, pantallas de verificar/recuperar/restablecer).
+    Desplegado en `staging.modelmarket.es` con la extensión Git de Plesk
+    (`deploy/plesk-deploy.sh`); mail-tester 8.5/10 con SPF, DKIM y DMARC correctos.
+  - [ ] **M8b · Contenido** — anuncios, peticiones, catálogos, fotos en disco, favoritos, filtros.
+  - [ ] **M8c · Comunicación** — conversaciones, mensajes, ofertas, notificaciones y sus emails.
+  - [ ] **M8d · Negocio y admin** — Stripe, panel admin, contacto, borrado de cuenta.
+  - [ ] **M8e · Corte** — migración de datos y fotos, ensayo en staging, corte, retirada de
+    Supabase/Resend/landing, reescritura de este documento y de la política de privacidad.
 
 ### Desviaciones respecto al doc original (decididas)
 
