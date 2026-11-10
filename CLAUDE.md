@@ -54,6 +54,10 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
     (`npm run db:import-supabase`, ensayada en staging), guion `docs/corte-v3.md`, `main` en
     v3 y release `v3.0.0`. Pendiente: **puesta en producción, que espera a M8p**; producción
     arrancará vacía (v2 solo tenía cuentas de prueba).
+  - [x] **Importador masivo (admin)** — `/admin/importar`: Excel de colección + ZIP de imágenes
+    por referencia, vista previa con motivos y categorías a elegir, publicación con etiqueta
+    «Foto de catálogo» (`listings.catalog_photo`) y `manufacturer_ref` para no duplicar.
+    Guía en `docs/importador.md`; ZIP desde ModelKitLibrary con `scripts/modelkitlibrary-zip.py`.
   - [ ] **M8p · Pagos (aplazado, a estudiar)** — Stripe: checkout, portal, webhook al VPS
     (ruta fuera de la contraseña de staging, verificada por firma), cambio de plan desde admin
     (`TIER_CHANGES_ENABLED`) y cancelación de la suscripción al borrar una cuenta.

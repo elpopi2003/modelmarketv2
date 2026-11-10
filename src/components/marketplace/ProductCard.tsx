@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import type { Listing } from '@/lib/api/listings'
 import { formatPriceShort, pendingVisibilityLabel } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { CatalogPhotoBadge } from './CatalogPhotoBadge'
 import { ConditionBadge } from './ConditionBadge'
 import { OwnerActions } from './OwnerActions'
 import { ScaleTag } from './ScaleTag'
@@ -49,6 +50,7 @@ export function ProductCard({
   const moderated = listing.previous_status != null
   // Plan Free: se publica con 24 h de retardo. Solo su dueño lo ve mientras tanto.
   const pending = isOwn && !suspended ? pendingVisibilityLabel(listing.visible_at) : null
+  const isCatalogCover = !!listing.catalog_photo && listing.photos[0] === listing.catalog_photo
 
   return (
     <div
@@ -107,6 +109,8 @@ export function ProductCard({
               {pending}
             </span>
           )}
+
+          {isCatalogCover && <CatalogPhotoBadge className="absolute bottom-3 right-3" />}
 
           {suspended ? (
             <div className="absolute inset-0 flex items-center justify-center">

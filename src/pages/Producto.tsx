@@ -31,6 +31,7 @@ import {
 } from '@/lib/format'
 import { Seo } from '@/components/seo/Seo'
 import { absoluteUrl } from '@/lib/url'
+import { CatalogPhotoBadge } from '@/components/marketplace/CatalogPhotoBadge'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { OfferForm } from '@/components/marketplace/OfferForm'
 import { OffersPanel } from '@/components/marketplace/OffersPanel'
@@ -138,7 +139,11 @@ export default function Producto() {
   const memberSince = seller?.created_at ? new Date(seller.created_at).getFullYear() : null
 
   const ConditionIcon =
-    listing.condition === 'sealed' ? Package : listing.condition === 'opened' ? PackageOpen : Package
+    listing.condition === 'sealed'
+      ? Package
+      : listing.condition === 'opened'
+        ? PackageOpen
+        : Package
 
   async function handleContact() {
     if (!user) {
@@ -238,6 +243,9 @@ export default function Producto() {
               </div>
             )}
             <ConditionBadge condition={listing.condition} className="absolute right-3 top-3" />
+            {listing.catalog_photo && listing.photos[activePhoto] === listing.catalog_photo && (
+              <CatalogPhotoBadge className="absolute bottom-3 right-3" />
+            )}
             {listing.photos.length > 1 && (
               <span className="mm-mono absolute bottom-3 left-3 rounded-md border border-border bg-card/90 px-2 py-0.5 text-xs">
                 {activePhoto + 1} / {listing.photos.length}
@@ -271,6 +279,11 @@ export default function Producto() {
           <div className="flex flex-wrap items-center gap-3">
             {listing.scale && <ScaleTag scale={listing.scale} />}
             <span className="mm-mono text-xs text-muted-foreground">Ref: {listing.ref_number}</span>
+            {listing.manufacturer_ref && (
+              <span className="mm-mono text-xs text-muted-foreground">
+                Ref. fabricante: {listing.manufacturer_ref}
+              </span>
+            )}
           </div>
 
           {brandName && (
@@ -335,9 +348,7 @@ export default function Producto() {
 
                 {listing.shipping_inpost ? (
                   <TrustCell Icon={Truck} tone="bg-sealed/10 text-sealed" title="Envío disponible">
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      Puede enviar el producto
-                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Puede enviar el producto</p>
                   </TrustCell>
                 ) : (
                   <TrustCell
@@ -353,7 +364,9 @@ export default function Producto() {
           </div>
 
           {/* Precio */}
-          <div className={cn(panel, 'hover:border-primary hover:shadow-lg hover:shadow-primary/10')}>
+          <div
+            className={cn(panel, 'hover:border-primary hover:shadow-lg hover:shadow-primary/10')}
+          >
             <div className="absolute right-0 top-0 size-20 rounded-bl-[3rem] bg-primary/5 transition-colors duration-300 group-hover:bg-primary/10" />
             <div className="relative z-10 p-6">
               <div className="mb-4 flex items-end justify-between gap-4">
@@ -398,9 +411,7 @@ export default function Producto() {
                 <OfferForm
                   listingId={listing.id}
                   suggestedAmountEuros={listing.price_cents / 100}
-                  minAmountEuros={
-                    listing.accepts_offers ? undefined : listing.price_cents / 100
-                  }
+                  minAmountEuros={listing.accepts_offers ? undefined : listing.price_cents / 100}
                   onSent={() => setOffering(false)}
                 />
               ) : (

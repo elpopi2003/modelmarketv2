@@ -3,7 +3,12 @@ import { api, qs } from './http'
 
 // Los tipos siguen la forma de las filas de v2 (snake_case): el servidor devuelve los
 // mismos campos para que los componentes no cambien.
-export type Listing = Database['public']['Tables']['listings']['Row']
+export type Listing = Database['public']['Tables']['listings']['Row'] & {
+  /** Referencia del fabricante (p. ej. Tamiya 24229). La rellena el importador. */
+  manufacturer_ref?: string | null
+  /** Foto que es imagen de catálogo (caja oficial), no una foto real del artículo. */
+  catalog_photo?: string | null
+}
 export type ListingInsert = Database['public']['Tables']['listings']['Insert']
 export type ListingUpdate = Database['public']['Tables']['listings']['Update']
 

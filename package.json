@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "optimize:hero": "node scripts/optimize-hero.mjs",
     "test:e2e": "playwright test",
-    "server:dev": "tsx watch server/index.ts",
+    "server:dev": "tsx watch --exclude \"server/.local/**\" server/index.ts",
     "server:build": "tsup",
     "server:start": "node server/start.cjs",
     "db:migrate": "tsx server/scripts/migrate.ts up",

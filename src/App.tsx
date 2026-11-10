@@ -36,6 +36,7 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'))
 const AdminReportes = lazy(() => import('@/pages/admin/AdminReportes'))
 const AdminUsuarios = lazy(() => import('@/pages/admin/AdminUsuarios'))
 const AdminContenido = lazy(() => import('@/pages/admin/AdminContenido'))
+const AdminImportar = lazy(() => import('@/pages/admin/AdminImportar'))
 const PublicarAnuncio = lazy(() => import('@/pages/PublicarAnuncio'))
 const EditarAnuncio = lazy(() => import('@/pages/EditarAnuncio'))
 
@@ -95,6 +96,7 @@ function App() {
               <Route path="admin/reportes" element={<AdminReportes />} />
               <Route path="admin/usuarios" element={<AdminUsuarios />} />
               <Route path="admin/contenido" element={<AdminContenido />} />
+              <Route path="admin/importar" element={<AdminImportar />} />
             </Route>
           </Route>
         </Route>

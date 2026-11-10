@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Flag, LayoutDashboard, Package, Users } from 'lucide-react'
+import { FileSpreadsheet, Flag, LayoutDashboard, Package, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
@@ -7,6 +7,7 @@ const LINKS = [
   { to: '/admin/reportes', label: 'Moderación', Icon: Flag, end: false },
   { to: '/admin/usuarios', label: 'Usuarios', Icon: Users, end: false },
   { to: '/admin/contenido', label: 'Contenido', Icon: Package, end: false },
+  { to: '/admin/importar', label: 'Importar', Icon: FileSpreadsheet, end: false },
 ]
 
 /** Navegación entre secciones del panel de administración. */

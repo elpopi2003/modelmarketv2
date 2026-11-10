@@ -65,6 +65,11 @@ export function upload<T>(path: string, file: File): Promise<T> {
   return request<T>(path, { method: 'POST', body: form })
 }
 
+/** Envía un formulario con varios campos y ficheros (multipart). */
+export function postForm<T>(path: string, form: FormData): Promise<T> {
+  return request<T>(path, { method: 'POST', body: form })
+}
+
 /** Query string a partir de un objeto. Omite undefined, null y ''. */
 export function qs(params: Record<string, string | number | undefined | null>): string {
   const sp = new URLSearchParams()
