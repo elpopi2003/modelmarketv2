@@ -34,3 +34,6 @@ export const resetPassword = (token: string, password: string) =>
 
 export const changePassword = (password: string) =>
   api<{ changed: true }>('/auth/change-password', { body: { password } })
+
+/** Baja de la propia cuenta: borra todo y envía la confirmación por email. */
+export const deleteOwnAccount = () => api<{ deleted: true }>('/account', { method: 'DELETE' })

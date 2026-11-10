@@ -17,10 +17,9 @@ import {
   Trash2,
   User,
 } from 'lucide-react'
-import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
-import { changePassword } from '@/lib/api/auth'
+import { changePassword, deleteOwnAccount } from '@/lib/api/auth'
 import {
   passwordSchema,
   profileSchema,
@@ -224,9 +223,7 @@ export default function Configuracion() {
     setDeleteBusy(true)
     setDeleteError(null)
     try {
-      const { data, error } = await supabase.functions.invoke('delete-account')
-      if (error) throw error
-      if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo eliminar la cuenta')
+      await deleteOwnAccount()
       await signOut()
       navigate('/', { replace: true })
     } catch (error) {

@@ -29,6 +29,9 @@ import { Input } from '@/components/ui/input'
 import { cn, matchesSearch } from '@/lib/utils'
 import type { SubscriptionPlan } from '@/integrations/supabase/types'
 
+/** El cambio de plan actúa sobre Stripe: se activa en la fase de pagos de v3. */
+const TIER_CHANGES_ENABLED = false
+
 const TIERS: SubscriptionPlan[] = ['free', 'pro', 'retail']
 const TIER_LABEL: Record<SubscriptionPlan, string> = {
   free: 'Free',
@@ -154,16 +157,20 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
       )}
 
       {/* Plan. Cambiarlo actúa sobre Stripe, así que no se aplica al soltar el desplegable:
-          hace falta confirmar, y se dice antes qué va a pasar con el cobro. */}
+          hace falta confirmar, y se dice antes qué va a pasar con el cobro.
+          Desactivado hasta la fase de pagos de v3 (TIER_CHANGES_ENABLED). */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <label htmlFor={`tier-${user.id}`} className="mm-mono text-xs uppercase text-muted-foreground">
+        <label
+          htmlFor={`tier-${user.id}`}
+          className="mm-mono text-xs uppercase text-muted-foreground"
+        >
           Plan
         </label>
         <select
           id={`tier-${user.id}`}
           className="h-9 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={tier}
-          disabled={busy}
+          disabled={busy || !TIER_CHANGES_ENABLED}
           onChange={(e) => setTierValue(e.target.value as SubscriptionPlan)}
         >
           {TIERS.map((t) => (
@@ -172,7 +179,12 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
             </option>
           ))}
         </select>
-        {tier !== user.tier && (
+        {!TIER_CHANGES_ENABLED && (
+          <p className="w-full text-xs text-muted-foreground">
+            El cambio de plan desde aquí estará disponible cuando se integren los pagos.
+          </p>
+        )}
+        {TIER_CHANGES_ENABLED && tier !== user.tier && (
           <>
             <Button
               size="sm"
@@ -276,8 +288,8 @@ function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
             Motivo de la suspensión
           </label>
           <p className="mb-2 text-xs text-muted-foreground">
-            Se le envía tal cual por email, así que escríbelo pensando en que lo va a leer.
-            No podrá entrar y sus anuncios y peticiones dejarán de verse.
+            Se le envía tal cual por email, así que escríbelo pensando en que lo va a leer. No podrá
+            entrar y sus anuncios y peticiones dejarán de verse.
           </p>
           <textarea
             id={`reason-${user.id}`}
@@ -377,9 +389,7 @@ export default function AdminUsuarios() {
         </div>
       ) : filtrados.length === 0 ? (
         <div className="mt-6 rounded-lg border-2 border-dashed border-border p-12 text-center">
-          <p className="text-muted-foreground">
-            Ningún usuario coincide con «{search}».
-          </p>
+          <p className="text-muted-foreground">Ningún usuario coincide con «{search}».</p>
         </div>
       ) : (
         <div className="mt-6 space-y-4">

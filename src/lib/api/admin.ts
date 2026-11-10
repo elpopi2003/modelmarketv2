@@ -1,8 +1,8 @@
-import { supabase } from '@/integrations/supabase/client'
-import { handleSupabaseError } from '@/lib/errors'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
 import type { SubscriptionPlan } from '@/integrations/supabase/types'
+import { AppError } from '@/lib/errors'
+import { api } from './http'
 
 export interface AdminUser {
   id: string
@@ -23,134 +23,65 @@ export interface AdminUser {
   suspension_reason: string | null
 }
 
-/** Usuarios con email y actividad. La RPC comprueba el rol en la BD. */
-export async function fetchAdminUsers(): Promise<AdminUser[]> {
-  const { data, error } = await supabase.rpc('admin_users')
-  if (error) handleSupabaseError(error)
-  return (data ?? []) as AdminUser[]
-}
+/** Usuarios con email y actividad. El servidor comprueba el rol. */
+export const fetchAdminUsers = () => api<AdminUser[]>('/admin/users')
 
-/** Promueve o degrada a administrador (la BD impide auto-degradarse y quedarse sin admins). */
+/** Promueve o degrada a administrador (nadie se degrada a sí mismo y siempre queda uno). */
 export async function setUserAdmin(userId: string, makeAdmin: boolean): Promise<void> {
-  const { error } = await supabase.rpc('admin_set_admin', {
-    _user_id: userId,
-    _make_admin: makeAdmin,
-  })
-  if (error) handleSupabaseError(error)
+  await api(`/admin/users/${userId}/admin`, { method: 'PUT', body: { makeAdmin } })
 }
 
-/** Elimina la cuenta de otro usuario vía Edge Function (rol verificado server-side). */
+/** Elimina la cuenta de otro usuario (con email de aviso). */
 export async function deleteUserAsAdmin(userId: string): Promise<void> {
-  await invokeAdminFunction('admin-delete-user', { userId }, 'No se pudo eliminar el usuario')
-}
-
-/**
- * Invoca una Edge Function y devuelve su `data`, con el mensaje de error de verdad.
- *
- * `supabase.functions.invoke` no lee el cuerpo cuando la respuesta no es 2xx: lanza un
- * `FunctionsHttpError` genérico ("non-2xx status code") y deja la explicación dentro de
- * `error.context`. Sin esto, todo el cuidado puesto en los mensajes del servidor se pierde
- * justo donde hace falta, y quien administra no sabe qué ha pasado ni qué hacer.
- */
-async function invokeAdminFunction(
-  name: string,
-  body: Record<string, unknown>,
-  fallback: string,
-): Promise<Record<string, unknown>> {
-  const { data, error } = await supabase.functions.invoke(name, { body })
-
-  if (error) {
-    const context = (error as { context?: Response }).context
-    if (context && typeof context.json === 'function') {
-      const cuerpo = await context.json().catch(() => null)
-      if (cuerpo?.error) throw new Error(cuerpo.error)
-    }
-    throw new Error(error.message || fallback)
-  }
-  if (data && data.ok === false) throw new Error(data.error ?? fallback)
-  return (data?.data ?? {}) as Record<string, unknown>
+  await api(`/admin/users/${userId}`, { method: 'DELETE' })
 }
 
 export interface ModerationResult {
-  /** El email pudo fallar sin que la acción se deshaga: hay que poder avisarlo. */
+  /** El email sale por la cola de envío; si fallara, se reintenta solo. */
   emailSent: boolean
   emailError: string | null
 }
 
 /**
- * Suspende una cuenta: bloquea el acceso y oculta su contenido. El motivo es obligatorio
- * porque se le envía a la persona por email.
+ * Suspende una cuenta: la saca de sus sesiones, oculta su contenido y le envía el motivo
+ * por email. El motivo es obligatorio.
  */
-export async function suspendUser(userId: string, reason: string): Promise<ModerationResult> {
-  const d = await invokeAdminFunction(
-    'admin-suspend-user',
-    { userId, action: 'suspend', reason },
-    'No se pudo suspender la cuenta',
-  )
-  return { emailSent: Boolean(d.emailSent), emailError: (d.emailError as string) ?? null }
+export function suspendUser(userId: string, reason: string): Promise<ModerationResult> {
+  return api<ModerationResult>(`/admin/users/${userId}/suspend`, { body: { reason } })
 }
 
 /** Levanta la suspensión: devuelve el acceso y vuelve a mostrar su contenido. */
-export async function unsuspendUser(userId: string): Promise<ModerationResult> {
-  const d = await invokeAdminFunction(
-    'admin-suspend-user',
-    { userId, action: 'unsuspend' },
-    'No se pudo reactivar la cuenta',
-  )
-  return { emailSent: Boolean(d.emailSent), emailError: (d.emailError as string) ?? null }
+export function unsuspendUser(userId: string): Promise<ModerationResult> {
+  return api<ModerationResult>(`/admin/users/${userId}/unsuspend`, { method: 'POST', body: {} })
 }
 
 /**
- * Cambia el plan de un usuario. Actúa también sobre Stripe (cancela o cambia el precio):
- * escribir solo en la base duraría hasta el siguiente evento del webhook.
+ * Cambio de plan desde administración. Actúa sobre Stripe, así que llega con la fase de
+ * pagos de v3; hasta entonces el panel lo tiene desactivado.
  */
 export async function setUserTier(
-  userId: string,
-  tier: SubscriptionPlan,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _tier: SubscriptionPlan,
 ): Promise<ModerationResult & { stripeAction: string }> {
-  const d = await invokeAdminFunction('admin-set-tier', { userId, tier }, 'No se pudo cambiar el plan')
-  return {
-    emailSent: Boolean(d.emailSent),
-    emailError: (d.emailError as string) ?? null,
-    stripeAction: (d.stripeAction as string) ?? 'none',
-  }
+  throw new AppError('El cambio de plan estará disponible cuando se integren los pagos.', {
+    code: 'payments_pending',
+  })
 }
 
-/**
- * Todo el contenido, sin filtrar por estado: la policy de admin permite verlo entero.
- * Para un no-admin la RLS devolvería solo lo suyo y lo público.
- */
-export async function fetchAllListings(): Promise<Listing[]> {
-  const { data, error } = await supabase
-    .from('listings')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) handleSupabaseError(error)
-  return data ?? []
-}
-
-export async function fetchAllRequests(): Promise<Request[]> {
-  const { data, error } = await supabase
-    .from('requests')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) handleSupabaseError(error)
-  return data ?? []
-}
+/** Todo el contenido, en cualquier estado, para moderar. */
+export const fetchAllListings = () => api<Listing[]>('/admin/listings')
+export const fetchAllRequests = () => api<Request[]>('/admin/requests')
 
 export type ContentKind = 'listing' | 'request'
 
-/**
- * Retira contenido guardando su estado previo, para poder devolverlo tal cual.
- * Vía RPC: leer-y-escribir desde el cliente podría guardar un estado obsoleto.
- */
+/** Retira contenido guardando su estado previo, para poder devolverlo tal cual. */
 export async function takeDownContent(kind: ContentKind, id: string): Promise<void> {
-  const { error } = await supabase.rpc('admin_take_down', { _kind: kind, _id: id })
-  if (error) handleSupabaseError(error)
+  await api(`/admin/content/${kind}/${id}/take-down`, { method: 'POST', body: {} })
 }
 
-/** Restaura contenido a su estado previo (o al público por defecto si no consta). */
+/** Restaura contenido a su estado previo. */
 export async function restoreContent(kind: ContentKind, id: string): Promise<void> {
-  const { error } = await supabase.rpc('admin_restore', { _kind: kind, _id: id })
-  if (error) handleSupabaseError(error)
+  await api(`/admin/content/${kind}/${id}/restore`, { method: 'POST', body: {} })
 }

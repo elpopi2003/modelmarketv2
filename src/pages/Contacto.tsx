@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
 import { CircleCheck, Mail, Send } from 'lucide-react'
-import { supabase } from '@/integrations/supabase/client'
+import { sendContactMessage } from '@/lib/api/contact'
 import { useAuth } from '@/hooks/useAuth'
 import { useRecaptcha } from '@/hooks/useRecaptcha'
 import { contactSchema, type ContactFormValues } from '@/lib/schemas/contact'
@@ -44,11 +44,7 @@ export default function Contacto() {
     setServerError(null)
     try {
       const token = await getToken('contact')
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: { ...values, recaptchaToken: token },
-      })
-      if (error) throw error
-      if (data && data.ok === false) throw new Error(data.error ?? 'No se pudo enviar el mensaje')
+      await sendContactMessage(values, token)
       setSent(true)
     } catch (e) {
       setServerError(getErrorMessage(e))
@@ -119,7 +115,13 @@ export default function Contacto() {
 
           <FieldError message={serverError ?? undefined} />
 
-          <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            variant="accent"
+            size="lg"
+            className="w-full"
+            disabled={isSubmitting}
+          >
             <Send />
             {isSubmitting ? 'Enviando…' : 'Enviar mensaje'}
           </Button>
