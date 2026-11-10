@@ -6,6 +6,10 @@ ventana de mantenimiento** (en `modelmarket.es` solo estaba la landing; nadie us
 **producción vacía** (2026-11-10): v2 solo tenía cuentas de prueba, así que no se importan; la
 importación quedó ensayada en staging (A) por si algún día hiciera falta.
 
+> **Estado (2026-11-10):** ensayo en staging hecho (A). La puesta en producción (B) se hará
+> **cuando estén integrados los pagos con Stripe (M8p)**; hasta entonces `modelmarket.es`
+> sigue sirviendo la landing. Con pagos, revisar si se mantiene `BETA_ALL_PRO`.
+
 Rutas del VPS usadas abajo:
 
 | Qué | Ruta |

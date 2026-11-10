@@ -50,12 +50,14 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
     contacto con reCAPTCHA v3 verificado en servidor hacia `hola@`, baja propia y por admin
     (borra también fotos del disco). Corrige el fallo de v2 al retirar contenido ya suspendido.
     Clave pública de reCAPTCHA en `.env.production` (versionado: solo variables públicas).
+  - [ ] **M8e · Corte** — hecho: modo beta `BETA_ALL_PRO`, importación desde Supabase
+    (`npm run db:import-supabase`, ensayada en staging), guion `docs/corte-v3.md`, `main` en
+    v3 y release `v3.0.0`. Pendiente: **puesta en producción, que espera a M8p**; producción
+    arrancará vacía (v2 solo tenía cuentas de prueba).
   - [ ] **M8p · Pagos (aplazado, a estudiar)** — Stripe: checkout, portal, webhook al VPS
     (ruta fuera de la contraseña de staging, verificada por firma), cambio de plan desde admin
     (`TIER_CHANGES_ENABLED`) y cancelación de la suscripción al borrar una cuenta.
     Hoy `src/lib/api/subscriptions.ts` (checkout/portal) es lo único que aún usa Supabase.
-  - [ ] **M8e · Corte** — migración de datos y fotos, ensayo en staging, corte, retirada de
-    Supabase/Resend/landing, reescritura de este documento y de la política de privacidad.
 
 ### Desviaciones respecto al doc original (decididas)
 
