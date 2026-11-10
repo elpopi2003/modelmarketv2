@@ -108,3 +108,15 @@ export function formatRelativeTime(iso: string, locale = 'es-ES'): string {
   if (abs < 2592000) return rtf.format(Math.round(diffSeconds / 86400), 'day')
   return rtf.format(Math.round(diffSeconds / 2592000), 'month')
 }
+
+/**
+ * Cuánto falta para que un anuncio del plan Free sea público (se publica con 24 h de
+ * retardo). null si ya es visible. Pensado para que su dueño sepa que aún no lo ve nadie.
+ */
+export function pendingVisibilityLabel(visibleAt: string, now: number = Date.now()): string | null {
+  const ms = new Date(visibleAt).getTime() - now
+  if (!(ms > 0)) return null
+  const minutes = Math.ceil(ms / 60_000)
+  if (minutes < 60) return `Público en ${minutes} min`
+  return `Público en ${Math.ceil(minutes / 60)} h`
+}

@@ -33,7 +33,7 @@ export function useMyRequests() {
   const userId = user?.id
   return useQuery({
     queryKey: queryKeys.requests.mine(),
-    queryFn: () => fetchMyRequests(userId as string),
+    queryFn: () => fetchMyRequests(),
     enabled: Boolean(userId),
   })
 }

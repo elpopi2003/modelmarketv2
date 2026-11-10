@@ -40,8 +40,8 @@ export function useToggleFavorite() {
   return useMutation({
     mutationFn: async ({ listingId, isFavorited }: { listingId: string; isFavorited: boolean }) => {
       if (!user) throw new Error('Debes iniciar sesión')
-      if (isFavorited) await removeFavorite(listingId, user.id)
-      else await addFavorite(listingId, user.id)
+      if (isFavorited) await removeFavorite(listingId)
+      else await addFavorite(listingId)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.favorites.all })

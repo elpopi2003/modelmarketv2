@@ -34,7 +34,7 @@ export function useMyListings() {
   const userId = user?.id
   return useQuery({
     queryKey: userId ? queryKeys.listings.mine(userId) : queryKeys.listings.all,
-    queryFn: () => fetchMyListings(userId as string),
+    queryFn: () => fetchMyListings(),
     enabled: Boolean(userId),
   })
 }

@@ -1,7 +1,8 @@
+import { thumbUrl } from '@/lib/api/storage'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDeleteListing, useMyListings } from '@/hooks/useListings'
-import { formatPrice, STATUS_LABELS } from '@/lib/format'
+import { formatPrice, pendingVisibilityLabel, STATUS_LABELS } from '@/lib/format'
 import { getErrorMessage } from '@/lib/errors'
 import { Button } from '@/components/ui/button'
 
@@ -51,7 +52,7 @@ export default function Dashboard() {
               <div className="flex min-w-0 items-center gap-3">
                 {listing.photos.length > 0 && (
                   <img
-                    src={listing.photos[0]}
+                    src={thumbUrl(listing.photos[0])}
                     alt={listing.title}
                     loading="lazy"
                     className="h-14 w-14 shrink-0 rounded-md border border-border object-cover"
@@ -64,6 +65,9 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">
                     {formatPrice(listing.price_cents, listing.currency)} ·{' '}
                     {STATUS_LABELS[listing.status]}
+                    {listing.status === 'active' && pendingVisibilityLabel(listing.visible_at)
+                      ? ` · ${pendingVisibilityLabel(listing.visible_at)}`
+                      : ''}
                   </p>
                 </div>
               </div>

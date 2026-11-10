@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useMyListings } from '@/hooks/useListings'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
+import { countsTowardListingLimit } from '@/lib/subscription'
 import { ListingForm } from '@/components/marketplace/ListingForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,7 +19,8 @@ export default function PublicarAnuncio() {
     )
   }
 
-  const count = myListings?.length ?? 0
+  // Lo vendido, archivado o retirado no ocupa hueco del plan (misma regla que el servidor).
+  const count = (myListings ?? []).filter((l) => countsTowardListingLimit(l.status)).length
   if (!canPublishListing(count)) {
     return (
       <section className="mx-auto max-w-2xl px-6 py-16">

@@ -3,6 +3,7 @@ import {
   CONDITION_LABELS,
   DECALS_LABELS,
   formatPrice,
+  pendingVisibilityLabel,
   formatPriceShort,
   STATUS_LABELS,
 } from './format'
@@ -47,5 +48,18 @@ describe('etiquetas', () => {
     expect(Object.keys(CONDITION_LABELS)).toHaveLength(3)
     expect(Object.keys(DECALS_LABELS)).toHaveLength(3)
     expect(Object.keys(STATUS_LABELS)).toHaveLength(5)
+  })
+})
+
+describe('pendingVisibilityLabel', () => {
+  const now = Date.parse('2026-11-10T12:00:00Z')
+  it('null si ya es visible', () => {
+    expect(pendingVisibilityLabel('2026-11-10T11:59:59Z', now)).toBeNull()
+    expect(pendingVisibilityLabel('2026-11-10T12:00:00Z', now)).toBeNull()
+  })
+  it('horas redondeadas hacia arriba, o minutos en la última hora', () => {
+    expect(pendingVisibilityLabel('2026-11-11T12:00:00Z', now)).toBe('Público en 24 h')
+    expect(pendingVisibilityLabel('2026-11-10T13:30:00Z', now)).toBe('Público en 2 h')
+    expect(pendingVisibilityLabel('2026-11-10T12:20:00Z', now)).toBe('Público en 20 min')
   })
 })

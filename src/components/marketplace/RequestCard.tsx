@@ -1,3 +1,4 @@
+import { thumbUrl } from '@/lib/api/storage'
 import { Clock, MapPin, User } from 'lucide-react'
 import type { Request } from '@/lib/api/requests'
 import { formatPriceShort, formatRelativeTime } from '@/lib/format'
@@ -34,7 +35,7 @@ export function RequestCard({
   onToggleSuspend?: () => void
   busy?: boolean
 }) {
-  const cover = request.photos[0]
+  const cover = thumbUrl(request.photos[0])
   // "Cerrada" es el estado con el que se oculta del listado público.
   const suspended = request.status === 'closed'
   // previous_status solo lo rellena la retirada administrativa.

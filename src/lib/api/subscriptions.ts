@@ -1,33 +1,28 @@
 import { supabase } from '@/integrations/supabase/client'
-import { handleSupabaseError } from '@/lib/errors'
 import { normalizeTier, type SubscriptionTier } from '@/lib/subscription'
+import { api } from './http'
 
-/** Tier público (activo) de varios usuarios, para insignias. Solo pro/retail. */
+/** Planes públicos (PRO/Retail activos) de varios usuarios, para las insignias. */
 export async function fetchPublicTiers(
   userIds: string[],
 ): Promise<Record<string, SubscriptionTier>> {
   if (userIds.length === 0) return {}
-  const { data, error } = await supabase
-    .from('subscriptions_public')
-    .select('user_id, tier, status')
-    .in('user_id', userIds)
-  if (error) handleSupabaseError(error)
-
   const map: Record<string, SubscriptionTier> = {}
-  for (const row of data ?? []) {
-    const active = row.status === 'active' || row.status === 'trialing'
-    if (row.user_id && active) map[row.user_id] = normalizeTier(row.tier)
+  for (let i = 0; i < userIds.length; i += 100) {
+    const ids = userIds.slice(i, i + 100).join(',')
+    Object.assign(
+      map,
+      await api<Record<string, SubscriptionTier>>(`/subscription/public-tiers?ids=${ids}`),
+    )
   }
+  for (const [id, tier] of Object.entries(map)) map[id] = normalizeTier(tier)
   return map
 }
 
-/** Tier real del usuario (lee su suscripción; 'free' si no hay o no está activa). */
+/** Plan efectivo del usuario ('free' si no tiene una suscripción activa). */
 export async function fetchMySubscriptionTier(): Promise<SubscriptionTier> {
-  const { data, error } = await supabase.from('subscriptions').select('tier, status').maybeSingle()
-  if (error) handleSupabaseError(error)
-  if (!data) return 'free'
-  const active = data.status === 'active' || data.status === 'trialing'
-  return active ? normalizeTier(data.tier) : 'free'
+  const { tier } = await api<{ tier: string }>('/subscription')
+  return normalizeTier(tier)
 }
 
 function extractUrl(payload: unknown): string {

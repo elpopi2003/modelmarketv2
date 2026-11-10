@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Calendar, Camera, MapPin, Package, Save, Target, User } from 'lucide-react'
-import { supabase } from '@/integrations/supabase/client'
+import { fetchMyListings } from '@/lib/api/listings'
+import { fetchMyRequests } from '@/lib/api/requests'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
 import { useCustomerPortal, useSubscription } from '@/hooks/useSubscription'
@@ -30,19 +31,11 @@ function useMyStats(userId: string | undefined) {
   return useQuery({
     queryKey: ['profile-stats', userId],
     queryFn: async () => {
-      const [listings, requests] = await Promise.all([
-        supabase
-          .from('listings')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId!)
-          .in('status', ['active', 'reserved']),
-        supabase
-          .from('requests')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId!)
-          .eq('status', 'open'),
-      ])
-      return { listings: listings.count ?? 0, requests: requests.count ?? 0 }
+      const [listings, requests] = await Promise.all([fetchMyListings(), fetchMyRequests()])
+      return {
+        listings: listings.filter((l) => l.status === 'active' || l.status === 'reserved').length,
+        requests: requests.filter((r) => r.status === 'open').length,
+      }
     },
     enabled: Boolean(userId),
   })
@@ -274,7 +267,9 @@ export default function Perfil() {
             {status && (
               <p
                 className={
-                  status.kind === 'ok' ? 'text-sm text-muted-foreground' : 'text-sm text-destructive'
+                  status.kind === 'ok'
+                    ? 'text-sm text-muted-foreground'
+                    : 'text-sm text-destructive'
                 }
               >
                 {status.message}

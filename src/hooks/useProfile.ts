@@ -1,25 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
+import {
+  fetchOwnProfile,
+  updateOwnProfile,
+  type Profile,
+  type ProfileUpdate,
+} from '@/lib/api/profiles'
 import { uploadAvatar } from '@/lib/api/storage'
 import { queryKeys } from '@/lib/queryKeys'
-import { handleSupabaseError } from '@/lib/errors'
 import { useAuth } from '@/hooks/useAuth'
-import type { Database } from '@/integrations/supabase/types'
 
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
+export type { Profile, ProfileUpdate }
 
-async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle()
-  if (error) handleSupabaseError(error)
-  return data
-}
-
-/** Perfil del usuario autenticado, con mutación de actualización (upsert defensivo). */
+/** Perfil del usuario autenticado, con mutación de actualización. */
 export function useProfile() {
   const { user } = useAuth()
   const userId = user?.id
@@ -27,34 +19,29 @@ export function useProfile() {
 
   const query = useQuery({
     queryKey: userId ? queryKeys.profile.detail(userId) : queryKeys.profile.all,
-    queryFn: () => fetchProfile(userId as string),
+    queryFn: fetchOwnProfile,
     enabled: Boolean(userId),
   })
 
   const mutation = useMutation({
-    mutationFn: async (updates: Omit<ProfileUpdate, 'id'>): Promise<Profile> => {
+    mutationFn: (updates: Omit<ProfileUpdate, 'id'>): Promise<Profile> => {
       if (!userId) throw new Error('No hay usuario autenticado')
-      const { data, error } = await supabase
-        .from('profiles')
-        .upsert({ id: userId, ...updates })
-        .select('*')
-        .single()
-      if (error) handleSupabaseError(error)
-      return data as Profile
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { created_at, updated_at, ...rest } = updates
+      return updateOwnProfile(rest)
     },
     onSuccess: (data) => {
       if (userId) queryClient.setQueryData(queryKeys.profile.detail(userId), data)
     },
   })
 
-  /** Sube el fichero al bucket de avatares y lo fija como avatar del perfil. */
+  /** Sube la imagen y la fija como avatar. El servidor borra el anterior. */
   async function setAvatar(file: File): Promise<void> {
     if (!userId) throw new Error('No hay usuario autenticado')
     const url = await uploadAvatar(userId, file)
     await mutation.mutateAsync({ avatar_url: url })
   }
 
-  /** Quita el avatar del perfil (el fichero queda en storage; no es visible sin la URL). */
   async function removeAvatar(): Promise<void> {
     await mutation.mutateAsync({ avatar_url: null })
   }

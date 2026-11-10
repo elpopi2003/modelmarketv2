@@ -1,7 +1,8 @@
-import { Truck } from 'lucide-react'
+import { thumbUrl } from '@/lib/api/storage'
+import { Clock, Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Listing } from '@/lib/api/listings'
-import { formatPriceShort } from '@/lib/format'
+import { formatPriceShort, pendingVisibilityLabel } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { ConditionBadge } from './ConditionBadge'
 import { OwnerActions } from './OwnerActions'
@@ -41,11 +42,13 @@ export function ProductCard({
   onToggleSuspend?: () => void
   busy?: boolean
 }) {
-  const cover = listing.photos[0]
+  const cover = thumbUrl(listing.photos[0])
   // "Archivado" es el estado con el que se oculta del catálogo público.
   const suspended = listing.status === 'archived'
   // previous_status solo lo rellena la retirada administrativa.
   const moderated = listing.previous_status != null
+  // Plan Free: se publica con 24 h de retardo. Solo su dueño lo ve mientras tanto.
+  const pending = isOwn && !suspended ? pendingVisibilityLabel(listing.visible_at) : null
 
   return (
     <div
@@ -92,6 +95,16 @@ export function ProductCard({
           {isOwn && (
             <span className="absolute right-3 top-3 inline-flex items-center rounded-md border border-primary/40 bg-card/95 px-2 py-0.5 font-mono text-[0.7rem] font-bold uppercase tracking-wide text-primary shadow-sm">
               Tu anuncio
+            </span>
+          )}
+
+          {pending && (
+            <span
+              title="Tu plan publica los anuncios 24 h después de crearlos. Mientras tanto solo los ves tú."
+              className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-2 py-0.5 font-mono text-[0.7rem] font-bold uppercase tracking-wide text-foreground shadow-sm"
+            >
+              <Clock className="size-3 shrink-0" aria-hidden />
+              {pending}
             </span>
           )}
 

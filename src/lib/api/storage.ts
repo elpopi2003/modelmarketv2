@@ -1,37 +1,27 @@
-import { supabase } from '@/integrations/supabase/client'
-import { handleSupabaseError } from '@/lib/errors'
+import { upload } from './http'
 
-const LISTING_PHOTOS_BUCKET = 'listing-photos'
-const AVATARS_BUCKET = 'avatars'
-
-/** Sube el avatar a la carpeta del usuario y devuelve su URL pública. */
-export async function uploadAvatar(userId: string, file: File): Promise<string> {
-  const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
-  const path = `${userId}/avatar-${Date.now()}.${ext}`
-
-  const { error } = await supabase.storage.from(AVATARS_BUCKET).upload(path, file, {
-    cacheControl: '3600',
-    upsert: false,
-    contentType: file.type || undefined,
-  })
-  if (error) handleSupabaseError(error)
-
-  const { data } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path)
-  return data.publicUrl
+/**
+ * Subida de imágenes al servidor. Se recodifican a WebP sin metadatos (EXIF/GPS) y se
+ * devuelve la URL para guardarla en el anuncio, la petición o el perfil.
+ * El usuario sale de la sesión; el parámetro se mantiene por compatibilidad.
+ */
+export async function uploadAvatar(_userId: string, file: File): Promise<string> {
+  const { url } = await upload<{ url: string }>('/uploads/avatar', file)
+  return url
 }
 
-/** Sube una foto a la carpeta del usuario y devuelve su URL pública. */
-export async function uploadListingPhoto(userId: string, file: File): Promise<string> {
-  const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
-  const path = `${userId}/${crypto.randomUUID()}.${ext}`
+export async function uploadListingPhoto(_userId: string, file: File): Promise<string> {
+  const { url } = await upload<{ url: string }>('/uploads/photo', file)
+  return url
+}
 
-  const { error } = await supabase.storage.from(LISTING_PHOTOS_BUCKET).upload(path, file, {
-    cacheControl: '3600',
-    upsert: false,
-    contentType: file.type || undefined,
-  })
-  if (error) handleSupabaseError(error)
-
-  const { data } = supabase.storage.from(LISTING_PHOTOS_BUCKET).getPublicUrl(path)
-  return data.publicUrl
+/**
+ * Miniatura (600 px) de una foto subida al servidor, para tarjetas y listados. Las fotos
+ * que no son nuestras (p. ej. las de v2 aún no migradas) se devuelven tal cual.
+ */
+export function thumbUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  return /^\/uploads\/photos\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.webp$/i.test(url)
+    ? url.replace(/\.webp$/, '-sm.webp')
+    : url
 }

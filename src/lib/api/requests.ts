@@ -1,6 +1,5 @@
-import { supabase } from '@/integrations/supabase/client'
-import { handleSupabaseError } from '@/lib/errors'
 import type { Database } from '@/integrations/supabase/types'
+import { api, qs } from './http'
 
 export type Request = Database['public']['Tables']['requests']['Row']
 export type RequestInsert = Database['public']['Tables']['requests']['Insert']
@@ -15,60 +14,47 @@ export interface RequestFilters {
   sort?: RequestSort
 }
 
-/** Peticiones públicas (solo abiertas; la RLS filtra visibilidad y ownership). */
-export async function fetchRequests(filters: RequestFilters = {}): Promise<Request[]> {
-  let query = supabase.from('requests').select('*').eq('status', 'open')
-
-  if (filters.categoryId) query = query.eq('category_id', filters.categoryId)
-  if (filters.brandId) query = query.eq('brand_id', filters.brandId)
-  if (filters.search) query = query.ilike('title', `%${filters.search}%`)
-
-  const ordered =
-    filters.sort === 'budget_desc'
-      ? query.order('max_price_cents', { ascending: false, nullsFirst: false })
-      : filters.sort === 'budget_asc'
-        ? query.order('max_price_cents', { ascending: true, nullsFirst: false })
-        : query.order('created_at', { ascending: false })
-
-  const { data, error } = await ordered
-  if (error) handleSupabaseError(error)
-  return data ?? []
+function writable<T extends Partial<RequestInsert>>(input: T) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, user_id, created_at, updated_at, ...rest } = input
+  return rest
 }
 
+/** Peticiones públicas (abiertas, de autores no suspendidos). */
+export function fetchRequests(filters: RequestFilters = {}): Promise<Request[]> {
+  return api<Request[]>(
+    `/requests${qs({
+      category: filters.categoryId,
+      brand: filters.brandId,
+      q: filters.search?.trim(),
+      sort: filters.sort,
+    })}`,
+  )
+}
+
+/** Una petición, si quien la pide puede verla; null si no existe o no está disponible. */
 export async function fetchRequestById(id: string): Promise<Request | null> {
-  const { data, error } = await supabase.from('requests').select('*').eq('id', id).maybeSingle()
-  if (error) handleSupabaseError(error)
-  return data
+  try {
+    return await api<Request>(`/requests/${id}`)
+  } catch (error) {
+    if ((error as { code?: string }).code === 'not_found') return null
+    throw error
+  }
 }
 
-export async function fetchMyRequests(userId: string): Promise<Request[]> {
-  const { data, error } = await supabase
-    .from('requests')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-  if (error) handleSupabaseError(error)
-  return data ?? []
+/** Peticiones del usuario con sesión, en cualquier estado. */
+export function fetchMyRequests(): Promise<Request[]> {
+  return api<Request[]>('/requests/mine')
 }
 
-export async function createRequest(input: RequestInsert): Promise<Request> {
-  const { data, error } = await supabase.from('requests').insert(input).select('*').single()
-  if (error) handleSupabaseError(error)
-  return data as Request
+export function createRequest(input: RequestInsert): Promise<Request> {
+  return api<Request>('/requests', { body: writable(input) })
 }
 
-export async function updateRequest(id: string, updates: RequestUpdate): Promise<Request> {
-  const { data, error } = await supabase
-    .from('requests')
-    .update(updates)
-    .eq('id', id)
-    .select('*')
-    .single()
-  if (error) handleSupabaseError(error)
-  return data as Request
+export function updateRequest(id: string, updates: RequestUpdate): Promise<Request> {
+  return api<Request>(`/requests/${id}`, { method: 'PATCH', body: writable(updates) })
 }
 
 export async function deleteRequest(id: string): Promise<void> {
-  const { error } = await supabase.from('requests').delete().eq('id', id)
-  if (error) handleSupabaseError(error)
+  await api(`/requests/${id}`, { method: 'DELETE' })
 }

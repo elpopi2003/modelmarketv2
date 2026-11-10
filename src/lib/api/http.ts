@@ -14,27 +14,18 @@ type ApiEnvelope<T> =
   | { ok: true; data: T; error: null }
   | { ok: false; data: null; error: { code: string; message: string } }
 
+type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+
 const NETWORK_ERROR =
   'No hemos podido conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
 
-export async function api<T>(
+async function request<T>(
   path: string,
-  options: {
-    method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-    body?: unknown
-    signal?: AbortSignal
-  } = {},
+  init: { method: Method; body?: BodyInit; headers?: HeadersInit; signal?: AbortSignal },
 ): Promise<T> {
-  const { method = options.body === undefined ? 'GET' : 'POST', body, signal } = options
   let res: Response
   try {
-    res = await fetch(`/api${path}`, {
-      method,
-      credentials: 'same-origin',
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-      signal,
-    })
+    res = await fetch(`/api${path}`, { ...init, credentials: 'same-origin' })
   } catch (cause) {
     throw new AppError(NETWORK_ERROR, { code: 'network', cause })
   }
@@ -48,4 +39,38 @@ export async function api<T>(
 
   if (!payload.ok) throw new AppError(payload.error.message, { code: payload.error.code })
   return payload.data
+}
+
+/** Petición JSON. Con `body` y sin `method`, es un POST. */
+export function api<T>(
+  path: string,
+  options: { method?: Method; body?: unknown; signal?: AbortSignal } = {},
+): Promise<T> {
+  const { method = options.body === undefined ? 'GET' : 'POST', body, signal } = options
+  return request<T>(path, {
+    method,
+    signal,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+}
+
+/**
+ * Sube un fichero (multipart, campo `file`). Sin Content-Type explícito: lo pone el
+ * navegador con el boundary correcto.
+ */
+export function upload<T>(path: string, file: File): Promise<T> {
+  const form = new FormData()
+  form.append('file', file)
+  return request<T>(path, { method: 'POST', body: form })
+}
+
+/** Query string a partir de un objeto. Omite undefined, null y ''. */
+export function qs(params: Record<string, string | number | undefined | null>): string {
+  const sp = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== '') sp.set(k, String(v))
+  }
+  const s = sp.toString()
+  return s ? `?${s}` : ''
 }

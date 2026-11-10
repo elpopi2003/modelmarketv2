@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useMyRequests } from '@/hooks/useRequests'
 import { useSubscriptionLimits } from '@/hooks/useSubscriptionLimits'
+import { countsTowardRequestLimit } from '@/lib/subscription'
 import { RequestForm } from '@/components/marketplace/RequestForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,7 +19,8 @@ export default function CrearPeticion() {
     )
   }
 
-  const count = myRequests?.length ?? 0
+  // Las cumplidas o cerradas no ocupan hueco del plan (misma regla que el servidor).
+  const count = (myRequests ?? []).filter((r) => countsTowardRequestLimit(r.status)).length
   if (!canCreateRequest(count)) {
     return (
       <section className="mx-auto max-w-2xl px-6 py-16">
