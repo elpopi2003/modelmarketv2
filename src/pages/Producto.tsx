@@ -30,6 +30,7 @@ import {
   formatPriceShort,
 } from '@/lib/format'
 import { Seo } from '@/components/seo/Seo'
+import { absoluteUrl } from '@/lib/url'
 import { ConditionBadge } from '@/components/marketplace/ConditionBadge'
 import { OfferForm } from '@/components/marketplace/OfferForm'
 import { OffersPanel } from '@/components/marketplace/OffersPanel'
@@ -177,7 +178,7 @@ export default function Producto() {
     '@type': 'Product',
     name: listing.title,
     ...(listing.description ? { description: listing.description } : {}),
-    ...(listing.photos.length > 0 ? { image: listing.photos } : {}),
+    ...(listing.photos.length > 0 ? { image: listing.photos.map(absoluteUrl) } : {}),
     ...(categoryName ? { category: categoryName } : {}),
     ...(brandName ? { brand: { '@type': 'Brand', name: brandName } } : {}),
     offers: {

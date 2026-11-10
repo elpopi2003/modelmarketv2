@@ -8,9 +8,11 @@
  * y para clientes sin JS.
  */
 
+import { absoluteUrl } from '@/lib/url'
+
 const SITE_NAME = 'ModelMarket'
-const DEFAULT_OG_IMAGE =
-  'https://shanozqxmmdiqvqhffbz.supabase.co/storage/v1/object/public/brand/logo.png'
+/** Logotipo servido por la propia app (`public/brand/logo.png`). */
+const DEFAULT_OG_IMAGE = '/brand/logo.png'
 
 /** URL absoluta y canónica de la ruta actual, sin query ni hash. */
 function canonicalUrl(): string | undefined {
@@ -33,10 +35,18 @@ export interface SeoProps {
   jsonLd?: Record<string, unknown>
 }
 
-export function Seo({ title, titleExact, description, image, type = 'website', noindex, jsonLd }: SeoProps) {
+export function Seo({
+  title,
+  titleExact,
+  description,
+  image,
+  type = 'website',
+  noindex,
+  jsonLd,
+}: SeoProps) {
   const fullTitle = titleExact ? title : `${title} · ${SITE_NAME}`
   const url = canonicalUrl()
-  const ogImage = image ?? DEFAULT_OG_IMAGE
+  const ogImage = absoluteUrl(image ?? DEFAULT_OG_IMAGE)
 
   return (
     <>
