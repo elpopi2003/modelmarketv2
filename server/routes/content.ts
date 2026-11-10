@@ -18,6 +18,7 @@ import {
 import { getPublicTiers, getUserTier } from '../content/tier'
 import { viewerOf } from '../content/viewer'
 import { ok } from '../http/reply'
+import { notify } from '../messaging/notifications'
 import { parse } from '../http/validate'
 
 const idParam = z.object({ id: z.string().uuid('ID no válido') })
@@ -120,7 +121,20 @@ export const contentRoutes: FastifyPluginAsync = async (app) => {
   app.put('/favorites/:id', limit(120, 15), async (req) => {
     requireAuth(req)
     const { id } = parse(idParam, req.params)
-    const { created } = await favorites.addFavorite(db, viewerOf(req)!, id)
+    const viewer = viewerOf(req)!
+    const { created, ownerId } = await favorites.addFavorite(db, viewer, id)
+    // Aviso al dueño la primera vez que alguien lo guarda (no al guardar lo propio).
+    if (created && ownerId !== viewer.userId) {
+      await notify(
+        { db, mail: { appUrl: config.APP_URL, logoUrl: config.MAIL_LOGO_URL } },
+        {
+          userId: ownerId,
+          type: 'favorite',
+          title: 'Han guardado tu anuncio',
+          link: `/producto/${id}`,
+        },
+      )
+    }
     return ok({ favorited: true, created })
   })
   app.delete('/favorites/:id', async (req) => {

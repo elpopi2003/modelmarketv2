@@ -45,7 +45,6 @@ export async function addFavorite(db: Db, viewer: NonNullable<Viewer>, listingId
     if (isDuplicateKey(err)) return { created: false, ownerId: listing.user_id }
     throw err
   }
-  // El aviso al dueño ("Han guardado tu anuncio") llega con las notificaciones en M8c.
   return { created: true, ownerId: listing.user_id }
 }
 

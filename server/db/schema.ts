@@ -185,6 +185,59 @@ export interface SubscriptionsTable {
   updated_at: AutoDate
 }
 
+export type MessageKind = 'text' | 'offer'
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
+
+export interface ConversationsTable {
+  id: string
+  listing_id: string | null
+  request_id: string | null
+  buyer_id: string
+  seller_id: string
+  buyer_deleted_at: Date | null
+  seller_deleted_at: Date | null
+  created_at: AutoDate
+  /** Lo actualiza la aplicación al llegar un mensaje (ordena la bandeja). */
+  updated_at: Defaulted<Date>
+}
+
+export interface MessagesTable {
+  id: string
+  conversation_id: string
+  sender_id: string
+  body: string
+  kind: Defaulted<MessageKind>
+  read_at: Date | null
+  created_at: AutoDate
+}
+
+export interface OffersTable {
+  id: string
+  listing_id: string | null
+  request_id: string | null
+  from_user_id: string
+  to_user_id: string
+  conversation_id: string | null
+  amount_cents: number
+  message: string | null
+  status: Defaulted<OfferStatus>
+  /** Columna generada: no se escribe. */
+  pending_key: ColumnType<string | null, never, never>
+  created_at: AutoDate
+  updated_at: AutoDate
+}
+
+export interface NotificationsTable {
+  id: string
+  user_id: string
+  type: string
+  title: string
+  body: string | null
+  link: string | null
+  read_at: Date | null
+  created_at: Defaulted<Date>
+}
+
 export interface Database {
   users: UsersTable
   sessions: SessionsTable
@@ -199,6 +252,10 @@ export interface Database {
   requests: RequestsTable
   favorites: FavoritesTable
   subscriptions: SubscriptionsTable
+  conversations: ConversationsTable
+  messages: MessagesTable
+  offers: OffersTable
+  notifications: NotificationsTable
 }
 
 export type User = Selectable<UsersTable>

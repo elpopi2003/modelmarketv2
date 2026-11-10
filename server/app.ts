@@ -12,6 +12,7 @@ import { HttpError, fail, forbidden } from './http/reply'
 import { authRoutes } from './routes/auth'
 import { contentRoutes } from './routes/content'
 import { healthRoutes } from './routes/health'
+import { messagingRoutes } from './routes/messaging'
 import { profileRoutes } from './routes/profiles'
 import { MAX_UPLOAD_BYTES } from './uploads/images'
 
@@ -95,6 +96,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       await api.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 } })
       await api.register(contentRoutes)
       await api.register(profileRoutes)
+      await api.register(messagingRoutes)
       api.setNotFoundHandler((_req, reply) =>
         reply.status(404).send(fail('not_found', 'Ruta no encontrada.')),
       )
