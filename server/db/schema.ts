@@ -238,6 +238,27 @@ export interface NotificationsTable {
   created_at: Defaulted<Date>
 }
 
+export type ReportReason = 'spam' | 'prohibited' | 'counterfeit' | 'misleading' | 'offensive' | 'other'
+export type ReportStatus = 'pending' | 'resolved' | 'dismissed'
+
+export interface ReportsTable {
+  id: string
+  reporter_id: string
+  listing_id: string | null
+  request_id: string | null
+  reported_user_id: string | null
+  reason: ReportReason
+  details: string | null
+  status: Defaulted<ReportStatus>
+  resolved_by: string | null
+  resolved_at: Date | null
+  resolution_note: string | null
+  /** Columna generada: no se escribe. */
+  pending_key: ColumnType<string | null, never, never>
+  created_at: AutoDate
+  updated_at: AutoDate
+}
+
 export interface Database {
   users: UsersTable
   sessions: SessionsTable
@@ -256,6 +277,7 @@ export interface Database {
   messages: MessagesTable
   offers: OffersTable
   notifications: NotificationsTable
+  reports: ReportsTable
 }
 
 export type User = Selectable<UsersTable>

@@ -9,6 +9,7 @@ import type { Db } from './db/client'
 import rateLimit from '@fastify/rate-limit'
 import { authPlugin } from './auth/plugin'
 import { HttpError, fail, forbidden } from './http/reply'
+import { adminRoutes } from './routes/admin'
 import { authRoutes } from './routes/auth'
 import { contentRoutes } from './routes/content'
 import { healthRoutes } from './routes/health'
@@ -97,6 +98,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       await api.register(contentRoutes)
       await api.register(profileRoutes)
       await api.register(messagingRoutes)
+      await api.register(adminRoutes)
       api.setNotFoundHandler((_req, reply) =>
         reply.status(404).send(fail('not_found', 'Ruta no encontrada.')),
       )

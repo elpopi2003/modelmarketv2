@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify'
 import fp from 'fastify-plugin'
-import { unauthorized } from '../http/reply'
+import { forbidden, unauthorized } from '../http/reply'
 import { SESSION_COOKIE, resolveSession, type SessionAuth } from './sessions'
 
 declare module 'fastify' {
@@ -45,4 +45,11 @@ export function setSessionCookie(
 
 export function clearSessionCookie(reply: FastifyReply, secure: boolean) {
   reply.clearCookie(SESSION_COOKIE, { httpOnly: true, secure, sameSite: 'lax', path: '/' })
+}
+
+/** Exige sesión de administrador. El rol se resuelve en el servidor, nunca lo dice el cliente. */
+export function requireAdmin(req: FastifyRequest): SessionAuth {
+  const auth = requireAuth(req)
+  if (!auth.isAdmin) throw forbidden('Solo administradores.')
+  return auth
 }

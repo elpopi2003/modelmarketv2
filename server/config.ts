@@ -46,6 +46,14 @@ const envSchema = z.object({
   /** URL absoluta del logo en los emails (lo abre el cliente de correo, sin sesión). */
   MAIL_LOGO_URL: z.string().url().default('https://modelmarket.es/brand/logo.png'),
   MAIL_FILE_DIR: z.string().default('server/.local/mail'),
+  /** Buzón que recibe el formulario de contacto. */
+  CONTACT_EMAIL: z.string().email().default('hola@modelmarket.es'),
+  /**
+   * Clave SECRETA de reCAPTCHA v3 (la pública va en el frontend). Vacía = el formulario de
+   * contacto funciona sin verificar (útil en local); en producción debe estar puesta.
+   */
+  RECAPTCHA_SECRET: z.string().default(''),
+  RECAPTCHA_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.5),
 })
 
 export type Config = z.infer<typeof envSchema>
