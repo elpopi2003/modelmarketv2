@@ -1,8 +1,10 @@
 # Corte a v3 · ModelMarket en el VPS
 
 Guion del paso de v2 (Supabase + Resend) a v3 (VPS Plesk: MariaDB + Postfix).
-Decisiones: corte **sin pagos** (`BETA_ALL_PRO=true`: PRO gratis durante la beta) y **sin
-ventana de mantenimiento** (en `modelmarket.es` solo estaba la landing; nadie usa v2).
+Decisiones: corte **sin pagos** (`BETA_ALL_PRO=true`: PRO gratis durante la beta), **sin
+ventana de mantenimiento** (en `modelmarket.es` solo estaba la landing; nadie usa v2) y
+**producción vacía** (2026-11-10): v2 solo tenía cuentas de prueba, así que no se importan; la
+importación quedó ensayada en staging (A) por si algún día hiciera falta.
 
 Rutas del VPS usadas abajo:
 
@@ -119,15 +121,21 @@ En *Node.js → Reiniciar aplicación*, y después en `https://staging.modelmark
 5. **nginx** (directivas adicionales de `modelmarket.es`): `passenger_min_instances 1;`
    (sin contraseña ni `noindex`, al contrario que staging).
 
-### B3. Importar los datos
+### B3. Primera cuenta de administrador
 
-Igual que A2–A4, en `/var/www/vhosts/modelmarket.es/app`, con `mm_prod`,
-`modelmarket_prod`, `uploads-prod` y **sin `--wipe`** (la base está vacía).
+Producción empieza vacía (no se importa v2). Regístrate en `https://modelmarket.es` con tu email
+real, confírmalo y conviértete en admin (SSH):
+
+```bash
+mysql -u admin -p"$(cat /etc/psa/.psa.shadow)" modelmarket_prod -e "INSERT IGNORE INTO user_roles (id, user_id, role) SELECT UUID(), id, 'admin' FROM users WHERE email='TU_EMAIL';"
+```
+
+(Si algún día hubiera que importar v2: A2–A4 en `…/app` con los datos de producción y sin `--wipe`.)
 
 ### B4. Comprobaciones
 
 - [ ] `https://modelmarket.es/api/health` → `{"ok":true,…,"version":"3.0.0"}`.
-- [ ] Entrar con tu cuenta de v2 y ver tus datos.
+- [ ] Tu cuenta tiene el panel de administración.
 - [ ] Alta nueva con un email real → llega el email de confirmación.
 - [ ] Publicar un anuncio con foto; contactar y ofertar con una segunda cuenta.
 - [ ] Contacto → llega a `hola@`.
