@@ -40,7 +40,11 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
     cumple en el servidor: límites de activos, fotos y retardo de 24 h del Free (en v2 no se
     aplicaba; la UI avisa «Público en X h»). Fotos en disco (`UPLOADS_DIR`, fuera del deploy):
     WebP 1600 px + miniatura 600 px, sin EXIF/GPS, solo subidas propias, borrado al dejar de usarse.
-  - [ ] **M8c · Comunicación** — conversaciones, mensajes, ofertas, notificaciones y sus emails.
+  - [x] **M8c · Comunicación** — conversaciones, mensajes, ofertas y notificaciones; la lógica
+    de las RPC y triggers de v2 en `server/messaging` (transacciones). Una oferta pendiente por
+    persona con columna generada + UNIQUE. Avisos con email por la cola si `notify_email`; los
+    mensajes seguidos se agrupan (un email). Texto ajeno escapado en el email. Fechas siempre en
+    UTC: cualquier escritura fuera de la app (scripts, migración M8e) debe usar `UTC_TIMESTAMP()`.
   - [ ] **M8d · Negocio y admin** — Stripe, panel admin, contacto, borrado de cuenta.
   - [ ] **M8e · Corte** — migración de datos y fotos, ensayo en staging, corte, retirada de
     Supabase/Resend/landing, reescritura de este documento y de la política de privacidad.

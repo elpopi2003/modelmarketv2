@@ -42,11 +42,10 @@ export function useUnreadCount() {
 }
 
 export function useSendMessage() {
-  const { user } = useAuth()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ conversationId, body }: { conversationId: string; body: string }) =>
-      sendMessage(conversationId, user!.id, body),
+      sendMessage(conversationId, body),
     onSuccess: (_data, { conversationId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.messages(conversationId) })
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list() })
