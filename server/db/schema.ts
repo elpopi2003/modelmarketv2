@@ -135,7 +135,11 @@ export interface ListingsTable {
   scale: string | null
   category_id: string | null
   brand_id: string | null
+  /** Referencia del fabricante (importador). */
+  manufacturer_ref: Defaulted<string | null>
   photos: JsonColumn<string[]>
+  /** URL de la foto que es imagen de catálogo (caja oficial), si la hay. */
+  catalog_photo: Defaulted<string | null>
   status: Defaulted<ListingStatus>
   previous_status: ListingStatus | null
   shipping_inpost: Defaulted<boolean>

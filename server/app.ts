@@ -13,6 +13,7 @@ import { adminRoutes } from './routes/admin'
 import { authRoutes } from './routes/auth'
 import { contentRoutes } from './routes/content'
 import { healthRoutes } from './routes/health'
+import { importRoutes } from './routes/import'
 import { messagingRoutes } from './routes/messaging'
 import { profileRoutes } from './routes/profiles'
 import { MAX_UPLOAD_BYTES } from './uploads/images'
@@ -101,6 +102,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
       await api.register(profileRoutes)
       await api.register(messagingRoutes)
       await api.register(adminRoutes)
+      await api.register(importRoutes)
       api.setNotFoundHandler((_req, reply) =>
         reply.status(404).send(fail('not_found', 'Ruta no encontrada.')),
       )

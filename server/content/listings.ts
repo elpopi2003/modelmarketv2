@@ -191,6 +191,10 @@ export async function updateListing(
           ...(fields.description !== undefined ? { description: fields.description || null } : {}),
           ...(fields.scale !== undefined ? { scale: fields.scale || null } : {}),
           ...(photos ? { photos: toJson(photos) } : {}),
+          // Si se quita la imagen de catálogo, deja de haber nada que etiquetar.
+          ...(photos && row.catalog_photo && !photos.includes(row.catalog_photo)
+            ? { catalog_photo: null }
+            : {}),
         })
         .where('id', '=', id)
         .execute()
