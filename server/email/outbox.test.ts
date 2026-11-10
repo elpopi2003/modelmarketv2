@@ -18,6 +18,9 @@ describe('layout de email', () => {
     expect(content.text).not.toMatch(/<[a-z]/i)
     expect(content.html).toContain('href="https://modelmarket.es/auth"')
     expect(content.html).toContain('src="https://modelmarket.es/brand/logo.png"')
+    // Enlace en texto bajo el botón, para clientes que no muestran botones.
+    expect(content.html).toContain('¿El botón no funciona?')
+    expect(content.html.split('href="https://modelmarket.es/auth"')).toHaveLength(3) // botón + texto
   })
 })
 

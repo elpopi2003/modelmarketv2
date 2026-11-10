@@ -68,7 +68,8 @@ export function layout(opts: LayoutOptions, ctx: LayoutContext): EmailContent {
     .join('')
   const ctaHref = opts.cta ? escapeHtml(absolute(opts.cta.href, ctx.appUrl)) : ''
   const cta = opts.cta
-    ? `<div style="margin:22px 0 6px;"><a href="${ctaHref}" style="display:inline-block;background:#1B3A5F;color:#ffffff;text-decoration:none;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:12px 24px;border-radius:6px;font-family:Arial,sans-serif;font-size:14px;">${opts.cta.label}</a></div>`
+    ? `<div style="margin:22px 0 6px;"><a href="${ctaHref}" style="display:inline-block;background:#1B3A5F;color:#ffffff;text-decoration:none;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:12px 24px;border-radius:6px;font-family:Arial,sans-serif;font-size:14px;">${opts.cta.label}</a></div>
+       <p style="margin:12px 0 0;color:#5B6B7B;font-size:12px;line-height:1.5;">¿El botón no funciona? Copia y pega este enlace en tu navegador:<br><a href="${ctaHref}" style="color:#1B3A5F;word-break:break-all;">${ctaHref}</a></p>`
     : ''
 
   const html = `<!doctype html>
