@@ -342,6 +342,61 @@ describe.skipIf(!TEST_DB_URL)('API de administración, denuncias, contacto y baj
     ).toBe(400)
   })
 
+  it('en bloque y al dar de baja una cuenta se avisa a quien tenía los anuncios en favoritos (un aviso por persona)', async () => {
+    const admin = await createTestUser(db, { admin: true })
+    const owner = await createTestUser(db)
+    const fan = await createTestUser(db)
+    const other = await createTestUser(db)
+    const ids = [
+      await listing(owner.id, { title: 'Airfix Spitfire' }),
+      await listing(owner.id, { title: 'Revell Bismarck' }),
+      await listing(owner.id, { title: 'Tamiya Tiger I' }),
+    ]
+    for (const id of ids) {
+      await db
+        .insertInto('favorites')
+        .values({ id: randomUUID(), user_id: fan.id, listing_id: id })
+        .execute()
+    }
+    await db
+      .insertInto('favorites')
+      .values({ id: randomUUID(), user_id: other.id, listing_id: ids[2] })
+      .execute()
+    const noticesOf = (userId: string) =>
+      db
+        .selectFrom('notifications')
+        .select(['title', 'body'])
+        .where('user_id', '=', userId)
+        .where('type', '=', 'favorite_withdrawn')
+        .orderBy('created_at')
+        .execute()
+
+    // Suspender en bloque: un único aviso agrupado para quien guardó varias.
+    await call('POST', '/admin/listings/bulk-update', admin.cookie, {
+      ids: ids.slice(0, 2),
+      changes: { status: 'archived' },
+    })
+    const [grouped] = await noticesOf(fan.id)
+    expect(grouped).toEqual({
+      title: '2 maquetas de tus favoritos ya no están disponibles',
+      body: 'Se han retirado del catálogo: «Airfix Spitfire», «Revell Bismarck». Si vuelven a publicarse, te aparecerán otra vez en Favoritos.',
+    })
+
+    // Borrar en bloque (aunque estén suspendidas): otro aviso agrupado.
+    await call('POST', '/admin/listings/bulk-delete', admin.cookie, { ids: ids.slice(0, 2) })
+    expect((await noticesOf(fan.id))[1].body).toBe(
+      'Se han eliminado y ya no están en el catálogo: «Airfix Spitfire», «Revell Bismarck».',
+    )
+
+    // Baja de la cuenta: avisa por lo que le quedaba publicado.
+    expect((await call('DELETE', `/admin/users/${owner.id}`, admin.cookie)).statusCode).toBe(200)
+    expect((await noticesOf(fan.id))[2].body).toBe(
+      '«Tamiya Tiger I» se ha eliminado y ya no está en el catálogo.',
+    )
+    expect(await noticesOf(other.id)).toHaveLength(1)
+    expect(await noticesOf(owner.id)).toHaveLength(0)
+  })
+
   // ── denuncias ─────────────────────────────────────────────────────────────
   it('denuncias: una pendiente por objetivo, nunca sobre lo propio, avisa a los admins', async () => {
     const admin = await createTestUser(db, { admin: true })

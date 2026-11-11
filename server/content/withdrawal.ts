@@ -6,6 +6,8 @@ import { notify } from '../messaging/notifications'
 
 /** Un aviso por semana como mucho por persona y anuncio (suspender/reactivar no hace spam). */
 const RENOTIFY_DAYS = 7
+/** Títulos que se citan en un aviso agrupado; el resto se resume en «y N más». */
+const TITLES_IN_NOTICE = 5
 
 /** El anuncio está en el catálogo: activo, reservado o vendido de escaparate. */
 export function isInCatalog(row: { status: ListingStatus; sold_showcase: boolean }) {
@@ -17,55 +19,84 @@ export function isInCatalog(row: { status: ListingStatus; sold_showcase: boolean
 }
 
 /**
- * Estados con los que el dueño saca un anuncio del catálogo sin venderlo: «Suspender»
- * (archived) o volver a borrador. Venderlo o la retirada de un admin no avisan.
+ * Estados con los que se saca un anuncio del catálogo sin venderlo: «Suspender»
+ * (archived) o volver a borrador. Venderlo o la retirada por moderación no avisan.
  */
 export const isWithdrawalStatus = (s: ListingStatus) => s === 'archived' || s === 'draft'
 
+const quoted = (titles: string[]) => {
+  const shown = titles.slice(0, TITLES_IN_NOTICE).map((t) => `«${t}»`)
+  const rest = titles.length - shown.length
+  return rest > 0 ? `${shown.join(', ')} y ${rest} más` : shown.join(', ')
+}
+
+function noticeText(titles: string[], how: 'withdrawn' | 'deleted') {
+  if (titles.length === 1) {
+    return {
+      title: 'Una maqueta de tus favoritos ya no está disponible',
+      body:
+        how === 'deleted'
+          ? `«${titles[0]}» se ha eliminado y ya no está en el catálogo.`
+          : `«${titles[0]}» se ha retirado del catálogo. Si vuelve a publicarse, te aparecerá otra vez en Favoritos.`,
+    }
+  }
+  return {
+    title: `${titles.length} maquetas de tus favoritos ya no están disponibles`,
+    body:
+      how === 'deleted'
+        ? `Se han eliminado y ya no están en el catálogo: ${quoted(titles)}.`
+        : `Se han retirado del catálogo: ${quoted(titles)}. Si vuelven a publicarse, te aparecerán otra vez en Favoritos.`,
+  }
+}
+
 /**
- * Avisa (campanita + email si lo tienen activado) a quienes guardaron el anuncio en
- * favoritos de que su dueño lo ha retirado o eliminado. Va dentro de la transacción del
- * cambio: el email entra en la cola solo si el cambio se confirma.
+ * Avisa (campanita + email si lo tienen activado) a quienes guardaron estos anuncios en
+ * favoritos de que se han retirado del catálogo o eliminado. Cada persona recibe un único
+ * aviso, aunque la operación afecte a varios de sus favoritos. Nunca se avisa al dueño.
+ *
+ * Va dentro de la transacción del cambio, y en un borrado ANTES de borrar (el borrado se
+ * lleva los favoritos por la clave foránea): el email entra en la cola solo si se confirma.
  */
-export async function notifyFavoritersOfWithdrawal(
+export async function notifyFavoritersOfRemoval(
   deps: { db: Db; mail: LayoutContext },
-  listing: { id: string; user_id: string; title: string },
+  listingIds: string[],
   how: 'withdrawn' | 'deleted',
 ) {
+  if (listingIds.length === 0) return 0
   const { db } = deps
   let q = db
-    .selectFrom('favorites')
-    .select(['id', 'user_id'])
-    .where('listing_id', '=', listing.id)
-    .where('user_id', '!=', listing.user_id)
+    .selectFrom('favorites as f')
+    .innerJoin('listings as l', 'l.id', 'f.listing_id')
+    .select(['f.id', 'f.user_id', 'l.title'])
+    .where('f.listing_id', 'in', listingIds)
+    .whereRef('f.user_id', '!=', 'l.user_id')
+    .orderBy('l.title')
   if (how === 'withdrawn') {
     q = q.where((eb) =>
       eb.or([
-        eb('withdrawal_notified_at', 'is', null),
+        eb('f.withdrawal_notified_at', 'is', null),
         eb(
-          'withdrawal_notified_at',
+          'f.withdrawal_notified_at',
           '<',
           sql<Date>`NOW(3) - INTERVAL ${sql.lit(RENOTIFY_DAYS)} DAY`,
         ),
       ]),
     )
   }
-  const fans = await q.execute()
-  if (fans.length === 0) return 0
+  const rows = await q.execute()
+  if (rows.length === 0) return 0
 
-  const body =
-    how === 'deleted'
-      ? `«${listing.title}» ya no está en el catálogo: su vendedor lo ha eliminado.`
-      : `«${listing.title}» ya no está en el catálogo: su vendedor lo ha retirado. Si vuelve a publicarlo, te aparecerá otra vez en Favoritos.`
-  for (const fan of fans) {
+  const byFan = new Map<string, string[]>()
+  for (const r of rows) byFan.set(r.user_id, [...(byFan.get(r.user_id) ?? []), r.title])
+  for (const [userId, titles] of byFan) {
     await notify(deps, {
-      userId: fan.user_id,
+      userId,
       type: 'favorite_withdrawn',
-      title: 'Una maqueta de tus favoritos ya no está disponible',
-      body,
       link: '/explorar',
+      ...noticeText(titles, how),
     })
   }
+
   if (how === 'withdrawn') {
     await db
       .updateTable('favorites')
@@ -73,9 +104,9 @@ export async function notifyFavoritersOfWithdrawal(
       .where(
         'id',
         'in',
-        fans.map((f) => f.id),
+        rows.map((r) => r.id),
       )
       .execute()
   }
-  return fans.length
+  return byFan.size
 }

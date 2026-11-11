@@ -4,6 +4,7 @@ import { sql } from 'kysely'
 import type { Db } from '../db/client'
 import type { EmailContent, LayoutContext } from '../email/layout'
 import { enqueueEmail } from '../email/outbox'
+import { notifyFavoritersOfRemoval } from '../content/withdrawal'
 import { badRequest, notFound } from '../http/reply'
 
 export interface AccountDeps {
@@ -46,7 +47,7 @@ export async function isLastAdmin(db: Db, userId: string) {
 /**
  * Borra una cuenta por completo: el usuario y, en cascada, perfil, roles, sesiones,
  * anuncios, peticiones, favoritos, ofertas, conversaciones y notificaciones; después, sus
- * fotos y avatares del disco.
+ * fotos y avatares del disco. Antes avisa a quien tenía sus anuncios en favoritos.
  *
  * Los datos de contacto se leen ANTES de borrar (después no hay a quién preguntar) y el
  * email se encola en la misma transacción: si el borrado falla, no se anuncia una baja que
@@ -68,6 +69,17 @@ export async function deleteAccount(
   }
   const contact = await contactOf(deps.db, userId)
   await deps.db.transaction().execute(async (trx) => {
+    // Sus anuncios desaparecen con la cuenta: aviso a quien los tenía en favoritos.
+    const listings = await trx
+      .selectFrom('listings')
+      .select('id')
+      .where('user_id', '=', userId)
+      .execute()
+    await notifyFavoritersOfRemoval(
+      { db: trx, mail: deps.mail },
+      listings.map((l) => l.id),
+      'deleted',
+    )
     await trx.deleteFrom('users').where('id', '=', userId).execute()
     await enqueueEmail(trx, { to: contact.email, kind, content: email(contact.name, deps.mail) })
   })

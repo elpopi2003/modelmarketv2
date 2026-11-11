@@ -1,10 +1,12 @@
 import { sql } from 'kysely'
 import { z } from 'zod'
 import { conditionEnum } from '../content/schemas'
+import { isInCatalog, notifyFavoritersOfRemoval } from '../content/withdrawal'
 import type { Db } from '../db/client'
 import { isMissingReference } from '../db/errors'
 import { jsonArray } from '../db/json'
 import { badRequest } from '../http/reply'
+import type { LayoutContext } from '../email/layout'
 import { deleteUploads, unreferencedPhotos } from '../uploads/images'
 
 /** Tope por operación: de sobra para una colección importada, acotado para el servidor. */
@@ -45,12 +47,16 @@ export type BulkChanges = z.infer<typeof bulkChangesSchema>
  * Edita varios anuncios a la vez (panel de administración). El estado no se toca en lo
  * retirado por moderación: eso se devuelve con «Restaurar», que conserva su estado previo.
  */
-export async function bulkUpdateListings(db: Db, ids: string[], changes: BulkChanges) {
+export async function bulkUpdateListings(
+  deps: { db: Db; mail: LayoutContext },
+  ids: string[],
+  changes: BulkChanges,
+) {
   const { status, price_percent, ...fields } = changes
-  return db.transaction().execute(async (trx) => {
+  return deps.db.transaction().execute(async (trx) => {
     const rows = await trx
       .selectFrom('listings')
-      .select(['id', 'previous_status'])
+      .select(['id', 'previous_status', 'status', 'sold_showcase'])
       .where('id', 'in', ids)
       .forUpdate()
       .execute()
@@ -78,7 +84,8 @@ export async function bulkUpdateListings(db: Db, ids: string[], changes: BulkCha
       throw err
     }
 
-    const movable = rows.filter((r) => r.previous_status === null).map((r) => r.id)
+    const movableRows = rows.filter((r) => r.previous_status === null)
+    const movable = movableRows.map((r) => r.id)
     if (status !== undefined && movable.length > 0) {
       await trx
         .updateTable('listings')
@@ -88,6 +95,14 @@ export async function bulkUpdateListings(db: Db, ids: string[], changes: BulkCha
         })
         .where('id', 'in', movable)
         .execute()
+      // Suspender lo que estaba en el catálogo avisa a quien lo tenía en favoritos.
+      if (status === 'archived') {
+        await notifyFavoritersOfRemoval(
+          { db: trx, mail: deps.mail },
+          movableRows.filter(isInCatalog).map((r) => r.id),
+          'withdrawn',
+        )
+      }
     }
     return {
       updated: rows.length,
@@ -96,8 +111,14 @@ export async function bulkUpdateListings(db: Db, ids: string[], changes: BulkCha
   })
 }
 
-/** Elimina varios anuncios y las fotos del disco que ya no use nadie. */
-export async function bulkDeleteListings(deps: { db: Db; uploadsDir: string }, ids: string[]) {
+/**
+ * Elimina varios anuncios y las fotos del disco que ya no use nadie. Avisa antes a quien
+ * los tenía en favoritos (un aviso por persona, con la lista de maquetas).
+ */
+export async function bulkDeleteListings(
+  deps: { db: Db; uploadsDir: string; mail: LayoutContext },
+  ids: string[],
+) {
   const { db } = deps
   const rows = await db
     .selectFrom('listings')
@@ -105,14 +126,11 @@ export async function bulkDeleteListings(deps: { db: Db; uploadsDir: string }, i
     .where('id', 'in', ids)
     .execute()
   if (rows.length === 0) return { deleted: 0 }
-  await db
-    .deleteFrom('listings')
-    .where(
-      'id',
-      'in',
-      rows.map((r) => r.id),
-    )
-    .execute()
+  const found = rows.map((r) => r.id)
+  await db.transaction().execute(async (trx) => {
+    await notifyFavoritersOfRemoval({ db: trx, mail: deps.mail }, found, 'deleted')
+    await trx.deleteFrom('listings').where('id', 'in', found).execute()
+  })
   const photos = rows.flatMap((r) => jsonArray<string>(r.photos))
   await deleteUploads(deps.uploadsDir, await unreferencedPhotos(db, photos))
   return { deleted: rows.length }

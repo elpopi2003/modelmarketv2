@@ -425,32 +425,40 @@ describe.skipIf(!TEST_DB_URL)('API de mensajería, ofertas y notificaciones', ()
     expect(await notificationsOf(fan.id)).toHaveLength(1)
   })
 
-  it('eliminar un anuncio guardado avisa; venderlo, la retirada de un admin o lo ya retirado, no', async () => {
+  it('borrar avisa siempre (dueño o admin, esté como esté); venderlo o la retirada por moderación, no', async () => {
     const seller = await createTestUser(db)
     const admin = await createTestUser(db, { admin: true })
     const fan = await createTestUser(db)
     const sold = await listing(seller.id)
-    const takenDown = await listing(seller.id)
-    const archived = await listing(seller.id, { status: 'archived' })
-    const deleted = await listing(seller.id, { title: 'Hasegawa Zero 1:48' })
-    for (const l of [sold, takenDown, deleted]) await call('PUT', `/favorites/${l}`, fan.cookie)
+    const moderated = await listing(seller.id)
+    const archived = await listing(seller.id, { status: 'archived', title: 'Hasegawa Zero 1:48' })
+    const byAdmin = await listing(seller.id, { title: 'Tamiya Tiger I' })
+    for (const l of [sold, moderated, byAdmin]) await call('PUT', `/favorites/${l}`, fan.cookie)
     await db
       .insertInto('favorites')
       .values({ id: randomUUID(), user_id: fan.id, listing_id: archived })
       .execute()
 
     await call('PATCH', `/listings/${sold}`, seller.cookie, { status: 'sold' })
-    await call('PATCH', `/listings/${takenDown}`, admin.cookie, { status: 'archived' })
-    await call('DELETE', `/listings/${archived}`, seller.cookie)
+    await call('POST', `/admin/content/listing/${moderated}/take-down`, admin.cookie)
     expect(await notificationsOf(fan.id)).toHaveLength(0)
 
-    expect((await call('DELETE', `/listings/${deleted}`, seller.cookie)).statusCode).toBe(200)
-    const list = await notificationsOf(fan.id)
-    expect(list).toHaveLength(1)
-    expect(list[0].body).toBe(
-      '«Hasegawa Zero 1:48» ya no está en el catálogo: su vendedor lo ha eliminado.',
+    // Ya estaba suspendido, pero borrarlo también avisa.
+    expect((await call('DELETE', `/listings/${archived}`, seller.cookie)).statusCode).toBe(200)
+    // Un admin lo suspende y luego lo borra: dos avisos.
+    await call('PATCH', `/listings/${byAdmin}`, admin.cookie, { status: 'archived' })
+    expect((await call('DELETE', `/listings/${byAdmin}`, admin.cookie)).statusCode).toBe(200)
+
+    const bodies = (await notificationsOf(fan.id)).map((n) => n.body)
+    expect(bodies).toHaveLength(3)
+    expect(bodies).toEqual(
+      expect.arrayContaining([
+        '«Hasegawa Zero 1:48» se ha eliminado y ya no está en el catálogo.',
+        '«Tamiya Tiger I» se ha retirado del catálogo. Si vuelve a publicarse, te aparecerá otra vez en Favoritos.',
+        '«Tamiya Tiger I» se ha eliminado y ya no está en el catálogo.',
+      ]),
     )
-    expect(await emailsTo(fan.email)).toHaveLength(1)
+    expect(await emailsTo(fan.email)).toHaveLength(3)
   })
 
   it('favorito: avisa al dueño (no al guardar lo propio); campanita, contador y marcar leídas', async () => {

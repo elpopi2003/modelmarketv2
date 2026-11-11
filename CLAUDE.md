@@ -43,9 +43,10 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
   - [x] **M8c · Comunicación** — conversaciones, mensajes, ofertas y notificaciones; la lógica
     de las RPC y triggers de v2 en `server/messaging` (transacciones). Una oferta pendiente por
     persona con columna generada + UNIQUE. Avisos con email por la cola si `notify_email`; los
-    mensajes seguidos se agrupan (un email). Texto ajeno escapado en el email. Si el dueño retira
-    (suspende/borrador) o elimina un anuncio del catálogo, se avisa a quien lo tenía en favoritos
-    (como mucho una vez por semana y anuncio). Fechas siempre en
+    mensajes seguidos se agrupan (un email). Texto ajeno escapado en el email. Quien tiene un anuncio
+    en favoritos recibe aviso siempre que se elimina (dueño, admin, en bloque o con la baja de
+    la cuenta) y cuando se suspende o pasa a borrador (máx. 1/semana por anuncio); un aviso
+    por persona y operación. Venderlo o retirarlo por moderación no avisa. Fechas siempre en
     UTC: cualquier escritura fuera de la app (scripts, migración M8e) debe usar `UTC_TIMESTAMP()`.
   - [x] **M8d · Admin, contacto y cuenta** (sin pagos) — panel (estadísticas, usuarios, roles,
     contenido, retirar/restaurar), suspensión con motivo y email, denuncias con aviso a admins,

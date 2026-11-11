@@ -142,12 +142,12 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
       z.object({ ids: bulkIdsSchema, changes: bulkChangesSchema }),
       req.body,
     )
-    return ok(await bulkUpdateListings(db, ids, changes))
+    return ok(await bulkUpdateListings({ db, mail }, ids, changes))
   })
   app.post('/admin/listings/bulk-delete', async (req) => {
     requireAdmin(req)
     const { ids } = parse(z.object({ ids: bulkIdsSchema }), req.body)
-    return ok(await bulkDeleteListings({ db, uploadsDir: config.UPLOADS_DIR }, ids))
+    return ok(await bulkDeleteListings(accountDeps, ids))
   })
   app.get('/admin/requests', async (req) => {
     requireAdmin(req)

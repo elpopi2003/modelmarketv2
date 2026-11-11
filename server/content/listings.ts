@@ -19,7 +19,7 @@ import {
 import type { listingCreateSchema, listingFiltersSchema, listingUpdateSchema } from './schemas'
 import { getUserCapabilities } from './tier'
 import { listingIsPublic, listingVisibleTo, type Viewer } from './viewer'
-import { isInCatalog, isWithdrawalStatus, notifyFavoritersOfWithdrawal } from './withdrawal'
+import { isInCatalog, isWithdrawalStatus, notifyFavoritersOfRemoval } from './withdrawal'
 
 export interface ContentDeps {
   db: Db
@@ -214,19 +214,9 @@ export async function updateListing(
       throw err
     }
 
-    // El dueño lo saca del catálogo (suspender o borrador): avisa a quien lo tenía guardado.
-    if (
-      deps.mail &&
-      statusChanges &&
-      viewer.userId === row.user_id &&
-      isInCatalog(row) &&
-      isWithdrawalStatus(input.status!)
-    ) {
-      await notifyFavoritersOfWithdrawal(
-        { db: trx, mail: deps.mail },
-        { id, user_id: row.user_id, title: fields.title ?? row.title },
-        'withdrawn',
-      )
+    // Sale del catálogo (suspender o borrador): avisa a quien lo tenía guardado.
+    if (deps.mail && statusChanges && isInCatalog(row) && isWithdrawalStatus(input.status!)) {
+      await notifyFavoritersOfRemoval({ db: trx, mail: deps.mail }, [id], 'withdrawn')
     }
   })
 
@@ -244,10 +234,8 @@ export async function deleteListing(deps: ContentDeps, viewer: Viewer, id: strin
   assertOwnerOrAdmin(viewer, row.user_id)
   assertNotModerated(viewer, row.previous_status, 'eliminarlo')
   await deps.db.transaction().execute(async (trx) => {
-    // Antes de borrar: el borrado se lleva los favoritos por la clave foránea.
-    if (deps.mail && viewer.userId === row.user_id && isInCatalog(row)) {
-      await notifyFavoritersOfWithdrawal({ db: trx, mail: deps.mail }, row, 'deleted')
-    }
+    // Siempre se avisa al borrar, y antes: el borrado se lleva los favoritos en cascada.
+    if (deps.mail) await notifyFavoritersOfRemoval({ db: trx, mail: deps.mail }, [id], 'deleted')
     await trx.deleteFrom('listings').where('id', '=', id).execute()
   })
   await deleteUploads(deps.uploadsDir, await unreferencedPhotos(deps.db, jsonArray(row.photos)))
