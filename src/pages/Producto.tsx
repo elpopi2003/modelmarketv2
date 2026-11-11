@@ -38,6 +38,7 @@ import { OffersPanel } from '@/components/marketplace/OffersPanel'
 import { ReportDialog } from '@/components/marketplace/ReportDialog'
 import { useListingOffers } from '@/hooks/useOffers'
 import { ScaleTag } from '@/components/marketplace/ScaleTag'
+import { SoldRibbon } from '@/components/marketplace/SoldRibbon'
 import { FavoriteButton } from '@/components/marketplace/FavoriteButton'
 import { TierBadge } from '@/components/marketplace/TierBadge'
 import { VerifiedSeller } from '@/components/marketplace/VerifiedSeller'
@@ -192,9 +193,11 @@ export default function Producto() {
       priceCurrency: listing.currency ?? 'EUR',
       itemCondition: schemaCondition,
       availability:
-        listing.status === 'reserved'
-          ? 'https://schema.org/OutOfStock'
-          : 'https://schema.org/InStock',
+        listing.status === 'sold'
+          ? 'https://schema.org/SoldOut'
+          : listing.status === 'reserved'
+            ? 'https://schema.org/OutOfStock'
+            : 'https://schema.org/InStock',
       url: typeof window !== 'undefined' ? window.location.href : undefined,
     },
   }
@@ -242,6 +245,7 @@ export default function Producto() {
                 <span className="mm-mono text-sm text-muted-foreground">SIN FOTO</span>
               </div>
             )}
+            {listing.status === 'sold' && <SoldRibbon size="lg" />}
             <ConditionBadge condition={listing.condition} className="absolute right-3 top-3" />
             {listing.catalog_photo && listing.photos[activePhoto] === listing.catalog_photo && (
               <CatalogPhotoBadge className="absolute bottom-3 right-3" />
@@ -407,6 +411,11 @@ export default function Producto() {
                     </span>
                   </label>
                 </div>
+              ) : listing.status === 'sold' ? (
+                <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-foreground">
+                  Esta maqueta ya está vendida: no admite ofertas. Puedes escribir al vendedor por
+                  el chat si buscas otra igual.
+                </p>
               ) : offering ? (
                 <OfferForm
                   listingId={listing.id}

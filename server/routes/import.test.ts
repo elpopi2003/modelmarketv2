@@ -279,6 +279,53 @@ describe.skipIf(!TEST_DB_URL)('importador masivo desde Excel', () => {
     expect((await app.inject({ method: 'GET', url: photos[0] })).statusCode).toBe(200)
   })
 
+  it('con «marcar como vendidas» salen en el catálogo como vendidas y sin admitir ofertas', async () => {
+    const admin = await createTestUser(db, { admin: true })
+    const owner = await createTestUser(db)
+    const res = await send('/admin/import/commit', admin.cookie, {
+      payload: JSON.stringify({
+        ownerId: owner.id,
+        options: { ...options, markAsSold: true },
+        categories: { '5': null },
+      }),
+    })
+    expect(res.json().data.created).toBe(5)
+    const statuses = await db
+      .selectFrom('listings')
+      .select('status')
+      .where('user_id', '=', owner.id)
+      .execute()
+    expect(statuses.every((l) => l.status === 'sold')).toBe(true)
+    const catalog = (await app.inject({ method: 'GET', url: '/api/listings' })).json().data
+    expect(catalog).toHaveLength(5)
+    expect(catalog.every((l: { status: string }) => l.status === 'sold')).toBe(true)
+    // Se ven, pero no se puede ofertar por ellas.
+    const buyer = await createTestUser(db)
+    const offer = await app.inject({
+      method: 'POST',
+      url: '/api/offers',
+      headers: { cookie: buyer.cookie, origin: TEST_ORIGIN },
+      payload: { listingId: catalog[0].id, amountCents: 1000 },
+    })
+    expect(offer.json().error.code).toBe('listing_sold')
+    // Sin la marca de escaparate (un vendido normal), desaparece del catálogo.
+    await db
+      .updateTable('listings')
+      .set({ sold_showcase: false })
+      .where('id', '=', catalog[0].id)
+      .execute()
+    expect((await app.inject({ method: 'GET', url: '/api/listings' })).json().data).toHaveLength(4)
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/listings/mine',
+      headers: { cookie: owner.cookie },
+    })
+    expect(mine.json().data).toHaveLength(5)
+    // Vendidas siguen contando para no duplicar.
+    const again = await send('/admin/import/preview', admin.cookie, { ownerId: owner.id })
+    expect(again.json().data.summary.toImport).toBe(0)
+  })
+
   it('reimportar el mismo Excel no duplica: todo sale como "ya existe"', async () => {
     const admin = await createTestUser(db, { admin: true })
     const owner = await createTestUser(db)

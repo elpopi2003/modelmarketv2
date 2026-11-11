@@ -11,6 +11,7 @@ const optionsSchema = z.object({
   handDelivery: z.boolean().default(true),
   acceptsOffers: z.boolean().default(true),
   decals: z.enum(['perfect', 'yellowed', 'unavailable']).default('perfect'),
+  markAsSold: z.boolean().default(false),
 })
 
 const commitSchema = z.object({

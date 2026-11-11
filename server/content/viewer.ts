@@ -16,10 +16,16 @@ export function authorNotSuspended(table: 'listings' | 'requests') {
   return sql<boolean>`NOT EXISTS (SELECT 1 FROM user_suspensions us WHERE us.user_id = ${sql.ref(`${table}.user_id`)})`
 }
 
-/** Anuncio visible para el público: activo o reservado, ya publicado y autor no suspendido. */
+/**
+ * Anuncio visible para el público: activo o reservado (o vendido de escaparate, con la banda
+ * «¡VENDIDA!»), ya publicado y autor no suspendido.
+ */
 export function listingIsPublic(eb: ExpressionBuilder<Database, 'listings'>) {
   return eb.and([
-    eb('listings.status', 'in', ['active', 'reserved']),
+    eb.or([
+      eb('listings.status', 'in', ['active', 'reserved']),
+      eb.and([eb('listings.status', '=', 'sold'), eb('listings.sold_showcase', '=', true)]),
+    ]),
     eb('listings.visible_at', '<=', sql<Date>`NOW(3)`),
     authorNotSuspended('listings'),
   ])

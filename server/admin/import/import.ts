@@ -24,7 +24,7 @@ import { normKey, type SheetRow } from './files'
  *  - Cantidad > 1: un solo anuncio con "Unidades disponibles: N" en la descripción.
  *  - La imagen es de catálogo (caja oficial): se marca para que la interfaz lo indique.
  *  - Se publica al momento y sin aplicar los límites del plan del destinatario: es una
- *    acción de administración.
+ *    acción de administración. Opcionalmente, todo el lote se importa como vendido.
  */
 
 export interface ImportBatchOptions {
@@ -32,6 +32,11 @@ export interface ImportBatchOptions {
   handDelivery: boolean
   acceptsOffers: boolean
   decals: DecalsStatus
+  /**
+   * Importar como vendidas: salen en el catálogo con la banda «¡VENDIDA!» (sold_showcase),
+   * sin admitir ofertas ni ocupar hueco del plan. Siguen contando para no duplicar.
+   */
+  markAsSold: boolean
 }
 
 export interface PreviewRow {
@@ -350,6 +355,8 @@ export async function runImport(
             shipping_inpost: input.options.shippingAvailable,
             hand_delivery: input.options.handDelivery,
             accepts_offers: input.options.acceptsOffers,
+            status: input.options.markAsSold ? 'sold' : 'active',
+            sold_showcase: input.options.markAsSold,
             visible_at: sql<Date>`NOW(3)`,
           })
           .execute()

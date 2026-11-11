@@ -142,6 +142,8 @@ export interface ListingsTable {
   catalog_photo: Defaulted<string | null>
   status: Defaulted<ListingStatus>
   previous_status: ListingStatus | null
+  /** Vendido pero visible en el catálogo con «¡VENDIDA!» (importador). */
+  sold_showcase: Defaulted<boolean>
   shipping_inpost: Defaulted<boolean>
   hand_delivery: Defaulted<boolean>
   accepts_offers: Defaulted<boolean>

@@ -259,6 +259,26 @@
   border: 2px dashed hsl(var(--border));
 }
 
+/*
+ * Banda «¡VENDIDA!» que cruza la foto a 45°. Mismo lenguaje que el resto: Raleway 800 en
+ * mayúsculas (como botones y titulares), cantos técnicos de 2px con línea discontinua
+ * interior y la sombra firma blueprint (desplazamiento duro, sin difuminado).
+ */
+.mm-sold-ribbon {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  text-align: center;
+  border-block: 2px solid hsl(var(--destructive-foreground));
+  outline: 1px dashed hsl(var(--destructive-foreground) / 0.55);
+  outline-offset: -6px;
+  box-shadow: 0 4px 0 0 hsl(var(--border));
+  transform: rotate(-45deg);
+}
+
 .mm-hover-lift {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }

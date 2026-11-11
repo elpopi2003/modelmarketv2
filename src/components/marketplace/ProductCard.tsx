@@ -8,6 +8,7 @@ import { CatalogPhotoBadge } from './CatalogPhotoBadge'
 import { ConditionBadge } from './ConditionBadge'
 import { OwnerActions } from './OwnerActions'
 import { ScaleTag } from './ScaleTag'
+import { SoldRibbon } from './SoldRibbon'
 import { FavoriteButton } from './FavoriteButton'
 
 /**
@@ -51,6 +52,7 @@ export function ProductCard({
   // Plan Free: se publica con 24 h de retardo. Solo su dueño lo ve mientras tanto.
   const pending = isOwn && !suspended ? pendingVisibilityLabel(listing.visible_at) : null
   const isCatalogCover = !!listing.catalog_photo && listing.photos[0] === listing.catalog_photo
+  const sold = listing.status === 'sold'
 
   return (
     <div
@@ -86,6 +88,9 @@ export function ProductCard({
           )}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+          {/* Antes que las etiquetas: la banda pasa por debajo de escala, «Tu anuncio», etc. */}
+          {sold && !suspended && <SoldRibbon />}
 
           {listing.scale && (
             <ScaleTag

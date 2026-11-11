@@ -47,13 +47,14 @@ export async function createOffer(
       // FOR UPDATE: dos ofertas simultáneas del mismo usuario no pueden crear dos pendientes.
       const l = await trx
         .selectFrom('listings')
-        .select(['id', 'user_id', 'price_cents', 'accepts_offers'])
+        .select(['id', 'user_id', 'price_cents', 'accepts_offers', 'status'])
         .where('id', '=', listingId)
         .where(listingVisibleTo(viewer))
         .forUpdate()
         .executeTakeFirst()
       if (!l) throw notFound('Este anuncio no existe o ya no está disponible.')
       if (l.user_id === me) throw badRequest('No puedes ofertar sobre tu propio anuncio.')
+      if (l.status === 'sold') throw badRequest('Este anuncio ya está vendido.', 'listing_sold')
       if (!l.accepts_offers && amountCents < l.price_cents) {
         throw badRequest(
           'Este vendedor no acepta ofertas por debajo del precio publicado.',

@@ -46,6 +46,7 @@ export default function AdminImportar() {
     handDelivery: true,
     acceptsOffers: true,
     decals: 'perfect',
+    markAsSold: false,
   })
 
   const [preview, setPreview] = useState<ImportPreview | null>(null)
@@ -236,6 +237,21 @@ export default function AdminImportar() {
               ))}
             </select>
           </label>
+          <label className="flex items-start gap-2 rounded-md border border-border p-3 text-sm sm:col-span-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-4 accent-primary"
+              checked={options.markAsSold}
+              onChange={(e) => setOptions((o) => ({ ...o, markAsSold: e.target.checked }))}
+            />
+            <span>
+              <span className="font-medium">Marcar como vendidas</span>
+              <span className="block text-xs text-muted-foreground">
+                Salen en el catálogo con la banda «¡VENDIDA!», sin admitir ofertas ni ocupar hueco
+                del plan. No se duplican al reimportar.
+              </span>
+            </span>
+          </label>
         </fieldset>
 
         <Button onClick={analyze} disabled={!excel || !ownerId || busy !== null}>
@@ -403,7 +419,7 @@ export default function AdminImportar() {
               <Upload className="size-4" />
               {busy === 'import'
                 ? 'Importando… (puede tardar un minuto)'
-                : `Importar ${preview.summary.toImport} anuncios`}
+                : `Importar ${preview.summary.toImport} anuncios${options.markAsSold ? ' como vendidos' : ''}`}
             </Button>
             {missingCategories > 0 && (
               <p className="text-sm text-muted-foreground">
@@ -423,7 +439,9 @@ export default function AdminImportar() {
           </h2>
           {owner && (
             <p className="text-sm text-muted-foreground">
-              Ya están publicados a nombre de {owner.display_name || owner.email}.{' '}
+              {options.markAsSold
+                ? `Publicados como vendidos a nombre de ${owner.display_name || owner.email}: salen en el catálogo con «¡VENDIDA!».`
+                : `Ya están publicados a nombre de ${owner.display_name || owner.email}.`}{' '}
               <Link to="/admin/contenido" className="underline underline-offset-4">
                 Ver en Contenido
               </Link>

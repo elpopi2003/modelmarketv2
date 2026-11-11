@@ -42,7 +42,10 @@ Scalemates) y crea `coleccion-imagenes.zip` junto al Excel. Solo lee; no modific
 - **Duplicados**: lo que ya tiene esa cuenta (misma marca + referencia) o se repite en el
   Excel se salta. Se puede reimportar un Excel ampliado sin duplicar.
 - **Publicación**: inmediata y sin aplicar los límites del plan de la cuenta destinataria.
-- Para todo el lote se eligen: envíos, entrega en mano, si acepta ofertas y estado de calcas.
+- Para todo el lote se eligen: envíos, entrega en mano, si acepta ofertas, estado de calcas y
+  si se importan **como vendidas**: salen en el catálogo (detrás de lo que está a la venta)
+  con una banda roja «¡VENDIDA!», no admiten ofertas, no ocupan hueco del plan y cuentan
+  para no duplicar. (Un anuncio que su dueño marca como vendido, en cambio, sale del catálogo.)
 
 ## 3. Límites
 

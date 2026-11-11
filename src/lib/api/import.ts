@@ -7,6 +7,8 @@ export interface ImportOptions {
   handDelivery: boolean
   acceptsOffers: boolean
   decals: DecalsStatus
+  /** Importar todo el lote como vendido: en el catálogo con «¡VENDIDA!», sin ofertas. */
+  markAsSold: boolean
 }
 
 export interface ImportPreviewRow {

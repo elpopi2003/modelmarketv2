@@ -33,9 +33,16 @@ const PUBLIC_LIMIT = 1000
 
 const BAD_REFERENCE = () => badRequest('La categoría o la marca no existen.', 'invalid_reference')
 
-/** Catálogo público: activos y reservados ya publicados, de autores no suspendidos. */
+/**
+ * Catálogo público: activos y reservados ya publicados, de autores no suspendidos, más los
+ * vendidos de escaparate, que van siempre detrás de lo que está a la venta.
+ */
 export async function listPublicListings(db: Db, f: Filters) {
-  let q = db.selectFrom('listings').selectAll().where(listingIsPublic)
+  let q = db
+    .selectFrom('listings')
+    .selectAll()
+    .where(listingIsPublic)
+    .orderBy(sql`listings.status = 'sold'`)
   if (f.category) q = q.where('category_id', '=', f.category)
   if (f.brand) q = q.where('brand_id', '=', f.brand)
   if (f.condition) q = q.where('condition', '=', f.condition)
