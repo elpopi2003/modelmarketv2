@@ -4,6 +4,7 @@ import type { z } from 'zod'
 import { LISTING_STATUSES_COUNTING, countsTowardListingLimit } from '@/lib/subscription'
 import type { Db } from '../db/client'
 import { isMissingReference } from '../db/errors'
+import type { LayoutContext } from '../email/layout'
 import { jsonArray, toJson } from '../db/json'
 import { badRequest, notFound } from '../http/reply'
 import { deleteUploads, unreferencedPhotos } from '../uploads/images'
@@ -18,10 +19,13 @@ import {
 import type { listingCreateSchema, listingFiltersSchema, listingUpdateSchema } from './schemas'
 import { getUserCapabilities } from './tier'
 import { listingIsPublic, listingVisibleTo, type Viewer } from './viewer'
+import { isInCatalog, isWithdrawalStatus, notifyFavoritersOfWithdrawal } from './withdrawal'
 
 export interface ContentDeps {
   db: Db
   uploadsDir: string
+  /** Para los avisos por email (p. ej. a quien guardó un anuncio que se retira). */
+  mail?: LayoutContext
 }
 
 type Filters = z.infer<typeof listingFiltersSchema>
@@ -209,6 +213,21 @@ export async function updateListing(
       if (isMissingReference(err)) throw BAD_REFERENCE()
       throw err
     }
+
+    // El dueño lo saca del catálogo (suspender o borrador): avisa a quien lo tenía guardado.
+    if (
+      deps.mail &&
+      statusChanges &&
+      viewer.userId === row.user_id &&
+      isInCatalog(row) &&
+      isWithdrawalStatus(input.status!)
+    ) {
+      await notifyFavoritersOfWithdrawal(
+        { db: trx, mail: deps.mail },
+        { id, user_id: row.user_id, title: fields.title ?? row.title },
+        'withdrawn',
+      )
+    }
   })
 
   await deleteUploads(deps.uploadsDir, await unreferencedPhotos(db, removedPhotos))
@@ -224,7 +243,13 @@ export async function deleteListing(deps: ContentDeps, viewer: Viewer, id: strin
   if (!row) throw notFound('Este anuncio no existe.')
   assertOwnerOrAdmin(viewer, row.user_id)
   assertNotModerated(viewer, row.previous_status, 'eliminarlo')
-  await deps.db.deleteFrom('listings').where('id', '=', id).execute()
+  await deps.db.transaction().execute(async (trx) => {
+    // Antes de borrar: el borrado se lleva los favoritos por la clave foránea.
+    if (deps.mail && viewer.userId === row.user_id && isInCatalog(row)) {
+      await notifyFavoritersOfWithdrawal({ db: trx, mail: deps.mail }, row, 'deleted')
+    }
+    await trx.deleteFrom('listings').where('id', '=', id).execute()
+  })
   await deleteUploads(deps.uploadsDir, await unreferencedPhotos(deps.db, jsonArray(row.photos)))
 }
 

@@ -176,6 +176,8 @@ export interface FavoritesTable {
   id: string
   user_id: string
   listing_id: string
+  /** Último aviso de «retirado del catálogo» a esta persona por este anuncio. */
+  withdrawal_notified_at: Defaulted<Date | null>
   created_at: AutoDate
 }
 

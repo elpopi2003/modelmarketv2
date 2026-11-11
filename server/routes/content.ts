@@ -29,7 +29,8 @@ const limit = (max: number, minutes: number) => ({
 /** Catálogo, anuncios, peticiones, favoritos y plan. */
 export const contentRoutes: FastifyPluginAsync = async (app) => {
   const { db, config } = app.deps
-  const deps = { db, uploadsDir: config.UPLOADS_DIR }
+  const mail = { appUrl: config.APP_URL, logoUrl: config.MAIL_LOGO_URL }
+  const deps = { db, uploadsDir: config.UPLOADS_DIR, mail }
 
   // ── Catálogos ─────────────────────────────────────────────────────────────
   app.get('/catalog/categories', async (_req, reply) => {
@@ -126,7 +127,7 @@ export const contentRoutes: FastifyPluginAsync = async (app) => {
     // Aviso al dueño la primera vez que alguien lo guarda (no al guardar lo propio).
     if (created && ownerId !== viewer.userId) {
       await notify(
-        { db, mail: { appUrl: config.APP_URL, logoUrl: config.MAIL_LOGO_URL } },
+        { db, mail },
         {
           userId: ownerId,
           type: 'favorite',

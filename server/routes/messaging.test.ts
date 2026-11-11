@@ -381,6 +381,78 @@ describe.skipIf(!TEST_DB_URL)('API de mensajería, ofertas y notificaciones', ()
   })
 
   // ── notificaciones ────────────────────────────────────────────────────────
+  it('retirar un anuncio guardado avisa a quien lo guardó (email según preferencia), una vez por semana', async () => {
+    const seller = await createTestUser(db)
+    const fan = await createTestUser(db)
+    const quiet = await createTestUser(db)
+    const other = await createTestUser(db)
+    await db
+      .updateTable('profiles')
+      .set({ notify_email: false })
+      .where('id', '=', quiet.id)
+      .execute()
+    const l = await listing(seller.id)
+    await call('PUT', `/favorites/${l}`, fan.cookie)
+    await call('PUT', `/favorites/${l}`, quiet.cookie)
+    await call('PUT', `/favorites/${l}`, seller.cookie) // lo propio no cuenta
+    await db.deleteFrom('email_outbox').execute()
+
+    expect(
+      (await call('PATCH', `/listings/${l}`, seller.cookie, { status: 'archived' })).statusCode,
+    ).toBe(200)
+    const [n] = await notificationsOf(fan.id)
+    expect(n).toMatchObject({
+      type: 'favorite_withdrawn',
+      title: 'Una maqueta de tus favoritos ya no está disponible',
+      link: '/explorar',
+    })
+    expect(n.body).toContain('Tamiya Spitfire 1:48')
+    const mails = await emailsTo(fan.email)
+    expect(mails).toHaveLength(1)
+    expect(mails[0].subject).toBe('Una maqueta de tus favoritos ya no está disponible')
+    // Sin emails activados: solo la campanita.
+    expect(await notificationsOf(quiet.id)).toHaveLength(1)
+    expect(await emailsTo(quiet.email)).toHaveLength(0)
+    expect(
+      (await notificationsOf(seller.id)).filter((x) => x.type === 'favorite_withdrawn'),
+    ).toHaveLength(0)
+    expect(await notificationsOf(other.id)).toHaveLength(0)
+
+    // Reactivar y volver a suspender en la misma semana no repite el aviso.
+    await call('PATCH', `/listings/${l}`, seller.cookie, { status: 'active' })
+    await call('PATCH', `/listings/${l}`, seller.cookie, { status: 'archived' })
+    expect(await emailsTo(fan.email)).toHaveLength(1)
+    expect(await notificationsOf(fan.id)).toHaveLength(1)
+  })
+
+  it('eliminar un anuncio guardado avisa; venderlo, la retirada de un admin o lo ya retirado, no', async () => {
+    const seller = await createTestUser(db)
+    const admin = await createTestUser(db, { admin: true })
+    const fan = await createTestUser(db)
+    const sold = await listing(seller.id)
+    const takenDown = await listing(seller.id)
+    const archived = await listing(seller.id, { status: 'archived' })
+    const deleted = await listing(seller.id, { title: 'Hasegawa Zero 1:48' })
+    for (const l of [sold, takenDown, deleted]) await call('PUT', `/favorites/${l}`, fan.cookie)
+    await db
+      .insertInto('favorites')
+      .values({ id: randomUUID(), user_id: fan.id, listing_id: archived })
+      .execute()
+
+    await call('PATCH', `/listings/${sold}`, seller.cookie, { status: 'sold' })
+    await call('PATCH', `/listings/${takenDown}`, admin.cookie, { status: 'archived' })
+    await call('DELETE', `/listings/${archived}`, seller.cookie)
+    expect(await notificationsOf(fan.id)).toHaveLength(0)
+
+    expect((await call('DELETE', `/listings/${deleted}`, seller.cookie)).statusCode).toBe(200)
+    const list = await notificationsOf(fan.id)
+    expect(list).toHaveLength(1)
+    expect(list[0].body).toBe(
+      '«Hasegawa Zero 1:48» ya no está en el catálogo: su vendedor lo ha eliminado.',
+    )
+    expect(await emailsTo(fan.email)).toHaveLength(1)
+  })
+
   it('favorito: avisa al dueño (no al guardar lo propio); campanita, contador y marcar leídas', async () => {
     const seller = await createTestUser(db)
     const fan = await createTestUser(db)
