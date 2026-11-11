@@ -219,6 +219,129 @@ describe.skipIf(!TEST_DB_URL)('API de administración, denuncias, contacto y baj
     expect((await call('GET', `/requests/${id}`)).statusCode).toBe(200)
   })
 
+  // ── operaciones en bloque ─────────────────────────────────────────────────
+  it('edición en bloque: solo admins; aplica lo indicado y no mueve lo retirado por moderación', async () => {
+    const admin = await createTestUser(db, { admin: true })
+    const owner = await createTestUser(db)
+    const a = await listing(owner.id)
+    const b = await listing(owner.id, { price_cents: 1999 })
+    const moderated = await listing(owner.id, { status: 'archived', previous_status: 'active' })
+    const untouched = await listing(owner.id)
+    const ids = [a, b, moderated]
+    const category = await db.selectFrom('categories').select('id').executeTakeFirstOrThrow()
+
+    const body = { ids, changes: { status: 'sold_showcase', accepts_offers: false } }
+    expect((await call('POST', '/admin/listings/bulk-update', owner.cookie, body)).statusCode).toBe(
+      403,
+    )
+
+    const res = await call('POST', '/admin/listings/bulk-update', admin.cookie, {
+      ids,
+      changes: {
+        status: 'sold_showcase',
+        category_id: category.id,
+        decals: 'yellowed',
+        shipping_inpost: true,
+        price_percent: -10,
+      },
+    })
+    expect(res.json().data).toEqual({ updated: 3, skippedModerated: 1 })
+    const rows = await db
+      .selectFrom('listings')
+      .select([
+        'id',
+        'status',
+        'sold_showcase',
+        'previous_status',
+        'category_id',
+        'decals',
+        'shipping_inpost',
+        'price_cents',
+        'condition',
+      ])
+      .where('user_id', '=', owner.id)
+      .execute()
+    const byId = new Map(rows.map((r) => [r.id, r]))
+    expect(byId.get(a)).toMatchObject({
+      status: 'sold',
+      sold_showcase: true,
+      category_id: category.id,
+      decals: 'yellowed',
+      shipping_inpost: true,
+      price_cents: 1800,
+    })
+    expect(byId.get(b)!.price_cents).toBe(1799) // 1999 × 0,9 = 1799,1 → 1799
+    // Lo moderado cambia sus datos, pero no de estado: sigue retirado.
+    expect(byId.get(moderated)).toMatchObject({
+      status: 'archived',
+      previous_status: 'active',
+      decals: 'yellowed',
+    })
+    expect(byId.get(untouched)).toMatchObject({
+      status: 'active',
+      decals: 'perfect',
+      price_cents: 2000,
+    })
+
+    // Vendido «fuera del catálogo» quita la marca de escaparate.
+    await call('POST', '/admin/listings/bulk-update', admin.cookie, {
+      ids: [a],
+      changes: { status: 'sold' },
+    })
+    expect(
+      (
+        await db
+          .selectFrom('listings')
+          .select('sold_showcase')
+          .where('id', '=', a)
+          .executeTakeFirstOrThrow()
+      ).sold_showcase,
+    ).toBeFalsy()
+
+    const empty = await call('POST', '/admin/listings/bulk-update', admin.cookie, {
+      ids,
+      changes: {},
+    })
+    expect(empty.statusCode).toBe(400)
+    const zero = await call('POST', '/admin/listings/bulk-update', admin.cookie, {
+      ids,
+      changes: { price_percent: 0 },
+    })
+    expect(zero.statusCode).toBe(400)
+  })
+
+  it('borrado en bloque: solo admins; borra los anuncios y sus fotos del disco', async () => {
+    const admin = await createTestUser(db, { admin: true })
+    const owner = await createTestUser(db)
+    const dir = join(uploadsDir, 'photos', owner.id)
+    await mkdir(dir, { recursive: true })
+    const file = randomUUID()
+    await writeFile(join(dir, `${file}.webp`), 'x')
+    await writeFile(join(dir, `${file}-sm.webp`), 'x')
+    const photo = `/uploads/photos/${owner.id}/${file}.webp`
+    const a = await listing(owner.id, { photos: JSON.stringify([photo]) })
+    const b = await listing(owner.id)
+    const keep = await listing(owner.id)
+
+    expect(
+      (await call('POST', '/admin/listings/bulk-delete', owner.cookie, { ids: [a, b] })).statusCode,
+    ).toBe(403)
+    expect(
+      await data(call('POST', '/admin/listings/bulk-delete', admin.cookie, { ids: [a, b] })),
+    ).toEqual({ deleted: 2 })
+    const left = await db
+      .selectFrom('listings')
+      .select('id')
+      .where('user_id', '=', owner.id)
+      .execute()
+    expect(left.map((r) => r.id)).toEqual([keep])
+    await expect(stat(join(dir, `${file}.webp`))).rejects.toThrow()
+    await expect(stat(join(dir, `${file}-sm.webp`))).rejects.toThrow()
+    expect(
+      (await call('POST', '/admin/listings/bulk-delete', admin.cookie, { ids: [] })).statusCode,
+    ).toBe(400)
+  })
+
   // ── denuncias ─────────────────────────────────────────────────────────────
   it('denuncias: una pendiente por objetivo, nunca sobre lo propio, avisa a los admins', async () => {
     const admin = await createTestUser(db, { admin: true })

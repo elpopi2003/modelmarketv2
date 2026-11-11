@@ -51,6 +51,8 @@ Roadmap por hitos. Una PR por hito. `tsc` + `vitest` en verde antes de cerrar ca
     contenido, retirar/restaurar), suspensión con motivo y email, denuncias con aviso a admins,
     contacto con reCAPTCHA v3 verificado en servidor hacia `hola@`, baja propia y por admin
     (borra también fotos del disco). Corrige el fallo de v2 al retirar contenido ya suspendido.
+    Contenido → Anuncios: filtro por propietario y selector múltiple para editar (estado,
+    categoría, kit, calcas, entrega, ofertas, precio en %) o eliminar en bloque (máx. 500).
     Clave pública de reCAPTCHA en `.env.production` (versionado: solo variables públicas).
   - [ ] **M8e · Corte** — hecho: modo beta `BETA_ALL_PRO`, importación desde Supabase
     (`npm run db:import-supabase`, ensayada en staging), guion `docs/corte-v3.md`, `main` en

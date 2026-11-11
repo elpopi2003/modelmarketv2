@@ -9,6 +9,8 @@ import {
   type CreateReportInput,
 } from '@/lib/api/reports'
 import {
+  bulkDeleteListings,
+  bulkUpdateListings,
   deleteUserAsAdmin,
   fetchAdminUsers,
   fetchAllListings,
@@ -19,6 +21,7 @@ import {
   suspendUser,
   takeDownContent,
   unsuspendUser,
+  type BulkListingChanges,
   type ContentKind,
 } from '@/lib/api/admin'
 import { deleteListing } from '@/lib/api/listings'
@@ -161,6 +164,32 @@ export function useDeleteListingAsAdmin() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (listingId: string) => deleteListing(listingId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all })
+    },
+  })
+}
+
+/** Edita varios anuncios a la vez (selector de Contenido). */
+export function useBulkUpdateListings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ ids, changes }: { ids: string[]; changes: BulkListingChanges }) =>
+      bulkUpdateListings(ids, changes),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })
+    },
+  })
+}
+
+/** Elimina varios anuncios a la vez (selector de Contenido). */
+export function useBulkDeleteListings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: string[]) => bulkDeleteListings(ids),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all })
       void queryClient.invalidateQueries({ queryKey: queryKeys.listings.all })

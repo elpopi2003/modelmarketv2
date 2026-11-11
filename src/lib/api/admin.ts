@@ -1,6 +1,10 @@
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
-import type { SubscriptionPlan } from '@/integrations/supabase/types'
+import type {
+  DecalsStatus,
+  ListingCondition,
+  SubscriptionPlan,
+} from '@/integrations/supabase/types'
 import { AppError } from '@/lib/errors'
 import { api } from './http'
 
@@ -84,4 +88,34 @@ export async function takeDownContent(kind: ContentKind, id: string): Promise<vo
 /** Restaura contenido a su estado previo. */
 export async function restoreContent(kind: ContentKind, id: string): Promise<void> {
   await api(`/admin/content/${kind}/${id}/restore`, { method: 'POST', body: {} })
+}
+
+/** Estado en bloque. Vendido tiene dos variantes: en el catálogo con «¡VENDIDA!» o fuera. */
+export type BulkListingStatus = 'active' | 'reserved' | 'sold_showcase' | 'sold' | 'archived'
+
+/** Cambios en bloque: solo se aplican los campos presentes. */
+export interface BulkListingChanges {
+  status?: BulkListingStatus
+  category_id?: string | null
+  condition?: ListingCondition
+  decals?: DecalsStatus
+  shipping_inpost?: boolean
+  hand_delivery?: boolean
+  accepts_offers?: boolean
+  /** Ajuste de precio en %, p. ej. -10. */
+  price_percent?: number
+}
+
+export function bulkUpdateListings(ids: string[], changes: BulkListingChanges) {
+  return api<{ updated: number; skippedModerated: number }>('/admin/listings/bulk-update', {
+    method: 'POST',
+    body: { ids, changes },
+  })
+}
+
+export function bulkDeleteListings(ids: string[]) {
+  return api<{ deleted: number }>('/admin/listings/bulk-delete', {
+    method: 'POST',
+    body: { ids },
+  })
 }

@@ -1,7 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Ban, ExternalLink, Package, RotateCcw, Search, Target, Trash2 } from 'lucide-react'
 import {
+  Ban,
+  ExternalLink,
+  Package,
+  RotateCcw,
+  Search,
+  Target,
+  Trash2,
+  UserRound,
+} from 'lucide-react'
+import {
+  useAdminUsers,
   useAllListings,
   useAllRequests,
   useDeleteListingAsAdmin,
@@ -10,8 +20,14 @@ import {
 } from '@/hooks/useAdmin'
 import type { Listing } from '@/lib/api/listings'
 import type { Request } from '@/lib/api/requests'
-import { formatPriceShort, formatRelativeTime, REQUEST_STATUS_LABELS, STATUS_LABELS } from '@/lib/format'
+import {
+  formatPriceShort,
+  formatRelativeTime,
+  REQUEST_STATUS_LABELS,
+  STATUS_LABELS,
+} from '@/lib/format'
 import { AdminNav } from '@/components/admin/AdminNav'
+import { ListingBulkBar } from '@/components/admin/ListingBulkBar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn, matchesSearch } from '@/lib/utils'
@@ -48,6 +64,7 @@ function ContentRow({
   onToggle,
   onDelete,
   busy,
+  selection,
 }: {
   title: string
   subtitle: string
@@ -61,10 +78,26 @@ function ContentRow({
   /** Borrado definitivo. Solo se pasa cuando la acción está disponible. */
   onDelete?: () => void
   busy: boolean
+  /** Casilla del selector múltiple (solo en anuncios). */
+  selection?: { checked: boolean; onChange: (checked: boolean) => void }
 }) {
   const [confirming, setConfirming] = useState(false)
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-lg border-2 border-border bg-card p-4 shadow-sm">
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-4 rounded-lg border-2 bg-card p-4 shadow-sm transition-colors',
+        selection?.checked ? 'border-primary bg-primary/[0.04]' : 'border-border',
+      )}
+    >
+      {selection && (
+        <input
+          type="checkbox"
+          className="size-4 shrink-0 rounded border-input accent-primary"
+          checked={selection.checked}
+          onChange={(e) => selection.onChange(e.target.checked)}
+          aria-label={`Seleccionar «${title}»`}
+        />
+      )}
       <div className="size-14 shrink-0 overflow-hidden rounded-md border border-border">
         {cover ? (
           <img src={cover} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -96,12 +129,10 @@ function ContentRow({
 
       {confirming ? (
         <div className="flex w-full flex-col gap-2 rounded-md border-2 border-destructive/60 bg-destructive/10 p-3 sm:w-auto">
-          <p className="text-sm font-semibold text-destructive">
-            ¿Eliminar definitivamente?
-          </p>
+          <p className="text-sm font-semibold text-destructive">¿Eliminar definitivamente?</p>
           <p className="max-w-xs text-xs text-muted-foreground">
-            Se borrarán también sus ofertas, conversaciones y los reportes asociados. No se
-            puede deshacer.
+            Se borrarán también sus ofertas, conversaciones y los reportes asociados. No se puede
+            deshacer.
           </p>
           <div className="flex gap-2">
             <Button variant="destructive" size="sm" disabled={busy} onClick={onDelete}>
@@ -152,7 +183,11 @@ function ContentRow({
 export default function AdminContenido() {
   const [tab, setTab] = useState<Tab>('listings')
   const [search, setSearch] = useState('')
+  /** Propietario por el que se filtran los anuncios ('' = todos). */
+  const [owner, setOwner] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const { data: listings, isLoading: loadingL } = useAllListings()
+  const { data: users } = useAdminUsers()
   const { data: requests, isLoading: loadingR } = useAllRequests()
   const setStatus = useSetContentStatus()
   const deleteRequest = useDeleteRequestAsAdmin()
@@ -160,12 +195,43 @@ export default function AdminContenido() {
 
   const isLoading = tab === 'listings' ? loadingL : loadingR
 
-  // Se filtra por título y por estado, para poder localizar «lo retirado» de un vistazo.
+  const userName = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const u of users ?? []) m.set(u.id, u.display_name || u.username || u.email)
+    return m
+  }, [users])
+
+  // Propietarios con anuncios, para el selector (con cuántos tiene cada uno).
+  const owners = useMemo(() => {
+    const count = new Map<string, number>()
+    for (const l of listings ?? []) count.set(l.user_id, (count.get(l.user_id) ?? 0) + 1)
+    return [...count]
+      .map(([id, n]) => ({ id, n, name: userName.get(id) ?? 'Cuenta sin nombre' }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [listings, userName])
+
+  // Se filtra por propietario y por título, estado o dueño: así se localiza «lo retirado».
   const listingsFiltrados = useMemo(
     () =>
-      (listings ?? []).filter((l) => matchesSearch(search, [l.title, STATUS_LABELS[l.status]])),
-    [listings, search],
+      (listings ?? []).filter(
+        (l) =>
+          (!owner || l.user_id === owner) &&
+          matchesSearch(search, [l.title, STATUS_LABELS[l.status], userName.get(l.user_id)]),
+      ),
+    [listings, search, owner, userName],
   )
+  // Solo cuenta lo seleccionado que se ve con los filtros actuales.
+  const selectedIds = listingsFiltrados.filter((l) => selected.has(l.id)).map((l) => l.id)
+  const allSelected =
+    listingsFiltrados.length > 0 && selectedIds.length === listingsFiltrados.length
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  const clearSelection = () => setSelected(new Set())
   const requestsFiltradas = useMemo(
     () =>
       (requests ?? []).filter((r) =>
@@ -173,8 +239,7 @@ export default function AdminContenido() {
       ),
     [requests, search],
   )
-  const items: (Listing | Request)[] =
-    tab === 'listings' ? listingsFiltrados : requestsFiltradas
+  const items: (Listing | Request)[] = tab === 'listings' ? listingsFiltrados : requestsFiltradas
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -190,7 +255,7 @@ export default function AdminContenido() {
       <div className="mt-6 inline-flex rounded-lg border-2 border-border bg-card p-1">
         <button
           type="button"
-          onClick={() => setTab('listings')}
+          onClick={() => (setTab('listings'), clearSelection())}
           aria-current={tab === 'listings'}
           className={cn(
             'inline-flex items-center gap-2 rounded-md px-4 py-2 font-display text-sm font-extrabold uppercase tracking-wide transition-colors',
@@ -203,7 +268,7 @@ export default function AdminContenido() {
         </button>
         <button
           type="button"
-          onClick={() => setTab('requests')}
+          onClick={() => (setTab('requests'), clearSelection())}
           aria-current={tab === 'requests'}
           className={cn(
             'inline-flex items-center gap-2 rounded-md px-4 py-2 font-display text-sm font-extrabold uppercase tracking-wide transition-colors',
@@ -228,6 +293,47 @@ export default function AdminContenido() {
         />
       </div>
 
+      {tab === 'listings' && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <label className="flex min-w-0 flex-1 items-center gap-2 text-sm sm:max-w-sm">
+            <UserRound className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <select
+              className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={owner}
+              onChange={(e) => (setOwner(e.target.value), clearSelection())}
+              aria-label="Filtrar por propietario"
+            >
+              <option value="">Todos los propietarios</option>
+              {owners.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name} ({o.n})
+                </option>
+              ))}
+            </select>
+          </label>
+          {listingsFiltrados.length > 0 && (
+            <label className="inline-flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                className="size-4 rounded border-input accent-primary"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = selectedIds.length > 0 && !allSelected
+                }}
+                onChange={(e) =>
+                  setSelected(
+                    e.target.checked ? new Set(listingsFiltrados.map((l) => l.id)) : new Set(),
+                  )
+                }
+              />
+              {listingsFiltrados.length === 1
+                ? 'Seleccionar el anuncio mostrado'
+                : `Seleccionar los ${listingsFiltrados.length} mostrados`}
+            </label>
+          )}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -251,7 +357,9 @@ export default function AdminContenido() {
                   <ContentRow
                     key={l.id}
                     title={l.title}
-                    subtitle={`${formatPriceShort(l.price_cents, l.currency)} · ${formatRelativeTime(l.created_at)}`}
+                    subtitle={`${formatPriceShort(l.price_cents, l.currency)} · ${formatRelativeTime(l.created_at)}${
+                      owner ? '' : ` · ${userName.get(l.user_id) ?? 'Cuenta sin nombre'}`
+                    }`}
                     cover={l.photos[0] ?? null}
                     link={`/producto/${l.id}`}
                     statusLabel={STATUS_LABELS[l.status]}
@@ -267,6 +375,10 @@ export default function AdminContenido() {
                     }
                     // El borrado definitivo solo se ofrece si ya esta retirado.
                     onDelete={hidden ? () => deleteListing.mutate(l.id) : undefined}
+                    selection={{
+                      checked: selected.has(l.id),
+                      onChange: (on) => toggle(l.id, on),
+                    }}
                   />
                 )
               })
@@ -299,6 +411,8 @@ export default function AdminContenido() {
               })}
         </div>
       )}
+
+      {tab === 'listings' && <ListingBulkBar ids={selectedIds} onClear={clearSelection} />}
 
       {setStatus.isError && (
         <p className="mt-4 text-sm text-destructive">No se pudo cambiar el estado.</p>

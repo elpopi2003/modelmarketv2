@@ -1,6 +1,12 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { z } from 'zod'
 import { deleteAccount } from '../account/delete'
+import {
+  bulkChangesSchema,
+  bulkDeleteListings,
+  bulkIdsSchema,
+  bulkUpdateListings,
+} from '../admin/bulk'
 import * as adminContent from '../admin/content'
 import * as reports from '../admin/reports'
 import * as users from '../admin/users'
@@ -128,6 +134,20 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
   app.get('/admin/listings', async (req) => {
     requireAdmin(req)
     return ok(await adminContent.allListings(db))
+  })
+  // Operaciones en bloque sobre anuncios (selector de Contenido).
+  app.post('/admin/listings/bulk-update', async (req) => {
+    requireAdmin(req)
+    const { ids, changes } = parse(
+      z.object({ ids: bulkIdsSchema, changes: bulkChangesSchema }),
+      req.body,
+    )
+    return ok(await bulkUpdateListings(db, ids, changes))
+  })
+  app.post('/admin/listings/bulk-delete', async (req) => {
+    requireAdmin(req)
+    const { ids } = parse(z.object({ ids: bulkIdsSchema }), req.body)
+    return ok(await bulkDeleteListings({ db, uploadsDir: config.UPLOADS_DIR }, ids))
   })
   app.get('/admin/requests', async (req) => {
     requireAdmin(req)
